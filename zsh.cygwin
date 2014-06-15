@@ -1,0 +1,12 @@
+# map native windows commands
+alias reboot='shutdown /r'
+alias halt='shutdown /p'
+killall() { taskkill \/F \/IM "${1}.exe" }
+
+# help cygwin find and run non-exe's
+alias npm='npm.cmd' # note custom install only
+alias gem='gem.bat'
+alias jekyll='jekyll.bat'
+
+# misc
+export VBOX_USER_HOME='C:\Users\dmehta8\.VirtualBox\'

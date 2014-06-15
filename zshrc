@@ -32,8 +32,8 @@ export LANG=en_US.UTF-8
 export EDITOR='vim'
 
 # work stuff
-if [ -f ~/.zsh.work ]; then
-    source ~/.zsh.work
+if [ -f $HOME/.zsh.work ]; then
+    source $HOME/.zsh.work
 fi
 
 # Hail vim
@@ -47,12 +47,10 @@ chpwd() {
 
 # Save a ton of history
 HISTSIZE=20000
-HISTFILE=~/.zsh_history
+HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
 
-# cygwin stuff
-alias reboot='shutdown /r'
-alias halt='shutdown /p'
-alias npm='npm.cmd' # note custom install only
-killall() { taskkill \/F \/IM "${1}.exe" }
-export VBOX_USER_HOME='C:\Users\dmehta8\.VirtualBox\'
+# include cygwin crutches
+if [ -f $HOME/.zsh.cygwin ]; then
+    source $HOME/.zsh.cygwin
+fi
