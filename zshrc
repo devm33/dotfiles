@@ -50,7 +50,9 @@ HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
 
-# include cygwin crutches
-if [ -f $HOME/.zsh.cygwin ]; then
-    source $HOME/.zsh.cygwin
+# if on cygwin include crutches
+if [[  "$(uname -s)" == CYGWIN* ]]; then
+    if [ -f $HOME/.zsh.cygwin ]; then
+        source $HOME/.zsh.cygwin;
+    fi
 fi
