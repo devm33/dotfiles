@@ -6,6 +6,8 @@ killall() { taskkill \/F \/IM "${1}.exe" }
 # help cygwin find and run non-exe's
 alias npm='npm.cmd' # note custom install only
 alias gem='gem.bat'
+alias rake='rake.bat'
+alias bundle='bundle.bat'
 alias jekyll='jekyll.bat'
 
 # misc
