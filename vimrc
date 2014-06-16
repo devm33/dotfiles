@@ -34,13 +34,13 @@ set nofoldenable
 " DISPLAY
 
 syntax on
-set ruler
+" unsure of what this does set ruler
 set number
-set colorcolumn=80
+" not working? set colorcolumn=80
 
 " Color
 " not working? colorscheme monokai
-highlight ColorColumn ctermbg=235 guibg=#2c2d27
+" not working? highlight ColorColumn ctermbg=235 guibg=#2c2d27
 
 
 " Tab completion
