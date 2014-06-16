@@ -3,6 +3,7 @@ if &compatible
 end
 
 filetype off
+
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
@@ -12,9 +13,5 @@ Bundle 'gmarik/vundle'
 " Define bundles via Github repos
 Bundle 'flazz/vim-colorschemes'
 Bundle 'tpope/vim-surround'
-
-if filereadable(expand("~/.vimrc.bundles.local"))
-  source ~/.vimrc.bundles.local
-endif
 
 filetype on
