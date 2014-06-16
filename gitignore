@@ -1,5 +1,7 @@
 local.js
 secrets.json
 *~
-*.swp
-*.swo
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+.netrwhist
+
