@@ -1,0 +1,14 @@
+[user]
+	name = Devraj Mehta
+	email = devraj.mehta@gtri.gatech.edu
+[push]
+	default = simple
+[core]
+	excludesfile = ~/.gitignore
+[color]
+	ui = always
+	status = always
+	branch = always
+	diff = always
+	interactive = always
+
