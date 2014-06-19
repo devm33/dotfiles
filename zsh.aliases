@@ -1,0 +1,12 @@
+
+# Show contents of directory after cd-ing into it
+chpwd() {
+  ls
+}
+
+# Hail vim
+alias v="vim"
+alias vi="vim"
+
+alias vg='vagrant'
+

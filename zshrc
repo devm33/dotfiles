@@ -36,19 +36,16 @@ if [ -f $HOME/.zsh.work ]; then
     source $HOME/.zsh.work
 fi
 
-# Hail vim
-alias v="vim"
-alias vi="vim"
-
-# Show contents of directory after cd-ing into it
-chpwd() {
-  ls
-}
-
 # Save a ton of history
 HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
+
+# include aliases file
+if [ -f $HOME/.zsh.aliases]; then
+    source $HOME/.zsh.aliases;
+fi
+
 
 # if on cygwin include crutches
 if [[  "$(uname -s)" == CYGWIN* ]]; then
