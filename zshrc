@@ -42,7 +42,7 @@ HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
 
 # include aliases file
-if [ -f $HOME/.zsh.aliases]; then
+if [ -f $HOME/.zsh.aliases ]; then
     source $HOME/.zsh.aliases;
 fi
 
