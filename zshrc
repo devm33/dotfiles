@@ -1,6 +1,6 @@
 # oh-my-zsh config
 export ZSH=$HOME/.oh-my-zsh
-ZSH_THEME="ys"
+ZSH_THEME="bureau"
 DISABLE_AUTO_UPDATE="true"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
