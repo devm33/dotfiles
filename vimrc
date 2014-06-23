@@ -2,6 +2,13 @@ set nocompatible " vi improved
 
 set mouse=a
 
+" install vundle if it's not loaded
+if !exists('vundle')
+    let vdir = '~/.vim/bundle/vundle'
+    call system('mkdir -p ' . vdir)
+    call system('git clone https://github.com/gmarik/Vundle.vim.git ' . vdir)
+endif
+
 " include vundle config
 if filereadable(expand("~/.vimrc.bundles"))
   source ~/.vimrc.bundles
@@ -15,9 +22,11 @@ let mapleader=" "
 
 map <leader>k :E<CR>
 
+inoremap qq <esc>:q<CR>
 inoremap jk <esc>
 inoremap <C-z> <esc>:w<CR>
 inoremap <C-x> <esc>:x<CR>
+nnoremap qq :q<CR>
 nnoremap <C-z> :w<CR>
 nnoremap <C-x> :x<CR>
 command! Q q " Bind :Q to :q
