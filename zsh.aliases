@@ -5,8 +5,9 @@ chpwd() {
 }
 
 # Hail vim
-alias v="vim"
-alias vi="vim"
+alias v='vim'
+alias vi='vim'
 
 alias vg='vagrant'
 
+alias untar='tar xvf --delete '
