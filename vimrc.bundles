@@ -13,5 +13,7 @@ Bundle 'gmarik/vundle'
 " Define bundles via Github repos
 Bundle 'flazz/vim-colorschemes'
 Bundle 'tpope/vim-surround'
+Bundle 'scrooloose/syntastic'
+Bundle 'othree/javascript-libraries-syntax.vim'
 
 filetype on

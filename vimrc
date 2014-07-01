@@ -31,7 +31,8 @@ nnoremap <C-z> :w<CR>
 nnoremap <C-x> :x<CR>
 command! Q q " Bind :Q to :q
 
-nnoremap <F11> :set nonumber!<CR>
+set number " start with line numbers on
+nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
 " File writing
