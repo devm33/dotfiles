@@ -10,4 +10,4 @@ alias vi='vim'
 
 alias vg='vagrant'
 
-alias untar='tar xvf --delete '
+alias untar='tar xvf '
