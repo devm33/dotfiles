@@ -1,6 +1,10 @@
 
 # Show contents of directory after cd-ing into it
 chpwd() {
+  if [ -d .git ]; then
+      git status
+      echo '--'
+  fi
   ls
 }
 
@@ -11,3 +15,5 @@ alias vi='vim'
 alias vg='vagrant'
 
 alias untar='tar xvf '
+
+alias xo='xdg-open '
