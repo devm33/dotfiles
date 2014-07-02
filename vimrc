@@ -31,7 +31,6 @@ nnoremap <C-z> :w<CR>
 nnoremap <C-x> :x<CR>
 command! Q q " Bind :Q to :q
 
-set number " start with line numbers on
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
@@ -46,11 +45,13 @@ set nofoldenable
 syntax on
 " unsure of what this does set ruler
 set number
-" not working? set colorcolumn=80
+set showcmd " show incomplete commands at bottom right
+set showmatch
+set ruler
+
 
 " Color
-" not working? colorscheme monokai
-" not working? highlight ColorColumn ctermbg=235 guibg=#2c2d27
+colorscheme desertedocean
 
 
 " Tab completion
