@@ -25,11 +25,9 @@ map <leader>s :%s/\s\+$//<CR>
 
 inoremap qq <esc>:q<CR>
 inoremap jk <esc>
-inoremap <C-z> <esc>:w<CR>
-inoremap <C-x> <esc>:x<CR>
+inoremap <C-z> <esc>:x<CR>
 nnoremap qq :q<CR>
-nnoremap <C-z> :w<CR>
-nnoremap <C-x> :x<CR>
+nnoremap <C-z> :x<CR>
 command! Q q " Bind :Q to :q
 
 nnoremap <F10> :set nonumber!<CR>
