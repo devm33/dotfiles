@@ -20,7 +20,8 @@ filetype plugin indent on
 
 let mapleader=" "
 
-map <leader>k :E<CR>
+map <leader>k :Hexplore<CR>
+map <leader>s :%s/\s\+$//<CR>
 
 inoremap qq <esc>:q<CR>
 inoremap jk <esc>
