@@ -15,5 +15,11 @@ Bundle 'flazz/vim-colorschemes'
 Bundle 'tpope/vim-surround'
 Bundle 'scrooloose/syntastic'
 Bundle 'othree/javascript-libraries-syntax.vim'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-repeat'
+Bundle 'tpope/vim-unimpaired'
+Bundle 'ervandew/supertab'
+Bundle 'skwp/greplace.vim'
+
 
 filetype on
