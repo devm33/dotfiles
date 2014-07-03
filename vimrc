@@ -27,6 +27,9 @@ nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>x :x<CR>
 
+" Trying to quickly open file
+nnoremap <leader>o :e **/
+
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ev :e $MYVIMRC<CR>
 nnoremap <leader>sv :so $MYVIMRC<CR>
