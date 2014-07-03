@@ -20,14 +20,26 @@ filetype plugin indent on
 
 let mapleader=" "
 
-map <leader>k :Hexplore<CR>
-map <leader>s :%s/\s\+$//<CR>
+nnoremap <leader>k :Vexplore<CR>
+nnoremap <leader>l :e .<CR>
+nnoremap <leader>t :%s/\s\+$//<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>x :x<CR>
 
-inoremap qq <esc>:q<CR>
+" Quickly edit/reload the vimrc file
+nnoremap <leader>ev :e $MYVIMRC<CR>
+nnoremap <leader>sv :so $MYVIMRC<CR>
+
 inoremap jk <esc>
+inoremap qq <esc>:q<CR>
+inoremap ww <esc>:w<CR>
+inoremap xx <esc>:x<CR>
 inoremap <C-z> <esc>:x<CR>
-nnoremap qq :q<CR>
 nnoremap <C-z> :x<CR>
+
+nnoremap ; :
+
 command! Q q " Bind :Q to :q
 
 nnoremap <F10> :set nonumber!<CR>
@@ -42,7 +54,6 @@ set nofoldenable
 " DISPLAY
 
 syntax on
-" unsure of what this does set ruler
 set number
 set showcmd " show incomplete commands at bottom right
 set showmatch
