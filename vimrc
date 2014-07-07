@@ -20,18 +20,32 @@ filetype plugin indent on
 
 let mapleader=" "
 
-map <leader>k :E<CR>
+nnoremap <leader>k :Vexplore<CR>
+nnoremap <leader>l :e .<CR>
+nnoremap <leader>t :%s/\s\+$//<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>x :x<CR>
 
-inoremap qq <esc>:q<CR>
+" Trying to quickly open file
+nnoremap <leader>o :e **/
+
+" Quickly edit/reload the vimrc file
+nnoremap <leader>ev :e $MYVIMRC<CR>
+nnoremap <leader>sv :so $MYVIMRC<CR>
+
 inoremap jk <esc>
-inoremap <C-z> <esc>:w<CR>
-inoremap <C-x> <esc>:x<CR>
-nnoremap qq :q<CR>
-nnoremap <C-z> :w<CR>
-nnoremap <C-x> :x<CR>
+inoremap qq <esc>:q<CR>
+inoremap ww <esc>:w<CR>
+inoremap xx <esc>:x<CR>
+inoremap <C-z> <esc>:x<CR>
+nnoremap <C-z> :x<CR>
+
+nnoremap ; :
+
 command! Q q " Bind :Q to :q
 
-nnoremap <F11> :set nonumber!<CR>
+nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
 " File writing
@@ -43,13 +57,14 @@ set nofoldenable
 " DISPLAY
 
 syntax on
-" unsure of what this does set ruler
 set number
-" not working? set colorcolumn=80
+set showcmd " show incomplete commands at bottom right
+set showmatch
+set ruler
+
 
 " Color
-" not working? colorscheme monokai
-" not working? highlight ColorColumn ctermbg=235 guibg=#2c2d27
+colorscheme desertedocean
 
 
 " Tab completion
