@@ -17,18 +17,27 @@ endif
 
 filetype plugin indent on
 
+
 " MAPPINGS
+
 nnoremap ; :
 command! Q q " Bind :Q to :q
 
 let mapleader=" "
 
-" Window mgmt
-nnoremap <leader>k :e .<CR>
-nnoremap <leader>l :e %:p:h<CR>
 nnoremap <leader>t :%s/\s\+$//<CR>
 
-" Trying to quickly open file
+" Window mgmt
+nnoremap <leader>v :vs<CR>
+nnoremap <leader>h :sp<CR>
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+
+" File nav
+nnoremap <leader>k :e .<CR>
+nnoremap <leader>l :e %:p:h<CR>
 nnoremap <leader>o :e **/*
 
 " Quickly edit/reload the vimrc file
@@ -46,7 +55,6 @@ nnoremap <leader>q :q<CR>
 nnoremap <leader>x :x<CR>
 nnoremap <leader><esc> :qall<CR>
 
-
 " Function key functions
 nnoremap <F3> :set hlsearch!<CR>
 nnoremap <F10> :set nonumber!<CR>
@@ -58,18 +66,15 @@ set nowritebackup
 set noswapfile
 set nofoldenable
 
-" DISPLAY
-
+" Display
 syntax on
 set number
 set showcmd " show incomplete commands at bottom right
 set showmatch
 set ruler
 
-
 " Color
 colorscheme desertedocean
-
 
 " Tab completion
 " will insert tab at beginning of line,
@@ -86,20 +91,12 @@ function! InsertTabWrapper()
 endfunction
 inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
 
-" WINDOWS
-
-" Quicker window movement
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
 
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
 set splitright
 
-" WHITE SPACE
-
+" View trailing white space
 set list listchars=tab:»·,trail:· " show trailing
 
 " Indentation
