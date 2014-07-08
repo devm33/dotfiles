@@ -20,18 +20,18 @@ filetype plugin indent on
 
 let mapleader=" "
 
-nnoremap <leader>k :Vexplore<CR>
-nnoremap <leader>l :e .<CR>
+nnoremap <leader>k :e .<CR>
+nnoremap <leader>l :e %:p:h<CR>
 nnoremap <leader>t :%s/\s\+$//<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>x :x<CR>
 
 " Trying to quickly open file
-nnoremap <leader>o :e **/
+nnoremap <leader>o :e **/*
 
 " Quickly edit/reload the vimrc file
-nnoremap <leader>ev :e $MYVIMRC<CR>
+nnoremap <leader>ev :tabe $MYVIMRC<CR>
 nnoremap <leader>sv :so $MYVIMRC<CR>
 
 inoremap jk <esc>
@@ -45,6 +45,8 @@ nnoremap ; :
 
 command! Q q " Bind :Q to :q
 
+" Function key functions
+nnoremap <F3> :set hlsearch!<CR>
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
