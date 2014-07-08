@@ -38,8 +38,8 @@ inoremap jk <esc>
 inoremap qq <esc>:q<CR>
 inoremap ww <esc>:w<CR>
 inoremap xx <esc>:x<CR>
-inoremap <C-z> <esc>:x<CR>
-nnoremap <C-z> :x<CR>
+inoremap <C-c> <esc>:x<CR>
+nnoremap <C-c> :x<CR>
 
 nnoremap ; :
 
