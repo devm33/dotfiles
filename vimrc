@@ -3,10 +3,11 @@ set nocompatible " vi improved
 set mouse=a
 
 " install vundle if it's not loaded
-if !exists('vundle')
-    let vdir = '~/.vim/bundle/vundle'
+let vdir = $HOME . '/.vim/bundle/vundle'
+if !isdirectory(vdir)
     call system('mkdir -p ' . vdir)
     call system('git clone https://github.com/gmarik/Vundle.vim.git ' . vdir)
+    autocmd VimEnter * PluginInstall
 endif
 
 " include vundle config
@@ -17,15 +18,15 @@ endif
 filetype plugin indent on
 
 " MAPPINGS
+nnoremap ; :
+command! Q q " Bind :Q to :q
 
 let mapleader=" "
 
+" Window mgmt
 nnoremap <leader>k :e .<CR>
 nnoremap <leader>l :e %:p:h<CR>
 nnoremap <leader>t :%s/\s\+$//<CR>
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
-nnoremap <leader>x :x<CR>
 
 " Trying to quickly open file
 nnoremap <leader>o :e **/*
@@ -35,15 +36,16 @@ nnoremap <leader>ev :tabe $MYVIMRC<CR>
 nnoremap <leader>sv :so $MYVIMRC<CR>
 
 inoremap jk <esc>
-inoremap qq <esc>:q<CR>
-inoremap ww <esc>:w<CR>
-inoremap xx <esc>:x<CR>
+
+inoremap <C-z> <esc>:w<CR>
 inoremap <C-c> <esc>:x<CR>
+
 nnoremap <C-c> :x<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>x :x<CR>
+nnoremap <leader><esc> :qall<CR>
 
-nnoremap ; :
-
-command! Q q " Bind :Q to :q
 
 " Function key functions
 nnoremap <F3> :set hlsearch!<CR>
