@@ -20,6 +20,7 @@ Bundle 'tpope/vim-repeat'
 Bundle 'tpope/vim-unimpaired'
 Bundle 'ervandew/supertab'
 Bundle 'skwp/greplace.vim'
+Bundle 'klen/python-mode'
 
 
 filetype on

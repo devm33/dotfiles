@@ -25,7 +25,9 @@ command! Q q " Bind :Q to :q
 
 let mapleader=" "
 
+" White space
 nnoremap <leader>t :%s/\s\+$//<CR>
+nnoremap <leader><tab> :retab<CR>
 
 " Window mgmt
 nnoremap <leader>v :vs<CR>
@@ -39,6 +41,7 @@ nnoremap <C-l> <C-w>l
 nnoremap <leader>k :e .<CR>
 nnoremap <leader>l :e %:p:h<CR>
 nnoremap <leader>o :e **/*
+nnoremap <leader>O :tabe **/*
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ev :tabe $MYVIMRC<CR>
@@ -80,7 +83,7 @@ endif
 
 colorscheme desertedocean
 highlight OverLength ctermbg=darkgray guibg=#F9D9D9
-match OverLength /\%81v.\+/
+autocmd BufWinEnter * match OverLength /\%81v.\+/
 
 " Tab completion
 " will insert tab at beginning of line,
