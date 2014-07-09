@@ -74,7 +74,13 @@ set showmatch
 set ruler
 
 " Color
+if $COLORTERM == 'gnome-terminal'
+  set t_Co=256
+endif
+
 colorscheme desertedocean
+highlight OverLength ctermbg=darkgray guibg=#F9D9D9
+match OverLength /\%81v.\+/
 
 " Tab completion
 " will insert tab at beginning of line,

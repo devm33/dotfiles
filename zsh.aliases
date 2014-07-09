@@ -18,6 +18,10 @@ alias untar='tar xvf '
 
 alias xo='xdg-open '
 
+# Checkout and track remote branch
+#todo
+
+
 # stolen from: http://zshwiki.org/home/examples/functions
 
 # Give us a root shell, or run the command with sudo.
@@ -79,3 +83,32 @@ extract_archive () {
 
 alias ex=extract_archive
 compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_archive
+
+# Functions to help manage dotfiles
+alias s.z='source $HOME/.zshrc'
+
+dotup () {
+    pushd .
+    cd ~/.dotfiles
+    git pull
+    cd ~/.gtri.dotfiles
+    git pull
+    . ~/.zshrc
+    popd
+}
+
+dotca () {
+    pushd .
+    cd ~/.dotfiles
+    git commit -v -a
+    git push
+    popd
+}
+
+dotwca () {
+    pushd .
+    cd ~/.gtri.dotfiles
+    git commit -v -a
+    git push
+    popd
+}
