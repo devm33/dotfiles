@@ -82,7 +82,7 @@ if $COLORTERM == 'gnome-terminal'
 endif
 
 colorscheme desertedocean
-highlight OverLength ctermbg=darkgray guibg=#F9D9D9
+highlight OverLength ctermbg=237
 autocmd BufWinEnter * match OverLength /\%81v.\+/
 
 " Tab completion
