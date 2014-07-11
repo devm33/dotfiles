@@ -21,6 +21,8 @@ Bundle 'tpope/vim-unimpaired'
 Bundle 'ervandew/supertab'
 Bundle 'skwp/greplace.vim'
 Bundle 'klen/python-mode'
+Bundle 'jelera/vim-javascript-syntax'
+Bundle 'scrooloose/nerdtree'
 
 
 filetype on

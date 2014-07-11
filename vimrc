@@ -30,22 +30,31 @@ nnoremap <leader>t :%s/\s\+$//<CR>
 nnoremap <leader><tab> :retab<CR>
 
 " Window mgmt
-nnoremap <leader>v :vs<CR>
-nnoremap <leader>h :sp<CR>
+nnoremap <leader>s :vs<CR>
+nnoremap <leader>S :sp<CR>
+nnoremap <leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
+nnoremap <leader>+ :exe "resize " . (winheight(0) * 3/2)<CR>
+nnoremap <leader>j <C-w>j
+nnoremap <leader>k <C-w>k
+nnoremap <leader>h <C-w>h
+nnoremap <leader>l <C-w>l
+" or with control keys
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 
 " File nav
-nnoremap <leader>k :e .<CR>
-nnoremap <leader>l :e %:p:h<CR>
+nnoremap <leader>f :NERDTreeToggle<CR>
+nnoremap <leader>d :e %:p:h<CR>
+nnoremap <leader>D :e .<CR>
 nnoremap <leader>o :e **/*
 nnoremap <leader>O :tabe **/*
 
 " Quickly edit/reload the vimrc file
-nnoremap <leader>ev :tabe $MYVIMRC<CR>
-nnoremap <leader>sv :so $MYVIMRC<CR>
+nnoremap <leader>ve :tabe $MYVIMRC<CR>
+nnoremap <leader>vs :so $MYVIMRC<CR>
+nnoremap <leader>vw :w<cr>:so $MYVIMRC<CR>
 
 inoremap jk <esc>
 
@@ -76,14 +85,26 @@ set showcmd " show incomplete commands at bottom right
 set showmatch
 set ruler
 
+" View trailing white space
+set list listchars=tab:»·,trail:· " show trailing
+
 " Color
 if $COLORTERM == 'gnome-terminal'
   set t_Co=256
 endif
 
-colorscheme desertedocean
+colorscheme hybrid
 highlight OverLength ctermbg=237
 autocmd BufWinEnter * match OverLength /\%81v.\+/
+
+" NERDTree settings
+let NERDTreeShowLineNumbers=1
+
+" Netrw settings
+let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
+let g:netrw_banner = 0
+let g:netrw_menu = 0
+let s:netrw_up = ''
 
 " Tab completion
 " will insert tab at beginning of line,
@@ -105,8 +126,12 @@ inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
 set splitbelow
 set splitright
 
-" View trailing white space
-set list listchars=tab:»·,trail:· " show trailing
+" Set window width to 80 cols + columns needed for linenumbers
+function! EightyColumns()
+    let numberwidth = float2nr(log10(line("$"))) + 2
+    let &l:columns = numberwidth + 80
+endfunction
+nnoremap <leader>8 :call EightyColumns()<cr>
 
 " Indentation
 set autoindent
