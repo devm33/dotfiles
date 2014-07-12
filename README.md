@@ -1,3 +1,3 @@
-repo for dotfiles
+Repo for dotfiles
 
-managed using rcm from thoughtbot
+Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)

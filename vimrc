@@ -70,6 +70,7 @@ nnoremap <leader><esc> :qall<CR>
 
 " Function key functions
 nnoremap <F3> :set hlsearch!<CR>
+nnoremap <F7> :set spell!<CR>
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
