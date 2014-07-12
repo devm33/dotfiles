@@ -59,6 +59,7 @@ nnoremap <leader>vw :w<cr>:so $MYVIMRC<CR>
 
 inoremap jk <esc>
 
+inoremap <C-d> <esc>:w<CR>:e %:p:h<CR>
 inoremap <C-z> <esc>:w<CR>
 inoremap <C-c> <esc>:x<CR>
 
@@ -104,6 +105,7 @@ set colorcolumn=80
 
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
+let NERDTreeMinimalUI=1
 
 " Netrw settings
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
