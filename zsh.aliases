@@ -1,3 +1,5 @@
+# Reload zsh configuration
+alias rz="source ~/.zshrc"
 
 # Show contents of directory after cd-ing into it
 chpwd() {
@@ -8,7 +10,6 @@ chpwd() {
   ls
 }
 
-# Hail vim
 alias v='vim'
 alias vi='vim'
 
@@ -17,6 +18,12 @@ alias vg='vagrant'
 alias untar='tar xvf '
 
 alias xo='xdg-open '
+
+markdown_preview() {
+    pandoc -o /tmp/tmp.html "$1" && xdg-open /tmp/tmp.html
+}
+alias mdp=markdown_preview
+compdef '_files -g "*.md *.txt"' markdown_preview
 
 # Checkout and track remote branch
 #TODO
