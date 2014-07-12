@@ -46,6 +46,7 @@ nnoremap <C-l> <C-w>l
 
 " File nav
 nnoremap <leader>f :NERDTreeToggle<CR>
+nnoremap <leader>F :NERDTreeFind<CR>
 nnoremap <leader>d :e %:p:h<CR>
 nnoremap <leader>D :e .<CR>
 nnoremap <leader>o :e **/*

@@ -23,6 +23,8 @@ Bundle 'skwp/greplace.vim'
 Bundle 'klen/python-mode'
 Bundle 'jelera/vim-javascript-syntax'
 Bundle 'scrooloose/nerdtree'
+Bundle 'vim-pandoc/vim-pandoc'
+Bundle 'vim-pandoc/vim-pandoc-syntax'
 
 
 filetype on

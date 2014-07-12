@@ -19,7 +19,7 @@ alias untar='tar xvf '
 alias xo='xdg-open '
 
 # Checkout and track remote branch
-#todo
+#TODO
 
 
 # stolen from: http://zshwiki.org/home/examples/functions
@@ -89,8 +89,6 @@ alias s.z='source $HOME/.zshrc'
 
 dotup () {
     pushd .
-    cd ~/.dotfiles
-    git pull
     cd ~/.gtri.dotfiles
     git pull
     . ~/.zshrc
@@ -100,14 +98,6 @@ dotup () {
 dotca () {
     pushd .
     cd ~/.dotfiles
-    git commit -v -a
-    git push
-    popd
-}
-
-dotwca () {
-    pushd .
-    cd ~/.gtri.dotfiles
     git commit -v -a
     git push
     popd
