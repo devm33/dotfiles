@@ -96,8 +96,11 @@ if $COLORTERM == 'gnome-terminal'
 endif
 
 colorscheme hybrid
-highlight OverLength ctermbg=237
-autocmd BufWinEnter * match OverLength /\%81v.\+/
+"
+" no longer needed on vim74 with colorcolumn
+" highlight OverLength ctermbg=237
+" autocmd BufWinEnter * match OverLength /\%81v.\+/
+set colorcolumn=80
 
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
