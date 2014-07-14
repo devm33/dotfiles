@@ -96,7 +96,7 @@ alias s.z='source $HOME/.zshrc'
 
 dotup () {
     pushd .
-    cd ~/.gtri.dotfiles
+    cd ~/.dotfiles
     git pull
     . ~/.zshrc
     popd
