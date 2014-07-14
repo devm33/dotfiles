@@ -46,10 +46,17 @@ if [ -f $HOME/.zsh.aliases ]; then
     source $HOME/.zsh.aliases;
 fi
 
-
 # if on cygwin include crutches
 if [[  "$(uname -s)" == CYGWIN* ]]; then
     if [ -f $HOME/.zsh.cygwin ]; then
         source $HOME/.zsh.cygwin;
     fi
 fi
+
+# Configure color term
+if [ -e /usr/share/terminfo/x/xterm-256color ]; then
+        export TERM='xterm-256color'
+else
+        export TERM='xterm-color'
+fi
+
