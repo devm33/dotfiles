@@ -64,6 +64,7 @@ inoremap <C-z> <esc>:w<CR>
 inoremap <C-c> <esc>:x<CR>
 
 nnoremap <C-c> :x<CR>
+nnoremap <C-d> :w<CR>:e %:p:h<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader>x :x<CR>
@@ -106,12 +107,6 @@ set colorcolumn=80
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
 let NERDTreeMinimalUI=1
-
-" Netrw settings
-let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
-let g:netrw_banner = 0
-let g:netrw_menu = 0
-let s:netrw_up = ''
 
 " Tab completion
 " will insert tab at beginning of line,
