@@ -1,0 +1,11 @@
+startup_message off # Turn off the splash screen
+
+defscrollback 30000 # Use a 30000-line scrollback buffer
+
+bindkey "^[[1;5D" prev  # change window with ctrl-left
+bindkey "^[[1;5C" next  # change window with ctrl-right
+
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{.kW}%-w%{.W}%n %t%{-}%{=b kw}%?%+w%? %=%c %d/%m/%Y" #B&W & date&time
+
