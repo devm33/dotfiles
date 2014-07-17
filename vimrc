@@ -54,6 +54,8 @@ nnoremap <leader>O :tabe **/*
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
+nnoremap <leader>vb :tabe ~/.vimrc.bundles<CR>
+nnoremap <leader>vi :PluginInstall<CR>:PluginClean<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<cr>:so $MYVIMRC<CR>
 
