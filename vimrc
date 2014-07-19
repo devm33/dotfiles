@@ -60,6 +60,7 @@ nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<cr>:so $MYVIMRC<CR>
 
 inoremap jk <esc>
+inoremap kj <esc>:w<cr>
 
 inoremap <C-d> <esc>:w<CR>:e %:p:h<CR>
 inoremap <C-z> <esc>:w<CR>
