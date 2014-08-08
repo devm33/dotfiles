@@ -25,5 +25,7 @@ Bundle 'pangloss/vim-javascript'
 Bundle 'scrooloose/nerdtree'
 Bundle 'vim-pandoc/vim-pandoc'
 Bundle 'vim-pandoc/vim-pandoc-syntax'
+Bundle 'haskell.vim'
+Bundle 'dag/vim2hs'
 
 filetype on

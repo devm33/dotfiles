@@ -1,33 +1,27 @@
--- default desktop configuration for Fedora
-
-import System.Posix.Env (getEnv)
-import Data.Maybe (maybe)
-
 import XMonad
-import XMonad.Config.Desktop
-import XMonad.Config.Gnome
-import XMonad.Config.Kde
-import XMonad.Config.Xfce
+import XMonad.Layout.NoBorders (noBorders)
+import XMonad.Hooks.ManageDocks
 import XMonad.Actions.GridSelect
-import XMonad.Util.EZConfig
+import XMonad.Util.EZConfig (additionalKeysP)
+import XMonad.Config.Gnome
 
-main = do
-     session <- getEnv "DESKTOP_SESSION"
-     xmonad  $ (maybe desktopConfig desktop session)
-         { modMask = mod4Mask
-         }
-         `additionalKeysP` myKeys
-    
-myKeys = [
-    ("M-g", goToSelected defaultGSConfig)
-    , ("M-S-l", spawn "gnome-screensaver-command -l")
-    , ("M-o", spawn "dmenu_run")
-    , ("M-S-o", spawn "gmrun")
-    ]
+main = xmonad myConfig
 
+myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
+                         , terminal = "gnome-terminal"
 
-desktop "gnome" = gnomeConfig
-desktop "kde" = kde4Config
-desktop "xfce" = xfceConfig
-desktop "xmonad-gnome" = gnomeConfig
-desktop _ = desktopConfig
+                         -- remove all borders, dont cover gnome-panel 
+                         , layoutHook = noBorders $ avoidStruts $ layoutHook defaultConfig
+                         -- dont tile gnome-panel
+                         , manageHook = manageDocks
+                         } `additionalKeysP` myKeys
+
+myKeys = [ ("M-g", goToSelected defaultGSConfig)
+         , ("M-l", spawn "gnome-screensaver-command -l")
+         , ("M-o", spawn "dmenu_run")
+         , ("M-S-o", spawn "gmrun")
+         , ("M-b", spawn "google-chrome")
+         , ("M-f", spawn "firefox")
+         , ("M-v", spawn "/opt/cisco/anyconnect/bin/vpnui")
+         ]
+
