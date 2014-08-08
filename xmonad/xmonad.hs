@@ -22,6 +22,8 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-o", spawn "gmrun")
          , ("M-b", spawn "google-chrome")
          , ("M-f", spawn "firefox")
+         , ("M-c", spawn "pidgin")
+         , ("M-x", kill)
          , ("M-v", spawn "/opt/cisco/anyconnect/bin/vpnui")
          ]
 
