@@ -30,6 +30,7 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-x", kill)
          , ("M-v", spawn "/opt/cisco/anyconnect/bin/vpnui")
          , ("M-m", spawn "VirtualBox")
+         , ("M-S-h", spawn "halt")
          ]
 
 myLayout = tiled ||| reflectHoriz tiled ||| Mirror tiled ||| Full
