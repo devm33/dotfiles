@@ -40,5 +40,5 @@ myLayout = tiled ||| reflectHoriz tiled ||| Mirror tiled ||| Full
         delta = 3/100
 
 myManageHook = composeAll [
-                          -- className =? "Pidgin"  --> doFloat
+                           (className =? "Pidgin" <&&> title =? "Buddy List")  --> doFloat
                           ]
