@@ -25,9 +25,35 @@ markdown_preview() {
 alias mdp=markdown_preview
 compdef '_files -g "*.md *.txt"' markdown_preview
 
-# Checkout and track remote branch
-#TODO
+# Git functions and aliases
+#TODO checkout and track remote branch
 
+git_reset_head () {
+    if [[ -n $1 ]]; then
+        git reset HEAD~$1
+    else
+        git reset HEAD
+    fi
+}
+alias grh=git_reset_head
+
+git_reset_head_hard () {
+    if [[ -n $1 ]]; then
+        git reset --hard HEAD~$1
+    else
+        git reset --hard HEAD
+    fi
+}
+alias grhh=git_reset_head_hard
+
+git_checkout_head () {
+    if [[ -n $1 ]]; then
+        git checkout HEAD~$1
+    else
+        git checkout HEAD
+    fi
+}
+alias gch=git_checkout_head
 
 # stolen from: http://zshwiki.org/home/examples/functions
 
