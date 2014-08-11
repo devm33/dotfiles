@@ -26,7 +26,12 @@ alias mdp=markdown_preview
 compdef '_files -g "*.md *.txt"' markdown_preview
 
 # Git functions and aliases
-#TODO checkout and track remote branch
+
+git_checkout_upstream () {
+    git checkout $1
+}
+alias gcu=git_checkout_upstream
+compdef '_values $(git branch -a --no-column --no-color | rev | cut -d" " -f 1 | cut -d"/" -f 1 | rev)' git_checkout_upstream
 
 git_reset_head () {
     if [[ -n $1 ]]; then
