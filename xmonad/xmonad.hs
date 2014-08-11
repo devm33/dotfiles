@@ -25,6 +25,6 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-c", spawn "pidgin")
          , ("M-x", kill)
          , ("M-v", spawn "/opt/cisco/anyconnect/bin/vpnui")
-         , ("M-S-v", spawn "VirtualBox")
+         , ("M-m", spawn "VirtualBox")
          ]
 
