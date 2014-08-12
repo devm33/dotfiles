@@ -3,7 +3,7 @@ set nocompatible " vi improved
 set mouse=a
 
 " install vundle if it's not loaded
-function FirstRunOnEnter()
+function! FirstRunOnEnter()
     PluginInstall
     source $MYVIMRC
 endfunction
@@ -114,6 +114,10 @@ set colorcolumn=80
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
 let NERDTreeMinimalUI=1
+
+" Syntastic settings
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_python_flake8_post_args='--ignore=E501'
 
 " Tab completion
 " will insert tab at beginning of line,
