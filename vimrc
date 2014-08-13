@@ -117,7 +117,11 @@ let NERDTreeMinimalUI=1
 
 " Syntastic settings
 let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_python_flake8_post_args='--ignore=E501'
+let g:syntastic_python_checkers=['flake8']
+let g:syntastic_python_flake8_args='--ignore=E501,E401,E302'
+
+" Python-mode settings
+let g:pymode_lint_ignore='E501,E401,E302'
 
 " Tab completion
 " will insert tab at beginning of line,
