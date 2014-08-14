@@ -3,15 +3,18 @@ set nocompatible " vi improved
 set mouse=a
 
 " install vundle if it's not loaded
-function! FirstRunOnEnter()
-    PluginInstall
-    source $MYVIMRC
-endfunction
+if !exists("*FirstRunOnEnter")
+    " have to be careful about defining this while in use
+    function FirstRunOnEnter()
+        PluginInstall
+        source $MYVIMRC
+    endfunction
+endif
 let vdir = $HOME . '/.vim/bundle/vundle'
 if !isdirectory(vdir)
     call system('mkdir -p ' . vdir)
     call system('git clone https://github.com/gmarik/Vundle.vim.git ' . vdir)
-    autocmd VimEnter * FirstRunOnEnter
+    autocmd VimEnter * :call FirstRunOnEnter()
 endif
 
 " include vundle config
