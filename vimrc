@@ -63,6 +63,9 @@ nnoremap <leader>O :tabe **/*
 set grepprg=ag
 nnoremap <leader>g :grep '<cword>' **/*
 
+" Registers
+nnoremap <leader>p "+
+
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
 nnoremap <leader>vb :tabe ~/.vimrc.bundles<CR>
