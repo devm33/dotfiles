@@ -56,6 +56,10 @@ nnoremap <leader>D :e .<CR>
 nnoremap <leader>o :e **/*
 nnoremap <leader>O :tabe **/*
 
+" File search
+set grepprg=ag
+nnoremap <leader>g :grep '<cword>' **/*
+
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
 nnoremap <leader>vb :tabe ~/.vimrc.bundles<CR>
@@ -159,5 +163,5 @@ set shiftround
 set softtabstop=4
 
 " MISC
-
+set formatoptions-=or " turn off auto-comment prefix on o/O
 set backspace=2 " help cygwin out with backspace
