@@ -33,10 +33,11 @@ command! Q q " Bind :Q to :q
 let mapleader=" "
 
 " White space
-nnoremap <leader>t :%s/\s\+$//<CR>
+nnoremap <leader>T :%s/\s\+$//<CR>
 nnoremap <leader><tab> :retab<CR>
 
 " Window mgmt
+nnoremap <leader>t :tabe<CR>
 nnoremap <leader>s :vs<CR>
 nnoremap <leader>S :sp<CR>
 nnoremap <leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
@@ -65,6 +66,7 @@ nnoremap <leader>g :grep '<cword>' **/*
 
 " Registers
 nnoremap <leader>p "+
+vnoremap <leader>p "+
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
