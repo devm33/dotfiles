@@ -12,12 +12,14 @@ main = xmonad myConfig
 
 myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 
-, terminal = "gnome-terminal"
+-- , terminal = "gnome-terminal"
 
 , layoutHook =
     noBorders $ -- remove borders
-    fullscreenFull $  -- allow fullscreen windows to cover panel
-    layoutHook gnomeConfig
+    avoidStruts $ -- dont cover gnome panel
+    fullscreenFull $  -- but allow fullscreen windows to cover panel
+    myLayout
+    -- layoutHook gnomeConfig
 
 , manageHook = composeAll [ manageHook gnomeConfig
                           , (className =? "Pidgin" <&&> title =? "Buddy List")  --> doFloat
@@ -46,3 +48,9 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-r", spawn "reboot")
          ]
 
+myLayout = tiled ||| reflectHoriz tiled ||| Full
+    where
+        tiled = Tall nmaster delta ratio
+        nmaster = 1
+        ratio = 1/2
+        delta = 3/100
