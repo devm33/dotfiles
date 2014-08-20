@@ -52,6 +52,13 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 
+" Tab mgmt
+nnoremap <leader>[ :tabN<CR>
+nnoremap <leader>] :tabn<CR>
+nnoremap <leader>{ :tabm -1<CR>
+nnoremap <leader>} :tabm +1<CR>
+
+
 " File nav
 nnoremap <leader>f :NERDTreeToggle<CR>
 nnoremap <leader>F :NERDTreeFind<CR>
