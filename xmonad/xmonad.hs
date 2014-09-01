@@ -21,14 +21,12 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
     noBorders $ -- remove borders
     avoidStruts $ -- dont cover gnome panel
     fullscreenFull $  -- but allow fullscreen windows to cover panel
-    myLayout
-    -- layoutHook gnomeConfig
+    layoutHook gnomeConfig
+    -- myLayout
 
 , manageHook = composeAll [ manageHook gnomeConfig
                           -- float pidgin buddy list
                           , (className =? "Pidgin" <&&> title =? "Buddy List")  --> doFloat
-                          -- move other pidgin windows out of master
-                          , className =? "Pidgin" --> doF W.swapDown
                           -- necessary for fullscreen windows
                           , isFullscreen --> doFullFloat
                           ]
