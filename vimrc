@@ -84,6 +84,7 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 
 " Work
 nnoremap <leader>vm :!ssh vm<CR>
+nnoremap <leader>cs :!ssh vm 'python2.7 /var/fact/fact/manage.py collectstatic --noinput'<CR>
 
 
 inoremap jk <esc>
