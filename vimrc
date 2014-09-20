@@ -85,6 +85,8 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 " Work
 nnoremap <leader>vm :!ssh vm<CR>
 nnoremap <leader>cs :!ssh vm 'python2.7 /var/fact/fact/manage.py collectstatic --noinput'<CR>
+nnoremap <leader>vfcs :!ssh tfod 'python2.7 /var/fact-app-testbed/testbed/manage.py collectstatic --noinput'<CR>
+nnoremap <leader>vfr :!ssh tfod 'service httpd restart'<CR>
 
 
 inoremap jk <esc>
