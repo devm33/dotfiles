@@ -1,6 +1,9 @@
 # Reload zsh configuration
 alias rz="source ~/.zshrc"
 
+# I alway want this for some reason
+alias lh="ls -lsh"
+
 # Show contents of directory after cd-ing into it
 chpwd() {
   if [ -d .git ]; then
