@@ -1,6 +1,5 @@
 set nocompatible " vi improved
 
-set mouse=a
 
 " install vundle if it's not loaded
 if !exists("*FirstRunOnEnter")
@@ -58,7 +57,6 @@ nnoremap <leader>] :tabn<CR>
 nnoremap <leader>{ :tabm -1<CR>
 nnoremap <leader>} :tabm +1<CR>
 
-
 " File nav
 nnoremap <leader>f :NERDTreeToggle<CR>
 nnoremap <leader>F :NERDTreeFind<CR>
@@ -83,12 +81,11 @@ nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 
 " Work
-nnoremap <leader>vm :!ssh vm<CR>
-nnoremap <leader>cs :!ssh vm 'python2.7 /var/fact/fact/manage.py collectstatic --noinput'<CR>
-nnoremap <leader>vfcs :!ssh tfod 'python2.7 /var/fact-app-testbed/testbed/manage.py collectstatic --noinput'<CR>
-nnoremap <leader>vfr :!ssh tfod 'service httpd restart'<CR>
+if filereadable(expand("~/.vimrc.work"))
+  source ~/.vimrc.bundles
+endif
 
-
+" Saving and Exiting
 inoremap jk <esc>
 inoremap kj <esc>:w<cr>
 
@@ -130,12 +127,11 @@ if $COLORTERM == 'gnome-terminal'
   set t_Co=256
 endif
 
+syntax enable
 colorscheme hybrid
-"
-" no longer needed on vim74 with colorcolumn
-" highlight OverLength ctermbg=237
-" autocmd BufWinEnter * match OverLength /\%81v.\+/
+
 set colorcolumn=80
+set cursorline
 
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
@@ -187,3 +183,4 @@ set softtabstop=4
 " MISC
 set formatoptions-=or " turn off auto-comment prefix on o/O
 set backspace=2 " help cygwin out with backspace
+set mouse=a
