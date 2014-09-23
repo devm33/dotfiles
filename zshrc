@@ -20,10 +20,11 @@ plugins=(git vagrant jira git-extras yum node npm pip django)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
-
+# prepend my bin to path so it's checked first because I'm important
 export PATH="$HOME/bin/:$PATH"
-# export MANPATH="/usr/local/man:$MANPATH"
+
+# gems on path
+export PATH="$PATH:$HOME/.gem/ruby/1.8/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
