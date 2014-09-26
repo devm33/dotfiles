@@ -82,7 +82,7 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 
 " Work
 if filereadable(expand("~/.vimrc.work"))
-  source ~/.vimrc.bundles
+  source ~/.vimrc.work
 endif
 
 " Saving and Exiting
