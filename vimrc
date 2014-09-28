@@ -172,6 +172,9 @@ function! EightyColumns()
 endfunction
 nnoremap <leader>8 :call EightyColumns()<cr>
 
+" Text wrap at 80
+au BufRead,BufNewFile *.md setlocal textwidth=80
+
 " Indentation
 set autoindent
 set expandtab
