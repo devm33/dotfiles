@@ -29,6 +29,7 @@ Bundle 'haskell.vim'
 Bundle 'dag/vim2hs'
 Bundle 'tomtom/tcomment_vim'
 Bundle 'PProvost/vim-markdown-jekyll'
+Bundle 'ingydotnet/yaml-vim'
 
 
 filetype on
