@@ -13,12 +13,17 @@ chpwd() {
   ls
 }
 
+# viM
 alias v='vim'
 alias vi='vim'
 
+# Vagrant
 alias vg='vagrant'
 alias rvg='vagrant destroy -f && vagrant up'
 alias vgrp='vagrant reload --provision'
+
+# Bower
+alias bower='noglob bower'
 
 alias untar='tar xvf '
 
