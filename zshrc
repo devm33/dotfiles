@@ -11,12 +11,12 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 # HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
+# ZSH_CUSTOM="$HOME/.zsh/ohmyzsh"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git vagrant jira git-extras yum node npm pip django)
+plugins=(git vagrant git-extras yum npm node pip django)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -33,8 +33,8 @@ export LANG=en_US.UTF-8
 export EDITOR='vim'
 
 # work stuff
-if [ -f $HOME/.zsh.work ]; then
-    source $HOME/.zsh.work
+if [ -f $HOME/.zsh/work ]; then
+    source $HOME/.zsh/work
 fi
 
 # Save a ton of history
@@ -43,14 +43,14 @@ HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
 
 # include aliases file
-if [ -f $HOME/.zsh.aliases ]; then
-    source $HOME/.zsh.aliases;
+if [ -f $HOME/.zsh/aliases ]; then
+    source $HOME/.zsh/aliases;
 fi
 
 # if on cygwin include crutches
 if [[  "$(uname -s)" == CYGWIN* ]]; then
-    if [ -f $HOME/.zsh.cygwin ]; then
-        source $HOME/.zsh.cygwin;
+    if [ -f $HOME/.zsh/cygwin ]; then
+        source $HOME/.zsh/cygwin;
     fi
 fi
 
