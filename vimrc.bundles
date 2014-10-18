@@ -28,7 +28,7 @@ Bundle 'vim-pandoc/vim-pandoc-syntax'
 Bundle 'haskell.vim'
 Bundle 'dag/vim2hs'
 Bundle 'tomtom/tcomment_vim'
-Bundle 'PProvost/vim-markdown-jekyll'
+" bug in ftplugin with tabstop/shiftwidth Bundle 'PProvost/vim-markdown-jekyll'
 Bundle 'ingydotnet/yaml-vim'
 
 

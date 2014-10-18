@@ -1,8 +1,10 @@
-# Reload zsh configuration
-alias rz="source ~/.zshrc"
+# Reload/edit zsh configuration
+alias rz='source ~/.zshrc'
+alias ze='vim ~/.zshrc'
+alias za='vim ~/.zsh/aliases'
 
 # I alway want this for some reason
-alias lh="ls -lsh"
+alias lh='ls -lsh'
 
 # Show contents of directory after cd-ing into it
 chpwd() {
@@ -13,7 +15,7 @@ chpwd() {
   ls
 }
 
-# viM
+# ViM
 alias v='vim'
 alias vi='vim'
 
@@ -25,8 +27,14 @@ alias vgrp='vagrant reload --provision'
 # Bower
 alias bower='noglob bower'
 
-alias untar='tar xvf '
+# Grunt
+alias gw='grunt watch'
 
+# Npm
+alias devnpm='npm install --save-dev '
+
+# Util / Misc
+alias untar='tar xvf '
 alias xo='xdg-open '
 
 markdown_preview() {
@@ -37,7 +45,7 @@ compdef '_files -g "*.md *.txt"' markdown_preview
 
 # Git functions and aliases
 
-alias gpr="git remote prune origin"
+alias gpr='git remote prune origin'
 
 git_checkout_upstream () {
     git checkout $1
@@ -72,6 +80,7 @@ git_checkout_head () {
 }
 alias gch=git_checkout_head
 
+# Util / Misc part 2
 # stolen from: http://zshwiki.org/home/examples/functions
 
 # Give us a root shell, or run the command with sudo.
