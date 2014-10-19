@@ -31,7 +31,7 @@ alias bower='noglob bower'
 alias gw='grunt watch'
 
 # Npm
-alias devnpm='npm install --save-dev '
+alias npmdev='npm install --save-dev '
 
 # Util / Misc
 alias untar='tar xvf '
