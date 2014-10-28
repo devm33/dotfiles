@@ -44,7 +44,7 @@ alias mdp=markdown_preview
 compdef '_files -g "*.md *.txt"' markdown_preview
 
 # Git functions and aliases
-
+alias gA='git add -A'
 alias gpr='git remote prune origin'
 
 git_checkout_upstream () {

@@ -107,6 +107,7 @@ nnoremap <leader><esc> :qall<CR>
 nnoremap <F3> :set hlsearch!<CR>
 nnoremap <F6> :!grunt<CR>
 nnoremap <S-F6> :!grunt -v<CR>
+nnoremap <C-F6> :!grunt clean<CR>
 nnoremap <F7> :set spell!<CR>
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
@@ -141,6 +142,7 @@ set cursorline
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
 let NERDTreeMinimalUI=1
+let NERDTreeIgnore=['\.pyc$']
 
 " Syntastic settings
 let g:syntastic_always_populate_loc_list = 1
