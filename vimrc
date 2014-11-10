@@ -134,7 +134,8 @@ if $COLORTERM == 'gnome-terminal'
 endif
 
 syntax enable
-colorscheme hybrid
+set background=dark
+colorscheme solarized
 
 set colorcolumn=80
 set cursorline
