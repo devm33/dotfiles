@@ -129,9 +129,10 @@ set ruler
 set list listchars=tab:»·,trail:· " show trailing
 
 " Color
-if $COLORTERM == 'gnome-terminal'
-  set t_Co=256
-endif
+" if $COLORTERM == 'gnome-terminal'
+" problematic on mac... unsure of best practice here
+set t_Co=256
+" endif
 
 syntax enable
 set background=dark
