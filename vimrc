@@ -135,7 +135,7 @@ endif
 
 syntax enable
 set background=dark
-colorscheme solarized
+colorscheme hybrid
 
 set colorcolumn=80
 set cursorline
@@ -149,6 +149,7 @@ let NERDTreeIgnore=['\.pyc$']
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_python_checkers=['flake8']
 let g:syntastic_python_flake8_args='--ignore=E501,E401,E302'
+let g:syntastic_html_checkers=[]
 
 " Python-mode settings
 let g:pymode_lint_ignore='E501,E401,E302'
