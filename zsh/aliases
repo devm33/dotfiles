@@ -33,6 +33,9 @@ alias gw='grunt watch'
 # Npm
 alias npmdev='npm install --save-dev '
 
+# Bundler
+alias bx='bundle exec'
+
 # Util / Misc
 alias untar='tar xvf '
 alias xo='xdg-open '
