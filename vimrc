@@ -156,11 +156,11 @@ let NERDTreeIgnore=['\.pyc$']
 " Syntastic settings
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_python_checkers=['flake8']
-let g:syntastic_python_flake8_args='--ignore=E501,E401,E302'
+let g:syntastic_python_flake8_args='--ignore=E501,E401,E302,E261,E128,E265'
 let g:syntastic_html_checkers=[]
 
 " Python-mode settings
-let g:pymode_lint_ignore='E501,E401,E302'
+let g:pymode_lint_ignore='E501,E401,E302,E261,E128,E265'
 
 " Tab completion
 " will insert tab at beginning of line,
