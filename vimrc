@@ -1,6 +1,5 @@
 set nocompatible " vi improved
 
-
 " install vundle if it's not loaded
 if !exists("*FirstRunOnEnter")
     " have to be careful about defining this while in use
@@ -67,7 +66,15 @@ nnoremap <leader>O :tabe **/*
 
 " File search
 set grepprg=ag
-nnoremap <leader>g :grep '<cword>' **/*
+nnoremap <leader>gc :grep '<cword>' **/*
+" using rking/ag.vim
+nnoremap <leader>gg :Ag
+nnoremap <leader>gh :Ag --html
+nnoremap <leader>gj :Ag --js
+nnoremap <leader>gp :Ag --python
+nnoremap <leader>gr :Ag --ruby
+
+
 
 " Registers
 nnoremap <leader>p "+
@@ -197,3 +204,6 @@ set softtabstop=4
 set formatoptions-=or " turn off auto-comment prefix on o/O
 set backspace=2 " help cygwin out with backspace
 set mouse=a
+
+set exrc            " enable per-directory .vimrc files
+set secure          " disable unsafe commands in local .vimrc files
