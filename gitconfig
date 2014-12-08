@@ -2,7 +2,7 @@
 	name = Devraj Mehta
 	email = devm33@gmail.com
 [push]
-	default = simple
+	default = matching
 [core]
 	excludesfile = ~/.gitignore
 [color]
