@@ -74,6 +74,12 @@ nnoremap <leader>gj :Ag --js
 nnoremap <leader>gp :Ag --python
 nnoremap <leader>gr :Ag --ruby
 
+" vimdiff for git mergetool
+if &diff
+    nnoremap <leader>1 :diffget LOCAL<cr>
+    nnoremap <leader>2 :diffget BASE<cr>
+    nnoremap <leader>3 :diffget REMOTE<cr>
+endif
 
 
 " Registers
