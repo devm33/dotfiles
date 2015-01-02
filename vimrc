@@ -128,6 +128,7 @@ set nofoldenable
 " Display
 syntax on
 set number
+set relativenumber
 set showcmd " show incomplete commands at bottom right
 set showmatch
 set ruler
