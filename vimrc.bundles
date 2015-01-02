@@ -32,5 +32,6 @@ Bundle 'tomtom/tcomment_vim'
 " bug in ftplugin with tabstop/shiftwidth Bundle 'PProvost/vim-markdown-jekyll'
 Bundle 'ingydotnet/yaml-vim'
 Bundle 'rking/ag.vim'
+Bundle 'groenewege/vim-less'
 
 filetype on
