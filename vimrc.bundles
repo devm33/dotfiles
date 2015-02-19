@@ -33,5 +33,7 @@ Bundle 'tomtom/tcomment_vim'
 Bundle 'ingydotnet/yaml-vim'
 Bundle 'rking/ag.vim'
 Bundle 'groenewege/vim-less'
+Bundle 'elzr/vim-json'
+
 
 filetype on
