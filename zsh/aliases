@@ -3,6 +3,10 @@ alias rz='source ~/.zshrc'
 alias ze='vim ~/.zshrc'
 alias za='vim ~/.zsh/aliases'
 
+# zsh awesomeness
+autoload -U zmv
+alias mmv='noglob zmv -W'
+
 # I alway want this for some reason
 alias lh='ls -lsh'
 
