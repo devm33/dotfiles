@@ -73,6 +73,7 @@ nnoremap <leader>gh :Ag --html
 nnoremap <leader>gj :Ag --js
 nnoremap <leader>gp :Ag --python
 nnoremap <leader>gr :Ag --ruby
+nnoremap <leader>gs :Ag --sass
 
 " vimdiff for git mergetool
 if &diff
@@ -206,6 +207,9 @@ set tabstop=4
 set shiftwidth=4
 set shiftround
 set softtabstop=4
+
+nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=2<cr>
+nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
 
 " MISC
 set formatoptions-=or " turn off auto-comment prefix on o/O
