@@ -34,6 +34,9 @@ let mapleader=" "
 nnoremap <leader>T :%s/\s\+$//<CR>
 nnoremap <leader><tab> :retab<CR>
 
+" Organizing
+vnoremap <leader>s :sort<CR>
+
 " Window mgmt
 nnoremap <leader>t :tabe<CR>
 nnoremap <leader>s :vs<CR>
