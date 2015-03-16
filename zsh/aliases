@@ -31,8 +31,18 @@ alias vgrp='vagrant reload --provision'
 # Bower
 alias bower='noglob bower'
 
-# Grunt
-alias gw='grunt watch'
+# Grunt / Gulp
+grunt_and_gulp() {
+    if [ -f 'gulpfile.js' -o -f 'Gulpfile.js' ]; then
+        gulp $*;
+    elif [ -f 'gruntfile.js' -o -f 'Gruntfile.js' ]; then
+        grunt $*;
+    else
+        echo 'no grunt or gulp file found';
+    fi
+}
+alias grlp='grunt_and_gulp'
+alias gw='grunt_and_gulp watch'
 
 # Npm
 alias npmdev='npm install --save-dev '
