@@ -143,6 +143,29 @@ set showcmd " show incomplete commands at bottom right
 set showmatch
 set ruler
 
+" Word wrapping
+function! ToggleWrap()
+    if &list
+        setlocal wrap linebreak nolist
+        noremap <buffer> <silent> j gj
+        noremap <buffer> <silent> k gk
+    else
+        setlocal list
+        silent! nunmap <buffer> j
+        silent! nunmap <buffer> k
+    endif
+endfunction
+noremap <F5> :call ToggleWrap()<cr>
+
+" Writing txt files
+function! TxtMode()
+    call ToggleWrap()
+    setlocal nonumber norelativenumber
+    setlocal spell
+endfunction
+autocmd! BufEnter,BufNew *.txt :call TxtMode()
+
+
 " View trailing white space
 set list listchars=tab:»·,trail:· " show trailing
 

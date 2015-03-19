@@ -34,6 +34,6 @@ Bundle 'ingydotnet/yaml-vim'
 Bundle 'rking/ag.vim'
 Bundle 'groenewege/vim-less'
 Bundle 'elzr/vim-json'
-
+Bundle 'reedes/vim-wordy'
 
 filetype on
