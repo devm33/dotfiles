@@ -31,7 +31,7 @@ command! Q q " Bind :Q to :q
 let mapleader=" "
 
 " White space
-nnoremap <leader>T :%s/\s\+$//<CR>
+nnoremap <leader>S :%s/\s\+$//<CR>
 nnoremap <leader><tab> :retab<CR>
 
 " Organizing
@@ -40,7 +40,7 @@ vnoremap <leader>s :sort<CR>
 " Window mgmt
 nnoremap <leader>t :tabe<CR>
 nnoremap <leader>s :vs<CR>
-nnoremap <leader>S :sp<CR>
+nnoremap <leader>v :sp<CR>
 nnoremap <leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
 nnoremap <leader>+ :exe "resize " . (winheight(0) * 3/2)<CR>
 nnoremap <leader>j <C-w>j
