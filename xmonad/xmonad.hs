@@ -42,6 +42,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-s", spawn "gnome-screensaver-command -l")
          , ("M-o", spawn "gmrun")
+         , ("M-<Space>", spawn "gmrun")
          , ("M-b", spawn "google-chrome")
          , ("M-f", spawn "firefox")
          , ("M-a", spawn "gnome-terminal")
