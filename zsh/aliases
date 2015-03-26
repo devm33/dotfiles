@@ -26,6 +26,7 @@ alias vi='vim'
 # Vagrant
 alias vg='vagrant'
 alias rvg='vagrant destroy -f && vagrant up'
+alias dvg='vagrant destroy -f && gclean && vagrant up'
 alias vgrp='vagrant reload --provision'
 
 # Bower
