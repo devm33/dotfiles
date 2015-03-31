@@ -39,8 +39,8 @@ vnoremap <leader>s :sort<CR>
 
 " Window mgmt
 nnoremap <leader>t :tabe<CR>
-nnoremap <leader>s :vs<CR>
-nnoremap <leader>v :sp<CR>
+nnoremap <leader>sv :vs<CR>
+nnoremap <leader>sh :sp<CR>
 nnoremap <leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
 nnoremap <leader>+ :exe "resize " . (winheight(0) * 3/2)<CR>
 nnoremap <leader>j <C-w>j
@@ -77,6 +77,10 @@ nnoremap <leader>gj :Ag --js
 nnoremap <leader>gp :Ag --python
 nnoremap <leader>gr :Ag --ruby
 nnoremap <leader>gs :Ag --sass
+
+" Replace all
+nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
+vnoremap <leader>r "sy:%s/<c-r>s/
 
 " vimdiff for git mergetool
 if &diff
