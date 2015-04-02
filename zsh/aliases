@@ -56,10 +56,20 @@ alias untar='tar xvf '
 alias xo='xdg-open '
 
 markdown_preview() {
-    pandoc -o /tmp/tmp.html "$1" && xdg-open /tmp/tmp.html
+    TMPFILE="/tmp/$1.html"
+    pandoc -o $TMPFILE "$1" && xdg-open $TMPFILE
+}
+markdown_watch() {
+    TMPFILE="/tmp/$1.html"
+    pandoc -o $TMPFILE "$1" && xdg-open $TMPFILE
+    while inotifywait -e modify "$1"; do
+        pandoc -o $TMPFILE "$1"
+    done
 }
 alias mdp=markdown_preview
+alias mdw=markdown_watch
 compdef '_files -g "*.md *.txt"' markdown_preview
+compdef '_files -g "*.md *.txt"' markdown_watch
 
 # Git functions and aliases
 alias gA='git add -A'
