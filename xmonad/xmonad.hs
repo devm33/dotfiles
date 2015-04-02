@@ -40,6 +40,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 } `additionalKeysP` myKeys
 
 myKeys = [ ("M-g", goToSelected defaultGSConfig)
+         , ("M-S-n", sendMessage NextLayout)
          , ("M-s", spawn "gnome-screensaver-command -l")
          , ("M-o", spawn "gmrun")
          , ("M-<Space>", spawn "gmrun")
