@@ -74,6 +74,8 @@ compdef '_files -g "*.md *.txt"' markdown_watch
 # Git functions and aliases
 alias gA='git add -A'
 alias gpr='git remote prune origin'
+alias gra='git remote add'
+alias gmm='git merge master'
 
 git_checkout_upstream () {
     git checkout $1
