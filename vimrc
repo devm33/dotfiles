@@ -138,6 +138,8 @@ set nobackup
 set nowritebackup
 set noswapfile
 set nofoldenable
+set autoread
+set autowriteall
 
 " Display
 syntax on
