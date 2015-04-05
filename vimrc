@@ -22,6 +22,8 @@ endif
 
 filetype plugin indent on
 
+" Filetypes
+autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 
 " MAPPINGS
 
@@ -89,13 +91,13 @@ if &diff
     nnoremap <leader>3 :diffget REMOTE<cr>
 endif
 
-
 " Registers
 nnoremap <leader>p "+
 vnoremap <leader>p "+
 
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
+nnoremap <leader>mo :!open '%'<CR>
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
