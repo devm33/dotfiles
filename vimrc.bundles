@@ -35,5 +35,6 @@ Bundle 'rking/ag.vim'
 Bundle 'groenewege/vim-less'
 Bundle 'elzr/vim-json'
 Bundle 'reedes/vim-wordy'
+Bundle 'jeffkreeftmeijer/vim-numbertoggle'
 
 filetype on
