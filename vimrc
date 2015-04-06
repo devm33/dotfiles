@@ -71,14 +71,14 @@ nnoremap <leader>O :tabe **/*
 
 " File search
 set grepprg=ag
-nnoremap <leader>gc :grep '<cword>' **/*
+nnoremap <leader>gc :Ag <c-r>=expand('<cword>'><cr>
 " using rking/ag.vim
-nnoremap <leader>gg :Ag
-nnoremap <leader>gh :Ag --html
-nnoremap <leader>gj :Ag --js
-nnoremap <leader>gp :Ag --python
-nnoremap <leader>gr :Ag --ruby
-nnoremap <leader>gs :Ag --sass
+nnoremap <leader>gg :Ag 
+nnoremap <leader>gh :Ag --html 
+nnoremap <leader>gj :Ag --js 
+nnoremap <leader>gp :Ag --python 
+nnoremap <leader>gr :Ag --ruby 
+nnoremap <leader>gs :Ag --sass 
 
 " Replace all
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
