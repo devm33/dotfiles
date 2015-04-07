@@ -28,6 +28,7 @@ alias vg='vagrant'
 alias rvg='vagrant destroy -f && vagrant up'
 alias dvg='vagrant destroy -f && gclean && vagrant up'
 alias vgrp='vagrant reload --provision'
+alias vgd='vagrant destroy -f'
 
 # Bower
 alias bower='noglob bower'
