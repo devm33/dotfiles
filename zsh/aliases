@@ -78,6 +78,11 @@ alias gpr='git remote prune origin'
 alias gra='git remote add'
 alias gmm='git merge master'
 
+git_copy_commit () {
+    git rev-parse HEAD | xclip -sel clip
+}
+alias gcpc=git_copy_commit
+
 git_checkout_upstream () {
     git checkout $1
 }
