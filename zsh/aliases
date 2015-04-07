@@ -79,7 +79,7 @@ alias gra='git remote add'
 alias gmm='git merge master'
 
 git_copy_commit () {
-    git rev-parse HEAD | xclip -sel clip
+    git rev-parse HEAD | tr -d '\n' | xclip -sel clip
 }
 alias gcpc=git_copy_commit
 
