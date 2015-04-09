@@ -30,6 +30,9 @@ autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 nnoremap ; :
 command! Q q " Bind :Q to :q
 
+" Change bracket notation to dot notation
+nnoremap cd f]xhxF[xr.
+
 let mapleader=" "
 
 " White space
