@@ -37,4 +37,14 @@ Bundle 'elzr/vim-json'
 Bundle 'reedes/vim-wordy'
 Bundle 'jeffkreeftmeijer/vim-numbertoggle'
 
+" Clojure plugins
+Bundle 'guns/vim-sexp'
+Bundle 'tpope/vim-sexp-mappings-for-regular-people'
+Bundle 'guns/vim-clojure-static'
+Bundle 'tpope/vim-leiningen'
+Bundle 'tpope/vim-fireplace'
+Bundle 'guns/vim-clojure-highlight'
+Bundle 'kien/rainbow_parentheses.vim'
+
+
 filetype on
