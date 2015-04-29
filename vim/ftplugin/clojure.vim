@@ -21,3 +21,5 @@ if exists(":RainbowParenthesesActivate") == 2
   autocmd Syntax * RainbowParenthesesLoadRound
   autocmd Syntax * RainbowParenthesesLoadSquare
 endif
+
+nnoremap cpa :%Eval<cr>
