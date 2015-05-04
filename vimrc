@@ -87,6 +87,10 @@ nnoremap <leader>gs :Ag --sass
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
 vnoremap <leader>r "sy:%s/<c-r>s/
 
+" Using fugitive
+nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
+nnoremap <leader>cp :Gpush<cr>
+
 " vimdiff for git mergetool
 if &diff
     nnoremap <leader>1 :diffget LOCAL<cr>
