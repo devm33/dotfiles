@@ -23,3 +23,5 @@ if exists(":RainbowParenthesesActivate") == 2
 endif
 
 nnoremap cpa :%Eval<cr>
+
+nmap ca 0i(assert)<esc>>)
