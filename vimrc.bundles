@@ -44,7 +44,7 @@ Bundle 'guns/vim-clojure-static'
 Bundle 'tpope/vim-leiningen'
 Bundle 'tpope/vim-fireplace'
 Bundle 'guns/vim-clojure-highlight'
-Bundle 'kien/rainbow_parentheses.vim'
+Bundle 'junegunn/rainbow_parentheses.vim'
 
 
 filetype on
