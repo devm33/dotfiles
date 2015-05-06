@@ -193,6 +193,7 @@ set t_Co=256
 syntax enable
 set background=dark
 colorscheme hybrid
+" colorscheme Tomorrow " light scheme
 
 set colorcolumn=80
 set cursorline
