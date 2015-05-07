@@ -1,2 +1,2 @@
 nnoremap cpa :%Eval<cr>
-nmap ca 0i(assert)<esc>>)
+nmap cA 0i(assert)<esc>>)
