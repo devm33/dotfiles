@@ -20,6 +20,9 @@ plugins=(git vagrant git-extras yum npm node pip django bundler)
 
 source $ZSH/oh-my-zsh.sh
 
+# ensure /usr/local/bin on $PATH
+export PATH="/usr/local/bin/:$PATH"
+
 # prepend my bin to path so it's checked first because I'm important
 export PATH="$HOME/bin/:$PATH"
 
