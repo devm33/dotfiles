@@ -7,3 +7,4 @@ secrets.json
 .idea/
 .ropeproject/
 .vimrc
+.DS_Store

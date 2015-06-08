@@ -33,5 +33,18 @@ Bundle 'tomtom/tcomment_vim'
 Bundle 'ingydotnet/yaml-vim'
 Bundle 'rking/ag.vim'
 Bundle 'groenewege/vim-less'
+Bundle 'elzr/vim-json'
+Bundle 'reedes/vim-wordy'
+Bundle 'jeffkreeftmeijer/vim-numbertoggle'
+
+" Clojure plugins
+Bundle 'guns/vim-sexp'
+Bundle 'tpope/vim-sexp-mappings-for-regular-people'
+Bundle 'guns/vim-clojure-static'
+Bundle 'tpope/vim-leiningen'
+Bundle 'tpope/vim-fireplace'
+Bundle 'guns/vim-clojure-highlight'
+Bundle 'junegunn/rainbow_parentheses.vim'
+
 
 filetype on

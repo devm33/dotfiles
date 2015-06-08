@@ -22,22 +22,30 @@ endif
 
 filetype plugin indent on
 
+" Filetypes
+autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 
 " MAPPINGS
 
 nnoremap ; :
 command! Q q " Bind :Q to :q
 
+" Change bracket notation to dot notation
+nnoremap cd f]xhxF[xr.
+
 let mapleader=" "
 
 " White space
-nnoremap <leader>T :%s/\s\+$//<CR>
+nnoremap <leader>S :%s/\s\+$//<CR>
 nnoremap <leader><tab> :retab<CR>
+
+" Organizing
+vnoremap <leader>s :sort<CR>
 
 " Window mgmt
 nnoremap <leader>t :tabe<CR>
-nnoremap <leader>s :vs<CR>
-nnoremap <leader>S :sp<CR>
+nnoremap <leader>sv :vs<CR>
+nnoremap <leader>sh :sp<CR>
 nnoremap <leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
 nnoremap <leader>+ :exe "resize " . (winheight(0) * 3/2)<CR>
 nnoremap <leader>j <C-w>j
@@ -66,13 +74,22 @@ nnoremap <leader>O :tabe **/*
 
 " File search
 set grepprg=ag
-nnoremap <leader>gc :grep '<cword>' **/*
+nnoremap <leader>gc :Ag <c-r>=expand('<cword>'><cr>
 " using rking/ag.vim
-nnoremap <leader>gg :Ag
-nnoremap <leader>gh :Ag --html
-nnoremap <leader>gj :Ag --js
-nnoremap <leader>gp :Ag --python
-nnoremap <leader>gr :Ag --ruby
+nnoremap <leader>gg :Ag 
+nnoremap <leader>gh :Ag --html 
+nnoremap <leader>gj :Ag --js 
+nnoremap <leader>gp :Ag --python 
+nnoremap <leader>gr :Ag --ruby 
+nnoremap <leader>gs :Ag --sass 
+
+" Replace all
+nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
+vnoremap <leader>r "sy:%s/<c-r>s/
+
+" Using fugitive
+nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
+nnoremap <leader>cp :Gpush<cr>
 
 " vimdiff for git mergetool
 if &diff
@@ -81,13 +98,13 @@ if &diff
     nnoremap <leader>3 :diffget REMOTE<cr>
 endif
 
-
 " Registers
 nnoremap <leader>p "+
 vnoremap <leader>p "+
 
 " Open file in browser
-nnoremap <leader>co :!google-chrome %<CR>
+nnoremap <leader>co :!google-chrome '%'<CR>
+nnoremap <leader>mo :!open '%'<CR>
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
@@ -130,6 +147,11 @@ set nobackup
 set nowritebackup
 set noswapfile
 set nofoldenable
+set autoread
+set autowriteall
+
+" Take autowrite a step further (write on lost focus)
+autocmd FocusLost * silent! wa
 
 " Display
 syntax on
@@ -138,6 +160,29 @@ set relativenumber
 set showcmd " show incomplete commands at bottom right
 set showmatch
 set ruler
+
+" Word wrapping
+function! ToggleWrap()
+    if &list
+        setlocal wrap linebreak nolist
+        noremap <buffer> <silent> j gj
+        noremap <buffer> <silent> k gk
+    else
+        setlocal list
+        silent! nunmap <buffer> j
+        silent! nunmap <buffer> k
+    endif
+endfunction
+noremap <F5> :call ToggleWrap()<cr>
+
+" Writing txt files
+function! TxtMode()
+    call ToggleWrap()
+    setlocal nonumber norelativenumber
+    setlocal spell
+endfunction
+autocmd! BufEnter,BufNew *.txt :call TxtMode()
+
 
 " View trailing white space
 set list listchars=tab:»·,trail:· " show trailing
@@ -151,6 +196,7 @@ set t_Co=256
 syntax enable
 set background=dark
 colorscheme hybrid
+" colorscheme Tomorrow " light scheme
 
 set colorcolumn=80
 set cursorline
@@ -161,13 +207,22 @@ let NERDTreeMinimalUI=1
 let NERDTreeIgnore=['\.pyc$']
 
 " Syntastic settings
+let g:syntastic_check_on_open = 1
+let g:syntastic_auto_loc_list = 1
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_python_checkers=['flake8']
+let g:syntastic_python_flake8_exec = 'python2.7'
 let g:syntastic_python_flake8_args='--ignore=E501,E401,E302,E261,E128,E265'
+let g:syntastic_python_python_exec = 'python2.7'
 let g:syntastic_html_checkers=[]
 
 " Python-mode settings
+let g:pymode_lint=1
+let g:pymode_lint_checkers=['pep8']
 let g:pymode_lint_ignore='E501,E401,E302,E261,E128,E265'
+let g:pymode_indent=1
+let g:pymode_run_bind = '<leader>gpr'
+let g:pymode_rope = 0 " too slow and buggy
 
 " Tab completion
 " will insert tab at beginning of line,
@@ -184,6 +239,11 @@ function! InsertTabWrapper()
 endfunction
 inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
 
+" Activate rainbow parens for lisps
+augroup rainbow_lisp
+  autocmd!
+  autocmd FileType lisp,clojure,scheme RainbowParentheses
+augroup END
 
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
@@ -206,6 +266,9 @@ set tabstop=4
 set shiftwidth=4
 set shiftround
 set softtabstop=4
+
+nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=2<cr>
+nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
 
 " MISC
 set formatoptions-=or " turn off auto-comment prefix on o/O

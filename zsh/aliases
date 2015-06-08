@@ -3,6 +3,10 @@ alias rz='source ~/.zshrc'
 alias ze='vim ~/.zshrc'
 alias za='vim ~/.zsh/aliases'
 
+# zsh awesomeness
+autoload -U zmv
+alias mmv='noglob zmv -W'
+
 # I alway want this for some reason
 alias lh='ls -lsh'
 
@@ -22,13 +26,26 @@ alias vi='vim'
 # Vagrant
 alias vg='vagrant'
 alias rvg='vagrant destroy -f && vagrant up'
+alias dvg='vagrant destroy -f && gclean && vagrant up'
 alias vgrp='vagrant reload --provision'
+alias vgd='vagrant destroy -f'
+alias vgc='vagrant destroy -f && gclean'
 
 # Bower
 alias bower='noglob bower'
 
-# Grunt
-alias gw='grunt watch'
+# Grunt / Gulp
+grunt_and_gulp() {
+    if [ -f 'gulpfile.js' -o -f 'Gulpfile.js' ]; then
+        gulp $*;
+    elif [ -f 'gruntfile.js' -o -f 'Gruntfile.js' ]; then
+        grunt $*;
+    else
+        echo 'no grunt or gulp file found';
+    fi
+}
+alias grlp='grunt_and_gulp'
+alias gw='grunt_and_gulp watch'
 
 # Npm
 alias npmdev='npm install --save-dev '
@@ -41,14 +58,31 @@ alias untar='tar xvf '
 alias xo='xdg-open '
 
 markdown_preview() {
-    pandoc -o /tmp/tmp.html "$1" && xdg-open /tmp/tmp.html
+    TMPFILE="/tmp/$1.html"
+    pandoc -o $TMPFILE "$1" && xdg-open $TMPFILE
+}
+markdown_watch() {
+    TMPFILE="/tmp/$1.html"
+    pandoc -o $TMPFILE "$1" && xdg-open $TMPFILE
+    while inotifywait -e modify "$1"; do
+        pandoc -o $TMPFILE "$1"
+    done
 }
 alias mdp=markdown_preview
+alias mdw=markdown_watch
 compdef '_files -g "*.md *.txt"' markdown_preview
+compdef '_files -g "*.md *.txt"' markdown_watch
 
 # Git functions and aliases
 alias gA='git add -A'
 alias gpr='git remote prune origin'
+alias gra='git remote add'
+alias gmm='git merge master'
+
+git_copy_commit () {
+    git rev-parse HEAD | tr -d '\n' | xclip -sel clip
+}
+alias gcpc=git_copy_commit
 
 git_checkout_upstream () {
     git checkout $1
