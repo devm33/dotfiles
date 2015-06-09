@@ -153,6 +153,9 @@ set nofoldenable
 set autoread
 set autowriteall
 
+" Take autowrite a step further (write on lost focus)
+autocmd FocusLost * silent! wa
+
 " Display
 syntax on
 set number
