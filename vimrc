@@ -87,6 +87,9 @@ nnoremap <leader>gs :Ag --sass
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
 vnoremap <leader>r "sy:%s/<c-r>s/
 
+" Replace in line
+nnoremap <leader>R :s/<c-r>=expand("<cword>")<cr>/
+
 " Using fugitive
 nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
 nnoremap <leader>cp :Gpush<cr>
