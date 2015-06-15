@@ -1,0 +1,11 @@
+" Per project setting overrides
+function! SetupEnvironment()
+    let l:path = expand('%:p')
+    if l:path =~ 'eefmp'
+        let g:syntastic_javascript_checkers=['jslint']
+        let g:syntastic_javascript_jslint_args=''
+    else
+        let g:syntastic_javascript_checkers=['jshint']
+    endif
+endfunction
+autocmd! BufReadPost,BufNewFile * call SetupEnvironment()

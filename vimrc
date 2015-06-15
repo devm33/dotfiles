@@ -280,3 +280,8 @@ set mouse=a
 
 set exrc            " enable per-directory .vimrc files
 set secure          " disable unsafe commands in local .vimrc files
+
+" Per project setting overrides
+if filereadable(expand("~/.vimrc.projects"))
+  source ~/.vimrc.projects
+endif
