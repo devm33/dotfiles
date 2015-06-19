@@ -78,6 +78,7 @@ alias gA='git add -A'
 alias gpr='git remote prune origin'
 alias gra='git remote add'
 alias gmm='git merge master'
+alias gwc='git whatchanged -p'
 
 git_copy_commit () {
     git rev-parse HEAD | tr -d '\n' | xclip -sel clip
