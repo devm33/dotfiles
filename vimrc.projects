@@ -3,7 +3,9 @@ function! SetupEnvironment()
     let l:path = expand('%:p')
     if l:path =~ 'eefmp'
         let g:syntastic_javascript_checkers=['jslint']
-        let g:syntastic_javascript_jslint_args=''
+        let l:jslintrc_path = strpart(l:path, 0, stridx(l:path, 'eefmp') + 5) .
+                    \ '/client-side/.jslintrc'
+        let g:syntastic_javascript_jslint_args = '--config ' . l:jslintrc_path
     else
         let g:syntastic_javascript_checkers=['jshint']
     endif

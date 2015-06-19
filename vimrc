@@ -136,6 +136,8 @@ nnoremap <leader>q :q<CR>
 nnoremap <leader>x :x<CR>
 nnoremap <leader><esc> :qall<CR>
 
+nnoremap <leader>c :ccl <bar> lcl<cr>
+
 " Function key functions
 nnoremap <F3> :set hlsearch!<CR>
 nnoremap <F6> :!grunt<CR>
@@ -225,7 +227,7 @@ let g:pymode_lint_checkers=['pep8']
 let g:pymode_lint_ignore='E501,E401,E302,E261,E128,E265'
 let g:pymode_indent=1
 let g:pymode_run_bind = '<leader>gpr'
-let g:pymode_rope = 0 " too slow and buggy
+let g:pymode_rope = 1 " too slow and buggy
 
 " Tab completion
 " will insert tab at beginning of line,
