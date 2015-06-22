@@ -21,10 +21,10 @@ plugins=(git vagrant yum npm node pip django bundler)
 source $ZSH/oh-my-zsh.sh
 
 # ensure /usr/local/bin on $PATH
-export PATH="/usr/local/bin/:$PATH"
+export PATH="/usr/local/bin:$PATH"
 
 # prepend my bin to path so it's checked first because I'm important
-export PATH="$HOME/bin/:$PATH"
+export PATH="$HOME/bin:$PATH"
 
 # gems on path
 export PATH="$PATH:$HOME/.gem/ruby/1.8/bin"
