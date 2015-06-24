@@ -215,7 +215,7 @@ let NERDTreeIgnore=['\.pyc$']
 let g:syntastic_check_on_open = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_python_checkers=['flake8']
+let g:syntastic_python_checkers=['flake8', 'pyflakes']
 let g:syntastic_python_flake8_exec = 'python2.7'
 let g:syntastic_python_flake8_args='--ignore=E501,E401,E302,E261,E128,E265'
 let g:syntastic_python_python_exec = 'python2.7'
@@ -228,6 +228,15 @@ let g:pymode_lint_ignore='E501,E401,E302,E261,E128,E265'
 let g:pymode_indent=1
 let g:pymode_run_bind = '<leader>gpr'
 let g:pymode_rope = 1 " too slow and buggy
+
+" Jedi.vim settings
+let g:jedi#goto_command = "<leader>jd"
+let g:jedi#goto_assignments_command = "<leader>jg"
+let g:jedi#goto_definitions_command = ""
+let g:jedi#documentation_command = "K"
+let g:jedi#usages_command = "<leader>jn"
+let g:jedi#completions_command = "<C-Space>"
+let g:jedi#rename_command = "<leader>jr"
 
 " Tab completion
 " will insert tab at beginning of line,

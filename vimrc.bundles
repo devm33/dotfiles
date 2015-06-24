@@ -21,7 +21,6 @@ Bundle 'tpope/vim-repeat'
 Bundle 'tpope/vim-unimpaired'
 Bundle 'ervandew/supertab'
 Bundle 'skwp/greplace.vim'
-" Bundle 'klen/python-mode'
 Bundle 'pangloss/vim-javascript'
 Bundle 'scrooloose/nerdtree'
 " Bundle 'vim-pandoc/vim-pandoc'
@@ -36,6 +35,10 @@ Bundle 'groenewege/vim-less'
 Bundle 'elzr/vim-json'
 Bundle 'reedes/vim-wordy'
 Bundle 'jeffkreeftmeijer/vim-numbertoggle'
+
+" Python
+Bundle 'davidhalter/jedi-vim'
+" Bundle 'klen/python-mode'
 
 " Clojure plugins
 Bundle 'guns/vim-sexp'
