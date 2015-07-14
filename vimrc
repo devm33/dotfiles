@@ -138,11 +138,11 @@ nnoremap <leader><esc> :qall<CR>
 
 nnoremap <leader>c :ccl <bar> lcl<cr>
 
+" Reload file
+nnoremap <F5> :e %<CR>
+
 " Function key functions
 nnoremap <F3> :set hlsearch!<CR>
-nnoremap <F6> :!grunt<CR>
-nnoremap <S-F6> :!grunt -v<CR>
-nnoremap <C-F6> :!grunt clean<CR>
 nnoremap <F7> :set spell!<CR>
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
@@ -178,7 +178,7 @@ function! ToggleWrap()
         silent! nunmap <buffer> k
     endif
 endfunction
-noremap <F5> :call ToggleWrap()<cr>
+noremap <F6> :call ToggleWrap()<cr>
 
 " Writing txt files
 function! TxtMode()
