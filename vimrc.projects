@@ -7,7 +7,7 @@ function! SetupEnvironment()
                     \ '/client-side/.jslintrc'
         let g:syntastic_javascript_jslint_args = '--config ' . l:jslintrc_path
     else
-        let g:syntastic_javascript_checkers=['jshint']
+        let g:syntastic_javascript_checkers=['jshint', 'jscs']
     endif
 endfunction
 autocmd! BufReadPost,BufNewFile * call SetupEnvironment()
