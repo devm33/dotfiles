@@ -41,6 +41,7 @@ nnoremap <leader><tab> :retab<CR>
 
 " Organizing
 vnoremap <leader>s :sort<CR>
+nnoremap <leader>s {jV}k:sort<CR>
 
 " Window mgmt
 nnoremap <leader>t :tabe<CR>
@@ -109,12 +110,15 @@ vnoremap <leader>p "+
 nnoremap <leader>co :!google-chrome '%'<CR>
 nnoremap <leader>mo :!open '%'<CR>
 
-" Quickly edit/reload the vimrc file
+" Edit/reload the vimrc file
 nnoremap <leader>ve :tabe $MYVIMRC<CR>
 nnoremap <leader>vb :tabe ~/.vimrc.bundles<CR>
-nnoremap <leader>vi :PluginInstall<CR>:PluginClean<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
+
+" Using vundle
+nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
+
 
 " Work
 if filereadable(expand("~/.vimrc.work"))
