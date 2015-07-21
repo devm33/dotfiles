@@ -80,6 +80,9 @@ alias gra='git remote add'
 alias gmm='git merge master'
 alias gwc='git whatchanged -p'
 
+# Overwrite of alias in omz plugin due to error
+alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -D'
+
 git_copy_commit () {
     git rev-parse HEAD | tr -d '\n' | xclip -sel clip
 }
