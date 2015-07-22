@@ -89,7 +89,7 @@ nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
 vnoremap <leader>r "sy:%s/<c-r>s/
 
 " Replace in line
-nnoremap <leader>R :s/<c-r>=expand("<cword>")<cr>/
+nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
 
 " Using fugitive
 nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
