@@ -6,6 +6,13 @@ if !exists("*FirstRunOnEnter")
     function FirstRunOnEnter()
         PluginInstall
         source $MYVIMRC
+        let oldpath = getcwd()
+        execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
+        " NOTE this need cmake to be installed
+        execute "./install.sh"
+        execute "cd ../tern_for_vim"
+        execute "npm install"
+        execute "cd " . oldpath
     endfunction
 endif
 let vdir = $HOME . '/.vim/bundle/vundle'

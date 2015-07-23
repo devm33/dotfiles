@@ -11,7 +11,7 @@ call vundle#rc()
 Bundle "gmarik/vundle"
 
 " General
-Bundle "ervandew/supertab"
+Bundle "Valloric/YouCompleteMe"
 Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
@@ -28,6 +28,7 @@ Bundle "sirver/ultisnips"
 
 
 " Javascript
+Bundle "marijnh/tern_for_vim"
 Bundle "pangloss/vim-javascript"
 Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
@@ -44,7 +45,7 @@ Bundle "hail2u/vim-css3-syntax"
 Bundle "groenewege/vim-less"
 
 " Python
-Bundle "davidhalter/jedi-vim"
+" Bundle "davidhalter/jedi-vim" " trying out ycm instead
 " Bundle "klen/python-mode"
 
 " Ruby
