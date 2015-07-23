@@ -1,0 +1,48 @@
+snippet #!
+	#!/usr/bin/env node
+
+snippet ex
+	module.exports = ${1};
+
+snippet cl
+	console.log(${0});
+
+snippet us
+	'use strict';
+
+snippet fun
+	function ${1:function_name}(${2}) {
+		${0}
+	}
+
+snippet f
+	function(${1}) {
+		${0}
+	}
+
+snippet :f
+	${1:method_name}: function (${2:attribute}) {
+		${3}
+	},
+
+snippet if
+	if (${1:true}) {
+		${0}
+	}
+
+snippet ife
+	if (${1:true}) {
+		${2}
+	} else {
+		${0}
+	}
+
+snippet ret
+	return ${0:result};
+
+snippet /**
+	/**
+	 * ${0:description}
+	 *
+	 */
+
