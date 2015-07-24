@@ -21,7 +21,20 @@ snippet div. "<div> with class" w
 endsnippet
 
 snippet input "Input with Label" w
-<label for="${2:${1/[[:alpha:]]+|( )/(?1:_:\L$0)/g}}">$1</label><input type="${3:text/submit/hidden/button}" name="${4:$2}" value="$5"${6: id="${7:$2}"}`!p x(snip)`>
+<label for="${2:${1/[[:alpha:]]+|( )/(?1:_:\L$0)/g}}">$1</label>
+<input type="${3:text/submit/hidden/button}" name="${4:$2}" value="$5"${6: id="${7:$2}"}`!p x(snip)`>
+endsnippet
+
+snippet submit
+<input type="submit" value="${2}" ${3}/>${7}
+endsnippet
+
+snippet textarea
+<textarea name="$2"${3: id="$4"}>$5</textarea>
+endsnippet
+
+snippet img
+<img src="$1"${2: alt="$3"}/>
 endsnippet
 
 snippet head "XHTML <head>"
