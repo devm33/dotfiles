@@ -197,7 +197,9 @@ function! TxtMode()
     setlocal nonumber norelativenumber
     setlocal spell
 endfunction
-autocmd! BufEnter,BufNew *.txt :call TxtMode()
+" autocmd! BufEnter,BufNew *.txt :call TxtMode() " need to find workaround for
+" this executing in vim help files
+command English call TxtMode()
 
 
 " View trailing white space
