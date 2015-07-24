@@ -3,11 +3,11 @@ snippet #! "shebang" b
 endsnippet
 
 snippet ex "exports" b
-module.exports = ${1};
+module.exports = $0;
 endsnippet
 
 snippet cl "console.log" b
-console.log(${1:"${2:value}"});
+console.log(${1:'${2:value}'});
 endsnippet
 
 snippet us "strict mode"
@@ -21,8 +21,8 @@ function ${1:function_name}(${2:argument}) {
 endsnippet
 
 snippet f "anonymous function"
-function(${1}) {
-	${0}
+function($1) {
+	$0
 }
 endsnippet
 
