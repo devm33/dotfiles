@@ -249,10 +249,14 @@ let g:jedi#usages_command = "<leader>jn"
 let g:jedi#completions_command = "<C-Space>"
 let g:jedi#rename_command = "<leader>jr"
 
+" YouCompleteMe
+let g:ycm_key_list_select_completion=['<tab>', '<Down>']
+let g:ycm_key_list_previous_completion=['<s-tab>', '<Up>']
+
 " Utisnips
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsExpandTrigger="<c-space>"
+let g:UltiSnipsJumpForwardTrigger="<c-space>"
+let g:UltiSnipsJumpBackwardTrigger="<s-space>"
 
 " Activate rainbow parens for lisps
 augroup rainbow_lisp
