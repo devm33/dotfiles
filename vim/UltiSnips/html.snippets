@@ -1,0 +1,17 @@
+snippet doctype HTML 5
+	<!DOCTYPE HTML>
+
+snippet a
+	<a href="${1:#}">${0:$1}</a>
+snippet a.
+	<a class="${1}" href="${2:#}">${0:$1}</a>
+
+snippet p
+	<p>${0}</p>
+snippet p.
+	<p class="${1}">${0}</p>
+
+snippet input
+	<input type="${1:text/submit/hidden/button/image}" name="${2}" id="${3:$2}" value="${4}" />
+snippet input.
+	<input class="${1}" type="${2:text/submit/hidden/button/image}" name="${3}" id="${4:$3}" value="${5}" />

@@ -1,0 +1,49 @@
+snippet #!
+	#!/usr/bin/env python
+	# -*- coding: utf-8 -*-
+
+snippet imp
+	import ${0:module}
+
+snippet uni
+	def __unicode__(self):
+		${0:representation}
+
+snippet from
+	from ${1:package} import ${0:module}
+
+snippet with
+	with ${1:expr} as ${2:var}:
+		${0}
+
+snippet def
+	def ${1:fname}(${2:`indent('.') ? 'self' : ''`}):
+		"""${3:docstring for $1}"""
+
+snippet defm
+	def ${1:mname}(self, ${2:arg}):
+		${0}
+
+snippet if
+	if ${1:condition}:
+		${0}
+snippet el
+	else:
+		${0}
+snippet ei
+	elif ${1:condition}:
+		${0}
+
+snippet for
+	for ${1:item} in ${2:items}:
+		${0}
+
+snippet ifmain
+	if __name__ == '__main__':
+		${0:main()}
+
+snippet _
+	__${1:init}__
+
+snippet pprint
+	import pprint; pprint.pprint(${1})
