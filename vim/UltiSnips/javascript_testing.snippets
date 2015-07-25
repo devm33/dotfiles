@@ -24,46 +24,46 @@ afterEach(function() {
 });
 endsnippet
 
-snippet ex "expect (js)" b
+snippet exp "expect (js)" b
 expect(${1:target})$0;
 endsnippet
 
-snippet ee "expect to equal (js)" b
+snippet exe "expect to equal (js)" b
 expect(${1:target}).toEqual(${2:value});
 endsnippet
 
-snippet eb "expect to be (js)" b
+snippet exb "expect to be (js)" b
 expect(${1:target}).toBe(${2:value});
 endsnippet
 
-snippet em "expect to match (js)" b
+snippet exm "expect to match (js)" b
 expect(${1:target}).toMatch(${2:pattern});
 endsnippet
 
-snippet s "spy on (js)" b
+snippet spy "spy on (js)" b
 spyOn(${1:object}, '${2:method}')$0;
 endsnippet
 
-snippet sr "spy on and return (js)" b
+snippet spyr "spy on and return (js)" b
 spyon(${1:object}, '${2:method}').and.returnValue(${3:arguments});
 endsnippet
 
-snippet sct "spy on and call through (js)" b
+snippet spyct "spy on and call through (js)" b
 spyOn(${1:object}, '${2:method}').and.callThrough();
 endsnippet
 
-snippet scf "spy on and call fake (js)" b
+snippet spycf "spy on and call fake (js)" b
 spyOn(${1:object}, '${2:method}').and.callFake(${3:function});
 endsnippet
 
-snippet ethbc "expect to have been called (js)" b
+snippet exthbc "expect to have been called (js)" b
 expect(${1:target}).toHaveBeenCalled();
 endsnippet
 
-snippet nthbc "expect not to have been called (js)" b
+snippet exnthbc "expect not to have been called (js)" b
 expect(${1:target}).not.toHaveBeenCalled();
 endsnippet
 
-snippet ethbcw "expect to have been called with (js)" b
+snippet exthbcw "expect to have been called with (js)" b
 expect(${1:target}).toHaveBeenCalledWith(${2:arguments});
 endsnippet
