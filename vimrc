@@ -199,7 +199,7 @@ function! TxtMode()
 endfunction
 " autocmd! BufEnter,BufNew *.txt :call TxtMode() " need to find workaround for
 " this executing in vim help files
-command English call TxtMode()
+command! English call TxtMode()
 
 
 " View trailing white space
