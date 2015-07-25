@@ -118,8 +118,9 @@ nnoremap <leader>co :!google-chrome '%'<CR>
 nnoremap <leader>mo :!open '%'<CR>
 
 " Edit/reload the vimrc file
-nnoremap <leader>ve :tabe $MYVIMRC<CR>
-nnoremap <leader>vb :tabe ~/.vimrc.bundles<CR>
+nnoremap <leader>va :tabe ~/.dotfiles/vimrc<CR>:vsp ~/.dotfiles/vimrc.bundles<CR><c-w>h
+nnoremap <leader>ve :tabe ~/.dotfiles/vimrc<CR>
+nnoremap <leader>vb :tabe ~/.dotfiles/vimrc.bundles<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 
