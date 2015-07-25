@@ -71,6 +71,7 @@ nnoremap <leader>[ :tabN<CR>
 nnoremap <leader>] :tabn<CR>
 nnoremap <leader>{ :tabm -1<CR>
 nnoremap <leader>} :tabm +1<CR>
+nnoremap <leader>T :tabc<CR>
 
 " File nav
 nnoremap <leader>f :NERDTreeToggle<CR>
