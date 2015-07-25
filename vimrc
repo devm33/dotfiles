@@ -266,6 +266,9 @@ augroup rainbow_lisp
   autocmd FileType lisp,clojure,scheme RainbowParentheses
 augroup END
 
+set wildmode=list:longest,list:full
+set wildmenu
+
 " Open new split panes to right and bottom, which feels more natural
 set splitbelow
 set splitright
