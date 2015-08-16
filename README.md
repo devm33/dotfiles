@@ -46,14 +46,7 @@ Dependencies:
 - vim needs to be >7.4 (use brew on mac)
 
 Install:
-- open vim, ignore warnings, let bundles download and install
-- the vim install script should compile tern and ycm 
-  - but it is a work-in-progress though so... in case it fails
-
-    ```
-    cd $HOME/.vim/bundle/YouCompleteMe
-    ./install.sh
-    cd ../tern_for_vim
-    npm install
-    ```
-
+- open vim and press enter to ignore warnings
+- the vim install script should do the rest:
+    - download and install bundles
+    - compile tern and ycm
