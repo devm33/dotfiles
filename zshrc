@@ -23,6 +23,9 @@ source $ZSH/oh-my-zsh.sh
 # ensure /usr/local/bin on $PATH
 export PATH="/usr/local/bin:$PATH"
 
+# for mac I sometimes store homebrew packages are stored here
+export PATH="$HOME/homebrew/bin:$PATH"
+
 # prepend my bin to path so it's checked first because I'm important
 export PATH="$HOME/bin:$PATH"
 
