@@ -41,6 +41,19 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
 
 Dependencies:
 
-- expects node/npm to be install
+- node
+- cmake
 - vim needs to be >7.4 (use brew on mac)
-- TODO
+
+Install:
+- open vim, ignore warnings, let bundles download and install
+- the vim install script should compile tern and ycm 
+  - but it is a work-in-progress though so... in case it fails
+
+    ```
+    cd $HOME/.vim/bundle/YouCompleteMe
+    ./install.sh
+    cd ../tern_for_vim
+    npm install
+    ```
+
