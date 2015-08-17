@@ -67,3 +67,8 @@ else
         export TERM='xterm-color'
 fi
 
+# Terminal settings
+
+# vi mode!
+set -o vi
+
