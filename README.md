@@ -2,8 +2,23 @@
 
 Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
 
+## Quick Ref
+
 - run `lsrc` to see which files will be installed
 - run `rcup -v` to link files from `.dotfiles` repo
+
+## Quick Install
+
+- Add a github authorized ssh key
+- Then run the script tailored to the environment
+  
+  ```bash  
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/ubuntu.sh)"
+  ```
+  
+  ```bash  
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/osx.sh)"
+  ```
 
 ## Detailed Installation
 
