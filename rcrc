@@ -1,2 +1,2 @@
 DOTFILES_DIRS="$HOME/.dotfiles"
-EXCLUDES="README.md git"
+EXCLUDES="README.md git install"
