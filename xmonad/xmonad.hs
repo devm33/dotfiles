@@ -17,23 +17,25 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 
 -- , terminal = "gnome-terminal"
 
+-- Note: commented out all of the fullscreen logic because it was causing
+-- google-chrome to behave very strangely: mis-firing painting, leaving
+-- remnants, flashing, etc.
+
 , layoutHook =
     noBorders $ -- remove borders
     avoidStruts $ -- dont cover gnome panel
-    fullscreenFull $  -- but allow fullscreen windows to cover panel
+    -- fullscreenFull $  -- but allow fullscreen windows to cover panel
     layoutHook gnomeConfig
-    -- myLayout
 
 , manageHook = composeAll [ manageHook gnomeConfig
-                          -- float pidgin buddy list
-                          , (className =? "Pidgin" <&&> title =? "Buddy List")  --> doFloat
-                          -- necessary for fullscreen windows
-                          , isFullscreen --> doFullFloat
+                          -- necessary for fullscreen windows to cover
+                          -- the gnome-panel
+                          -- , isFullscreen --> doFullFloat
                           ]
 
 , handleEventHook = composeAll [ handleEventHook gnomeConfig
                                -- necessary for fullscreen windows
-                               , fullscreenEventHook
+                               -- , fullscreenEventHook
                                ]
 
 -- custom key bindings
@@ -45,8 +47,11 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-o", spawn "gmrun")
          , ("M-<Space>", spawn "gmrun")
          , ("M-b", spawn "google-chrome")
+         , ("M-c", spawn "google-chrome")
+         , ("M-m", spawn "google-chrome --profile-directory=\"Profile 1\"")
          , ("M-f", spawn "firefox")
          , ("M-a", spawn "gnome-terminal")
+         , ("M-<Return>", spawn "gnome-terminal")
          , ("C-<Print>", spawn "gnome-screenshot -i")
          , ("M-x", kill)
          , ("M-S-h", spawn "halt")
@@ -62,15 +67,7 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-]", onScreen 1 W.shift)
          ]
 
-myLayout = tiled ||| reflectHoriz tiled ||| Full
-    where
-        tiled = Tall nmaster delta ratio
-        nmaster = 1
-        ratio = 1/2
-        delta = 3/100
-
 onScreen d f = do mws <- screenWorkspace d
                   case mws of
                       Nothing -> return ()
                       Just ws -> windows (f ws)
-
