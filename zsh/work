@@ -1,2 +1,5 @@
 alias p="prodaccess"
-source /etc/bash_completion.d/g4d
+
+if [ -r /etc/bash_completion.d/g4d]; then
+    source /etc/bash_completion.d/g4d
+fi
