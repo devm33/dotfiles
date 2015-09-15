@@ -20,6 +20,13 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 -- Note: commented out all of the fullscreen logic because it was causing
 -- google-chrome to behave very strangely: mis-firing painting, leaving
 -- remnants, flashing, etc.
+-- Note: Note: this might not have been due to fullscreen logic, testing
+-- out startup hook below, can maybe readd fullscreen logic if desired
+
+, startupHook =
+    do startupHook gnomeConfig
+       -- Custom startup hooks:
+       spawn "xcompmgr -a"
 
 , layoutHook =
     noBorders $ -- remove borders
