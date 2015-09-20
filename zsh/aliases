@@ -46,6 +46,7 @@ grunt_and_gulp() {
 }
 alias grlp='grunt_and_gulp'
 alias gw='grunt_and_gulp watch'
+alias b='grunt_and_gulp'
 
 # Npm
 alias npmdev='npm install --save-dev '
