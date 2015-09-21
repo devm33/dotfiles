@@ -296,6 +296,16 @@ set softtabstop=4
 nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=2<cr>
 nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
 
+" Undo
+let undodir='~/.vim/undodir'
+set undodir=~/.vim/undodir
+set undofile
+set undolevels=1000 " max changes
+set undoreload=10000 " max lines saved on buffer reload
+if !isdirectory(undodir)
+    call system('mkdir' . undodir)
+endif
+
 " MISC
 set formatoptions-=or " turn off auto-comment prefix on o/O
 set backspace=2 " help cygwin out with backspace
