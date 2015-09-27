@@ -151,7 +151,7 @@ nnoremap <leader><esc> :qall<CR>
 nnoremap <leader>c :ccl <bar> lcl<cr>
 
 " Run file
-nnoremap <leader>x :!./%
+nnoremap <leader>x :!./%<cr>
 
 " Reload file
 nnoremap <F5> :e %<CR>
