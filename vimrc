@@ -146,10 +146,12 @@ nnoremap <C-c> :x<CR>
 nnoremap <C-d> :w<CR>:e %:p:h<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
-nnoremap <leader>x :x<CR>
 nnoremap <leader><esc> :qall<CR>
 
 nnoremap <leader>c :ccl <bar> lcl<cr>
+
+" Run file
+nnoremap <leader>x :!./%
 
 " Reload file
 nnoremap <F5> :e %<CR>
