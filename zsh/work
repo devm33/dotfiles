@@ -1,5 +1,19 @@
+#vim:ft=bash
+
 alias p="prodaccess"
 
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
 fi
+
+function drive {
+    DRIVE="$HOME/Google Drive/"
+    if [ -z "$1" ]
+    then
+        echo 'Specify dir to move and link'
+    else
+        mv ./$1 $DRIVE
+        ln -s $DRIVE$1 ./
+    fi
+}
+
