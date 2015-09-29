@@ -27,6 +27,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
     do startupHook gnomeConfig
        -- Custom startup hooks:
        spawn "xcompmgr -a"
+       spawn "setxkbmap -option caps:super"
 
 , layoutHook =
     noBorders $ -- remove borders
