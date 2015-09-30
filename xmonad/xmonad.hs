@@ -10,6 +10,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Config.Gnome
 import qualified XMonad.StackSet as W
+import XMonad.Hooks.SetWMName
 
 main = xmonad myConfig
 
@@ -28,6 +29,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
        -- Custom startup hooks:
        spawn "xcompmgr -a"
        spawn "setxkbmap -option caps:super"
+       setWMName "LG3D"
 
 , layoutHook =
     noBorders $ -- remove borders
