@@ -27,6 +27,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
     do startupHook gnomeConfig
        -- Custom startup hooks:
        spawn "xcompmgr -a"
+       spawn "setxkbmap -option caps:super"
 
 , layoutHook =
     noBorders $ -- remove borders
@@ -53,7 +54,7 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-s", spawn "gnome-screensaver-command -l")
          , ("M-o", spawn "gmrun")
          , ("M-<Space>", spawn "gmrun")
-         , ("M-c", spawn "google-chrome --profile-directory=\"Default\"")
+         , ("M-c", spawn "google-chrome --profile-directory=\"Profile 2\"")
          , ("M-m", spawn "google-chrome --profile-directory=\"Profile 1\"")
          , ("M-f", spawn "firefox")
          , ("M-a", spawn "gnome-terminal")

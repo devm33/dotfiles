@@ -76,5 +76,8 @@ Bundle "reedes/vim-wordy"
 " Bundle "vim-pandoc/vim-pandoc-syntax"
 " bug in ftplugin with tabstop/shiftwidth Bundle "PProvost/vim-markdown-jekyll"
 
+" Roku Brightscript
+Bundle "chooh/brightscript.vim"
+
 
 filetype on

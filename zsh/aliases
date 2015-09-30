@@ -57,6 +57,7 @@ alias bx='bundle exec'
 # Util / Misc
 alias untar='tar xvf '
 alias xo='xdg-open '
+alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 
 markdown_preview() {
     TMPFILE="/tmp/$1.html"

@@ -146,10 +146,12 @@ nnoremap <C-c> :x<CR>
 nnoremap <C-d> :w<CR>:e %:p:h<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
-nnoremap <leader>x :x<CR>
 nnoremap <leader><esc> :qall<CR>
 
 nnoremap <leader>c :ccl <bar> lcl<cr>
+
+" Run file
+nnoremap <leader>x :!./%<cr>
 
 " Reload file
 nnoremap <F5> :e %<CR>
@@ -295,6 +297,16 @@ set softtabstop=4
 
 nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=2<cr>
 nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
+
+" Undo
+let undodir='~/.vim/undodir'
+set undodir=~/.vim/undodir
+set undofile
+set undolevels=1000 " max changes
+set undoreload=10000 " max lines saved on buffer reload
+if !isdirectory(undodir)
+    call system('mkdir' . undodir)
+endif
 
 " MISC
 set formatoptions-=or " turn off auto-comment prefix on o/O
