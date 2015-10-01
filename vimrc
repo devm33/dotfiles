@@ -147,6 +147,8 @@ nnoremap <C-d> :w<CR>:e %:p:h<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
+nnoremap <leader><leader>q :q!<CR>
+vnoremap <leader><leader>q :q!<CR>
 
 nnoremap <leader>c :ccl <bar> lcl<cr>
 
@@ -299,13 +301,12 @@ nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=
 nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
 
 " Undo
-let undodir='~/.vim/undodir'
-set undodir=~/.vim/undodir
 set undofile
 set undolevels=1000 " max changes
 set undoreload=10000 " max lines saved on buffer reload
-if !isdirectory(undodir)
-    call system('mkdir' . undodir)
+set undodir=~/.vim/undodir
+if empty(glob(&undodir))
+    call system('mkdir ' . &undodir)
 endif
 
 " MISC
