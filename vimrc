@@ -92,6 +92,9 @@ nnoremap <leader>gp :Ag --python
 nnoremap <leader>gr :Ag --ruby 
 nnoremap <leader>gs :Ag --sass 
 
+" Find
+vnoremap // y:<C-R>"<cr>
+
 " Replace all
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
 vnoremap <leader>r "sy:%s/<c-r>s/
