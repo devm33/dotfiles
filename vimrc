@@ -93,7 +93,7 @@ nnoremap <leader>gr :Ag --ruby
 nnoremap <leader>gs :Ag --sass 
 
 " Find
-vnoremap // y:<C-R>"<cr>
+vnoremap // y/<C-R>"<CR>
 
 " Replace all
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
