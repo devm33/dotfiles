@@ -2,6 +2,7 @@
 alias rz='source ~/.zshrc'
 alias ze='vim ~/.zshrc'
 alias za='vim ~/.zsh/aliases'
+alias zw='vim ~/.dotfile/zsh/work'
 
 # zsh awesomeness
 autoload -U zmv
@@ -58,6 +59,7 @@ alias bx='bundle exec'
 alias untar='tar xvf '
 alias xo='xdg-open '
 alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+alias json='python -mjson.tool'
 
 markdown_preview() {
     TMPFILE="/tmp/$1.html"
