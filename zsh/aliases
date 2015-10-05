@@ -2,7 +2,7 @@
 alias rz='source ~/.zshrc'
 alias ze='vim ~/.dotfiles/zshrc'
 alias za='vim ~/.dotfiles/zsh/aliases'
-alias zw='vim ~/.dotfile/zsh/work'
+alias zw='vim ~/.dotfiles/zsh/work'
 
 # zsh awesomeness
 autoload -U zmv
