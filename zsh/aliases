@@ -1,7 +1,7 @@
 # Reload/edit zsh configuration
 alias rz='source ~/.zshrc'
-alias ze='vim ~/.zshrc'
-alias za='vim ~/.zsh/aliases'
+alias ze='vim ~/.dotfiles/zshrc'
+alias za='vim ~/.dotfiles/zsh/aliases'
 alias zw='vim ~/.dotfile/zsh/work'
 
 # zsh awesomeness
