@@ -1,6 +1,7 @@
 #vim:ft=bash
 
 alias p="prodaccess"
+alias g5="git5"
 
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
@@ -16,4 +17,3 @@ function drive {
         ln -s $DRIVE$1 ./
     fi
 }
-
