@@ -4,3 +4,4 @@ else
         export TERM='xterm-color'
 fi
 
+export SSLKEYLOGFILE='/usr/local/google/home/devrajm/.sslkey.log'
