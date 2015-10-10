@@ -30,7 +30,9 @@ set ruler " display line and col numbers in bottom right
 set wildmenu
 set wildmode=list:longest,list:full
 set lazyredraw " save some cycles: dont redraw during macros
-set mouse=a
+set list listchars=tab:»·,trail:· " show trailing whitespace
+set colorcolumn=80
+set cursorline
 
 " Whitespace (should normally be overriden by local editorconfig)
 set autoindent
@@ -51,8 +53,19 @@ set noswapfile
 set nofoldenable
 set autoread
 set autowriteall
+autocmd FocusLost * silent! wa " write all on lost focus
+
+" Undo
+set undofile
+set undolevels=1000 " max changes
+set undoreload=10000 " max lines saved on buffer reload
+set undodir=~/.vim/undodir
+if empty(glob(&undodir))
+    call system('mkdir ' . &undodir)
+endif
 
 " Other settings
+set mouse=a " use the mouse
 set exrc " enable per-directory .vimrc files
 set secure " disable unsafe commands in local .vimrc files
 set backspace=2 " help cygwin out with backspace
@@ -61,20 +74,11 @@ set formatoptions-=r " dont add comment prefix on <cr>
 set formatoptions+=j " remove comment prefixes when joining lines
 
 " Non-leader mappings
-
-
-
-
-" Filetypes
-autocmd BufRead,BufNewFile *.es6 setfiletype javascript
-
-" MAPPINGS
-
 nnoremap ; :
 nnoremap q; q: " much easier to hit
 command! Q q " Bind :Q to :q
 
-
+" Leader mappings
 let mapleader=" "
 
 " White space
@@ -166,12 +170,6 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 " Using vundle
 nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
 
-
-" Work
-if filereadable(expand("~/.vimrc.work"))
-  source ~/.vimrc.work
-endif
-
 " Saving and Exiting
 inoremap jk <esc>
 inoremap kj <esc>:w<cr>
@@ -203,10 +201,6 @@ nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
 
-" Take autowrite a step further (write on lost focus)
-autocmd FocusLost * silent! wa
-
-" Display
 
 " Word wrapping
 function! ToggleWrap()
@@ -228,22 +222,8 @@ function! TxtMode()
     setlocal nonumber norelativenumber
     setlocal spell
 endfunction
-" autocmd! BufEnter,BufNew *.txt :call TxtMode() " need to find workaround for
-" this executing in vim help files
 command! English call TxtMode()
 
-
-" View trailing white space
-set list listchars=tab:»·,trail:· " show trailing
-
-" Color
-" if $COLORTERM == 'gnome-terminal'
-" problematic on mac... unsure of best practice here
-" endif
-
-
-set colorcolumn=80
-set cursorline
 
 " NERDTree settings
 let NERDTreeShowLineNumbers=1
@@ -286,29 +266,5 @@ let g:UltiSnipsExpandTrigger="<c-j>"
 let g:UltiSnipsJumpForwardTrigger="<c-j>"
 let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 
-" Activate rainbow parens for lisps
-augroup rainbow_lisp
-  autocmd!
-  autocmd FileType lisp,clojure,scheme RainbowParentheses
-augroup END
-
-
-
-
-" Text wrap at 80
-au BufRead,BufNewFile *.md setlocal textwidth=80
-
-
-" Undo
-set undofile
-set undolevels=1000 " max changes
-set undoreload=10000 " max lines saved on buffer reload
-set undodir=~/.vim/undodir
-if empty(glob(&undodir))
-    call system('mkdir ' . &undodir)
-endif
-
-" Per project setting overrides
-if filereadable(expand("~/.vimrc.projects"))
-  source ~/.vimrc.projects
-endif
+" Extra config files
+runtime! '~/.vimrc.*'
