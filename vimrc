@@ -1,31 +1,10 @@
 set nocompatible " vi improved
 
-" install vundle if it's not loaded
-if !exists("*FirstRunOnEnter")
-    " have to be careful about defining this while in use
-    function FirstRunOnEnter()
-        PluginInstall
-        source $MYVIMRC
-        let oldpath = getcwd()
-        execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
-        " NOTE this need cmake to be installed
-        silent !./install.sh
-        execute "cd ../tern_for_vim"
-        silent !npm install
-        execute "cd " . oldpath
-    endfunction
-endif
-let vdir = $HOME . '/.vim/bundle/vundle'
-if !isdirectory(vdir)
-    call system('mkdir -p ' . vdir)
-    call system('git clone https://github.com/gmarik/Vundle.vim.git ' . vdir)
-    autocmd VimEnter * :call FirstRunOnEnter()
-endif
+" Bootstrap this vimrc
+source ~/.vim/bootstrap.vim
 
-" include vundle config
-if filereadable(expand("~/.vimrc.bundles"))
-  source ~/.vimrc.bundles
-endif
+" Load vundle plugins
+source ~/.vim/bundles.vim
 
 filetype plugin indent on
 
@@ -35,6 +14,7 @@ autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 " MAPPINGS
 
 nnoremap ; :
+nnoremap q; q: " much easier to hit
 command! Q q " Bind :Q to :q
 
 " Change bracket notation to dot notation
