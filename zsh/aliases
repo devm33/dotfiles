@@ -197,6 +197,7 @@ dotup () {
     pushd .
     cd ~/.dotfiles
     git pull
+    rcup -v
     . ~/.zshrc
     popd
 }
