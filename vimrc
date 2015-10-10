@@ -1,12 +1,69 @@
 set nocompatible " vi improved
 
 " Bootstrap this vimrc
-source ~/.vim/bootstrap.vim
+source ~/.dotfiles/vim/bootstrap.vim
 
 " Load vundle plugins
-source ~/.vim/bundles.vim
+source ~/.dotfiles/vim/bundles.vim
 
-filetype plugin indent on
+" Colors
+syntax enable " source system syntax file
+syntax on " use background setting for highlight
+set t_Co=256 " always use 
+fun! ToggleColor()
+    if &background == "dark"
+        set background=light
+        colorscheme Tomorrow
+    else
+        set background=dark
+        colorscheme hybrid
+    endif
+endf
+call ToggleColor() " set default to dark
+
+" UI Config
+set number " line numbers on
+set relativenumber " note using plugin jeffkreeftmeijer/vim-numbertoggle
+set showcmd " show incomplete commands at bottom right
+set showmatch " briefly highlight matched bracket when pair completed
+set ruler " display line and col numbers in bottom right
+set wildmenu
+set wildmode=list:longest,list:full
+set lazyredraw " save some cycles: dont redraw during macros
+set mouse=a
+
+" Whitespace (should normally be overriden by local editorconfig)
+set autoindent
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set shiftround
+set softtabstop=4
+
+" Windows
+set splitright " Open new split panes to right
+set splitbelow " and bottom, which feels more natural
+
+" File writing
+set nobackup
+set nowritebackup
+set noswapfile
+set nofoldenable
+set autoread
+set autowriteall
+
+" Other settings
+set exrc " enable per-directory .vimrc files
+set secure " disable unsafe commands in local .vimrc files
+set backspace=2 " help cygwin out with backspace
+set formatoptions-=o " dont add comment prefix on o/O
+set formatoptions-=r " dont add comment prefix on <cr>
+set formatoptions+=j " remove comment prefixes when joining lines
+
+" Non-leader mappings
+
+
+
 
 " Filetypes
 autocmd BufRead,BufNewFile *.es6 setfiletype javascript
@@ -17,8 +74,6 @@ nnoremap ; :
 nnoremap q; q: " much easier to hit
 command! Q q " Bind :Q to :q
 
-" Change bracket notation to dot notation
-nnoremap cd f]xhxF[xr.
 
 let mapleader=" "
 
@@ -147,24 +202,11 @@ nnoremap <F7> :set spell!<CR>
 nnoremap <F10> :set nonumber!<CR>
 set pastetoggle=<F12>
 
-" File writing
-set nobackup
-set nowritebackup
-set noswapfile
-set nofoldenable
-set autoread
-set autowriteall
 
 " Take autowrite a step further (write on lost focus)
 autocmd FocusLost * silent! wa
 
 " Display
-syntax on
-set number
-set relativenumber
-set showcmd " show incomplete commands at bottom right
-set showmatch
-set ruler
 
 " Word wrapping
 function! ToggleWrap()
@@ -197,13 +239,8 @@ set list listchars=tab:»·,trail:· " show trailing
 " Color
 " if $COLORTERM == 'gnome-terminal'
 " problematic on mac... unsure of best practice here
-set t_Co=256
 " endif
 
-syntax enable
-set background=dark
-colorscheme hybrid
-" colorscheme Tomorrow " light scheme
 
 set colorcolumn=80
 set cursorline
@@ -255,33 +292,12 @@ augroup rainbow_lisp
   autocmd FileType lisp,clojure,scheme RainbowParentheses
 augroup END
 
-set wildmode=list:longest,list:full
-set wildmenu
 
-" Open new split panes to right and bottom, which feels more natural
-set splitbelow
-set splitright
 
-" Set window width to 80 cols + columns needed for linenumbers
-function! EightyColumns()
-    let numberwidth = float2nr(log10(line("$"))) + 2
-    let &l:columns = numberwidth + 80
-endfunction
-nnoremap <leader>8 :call EightyColumns()<cr>
 
 " Text wrap at 80
 au BufRead,BufNewFile *.md setlocal textwidth=80
 
-" Indentation
-set autoindent
-set expandtab
-set tabstop=4
-set shiftwidth=4
-set shiftround
-set softtabstop=4
-
-nnoremap <leader><Tab>2 :set shiftwidth=2<cr>:set softtabstop=2<cr>:set tabstop=2<cr>
-nnoremap <leader><Tab>4 :set shiftwidth=4<cr>:set softtabstop=4<cr>:set tabstop=4<cr>
 
 " Undo
 set undofile
@@ -291,14 +307,6 @@ set undodir=~/.vim/undodir
 if empty(glob(&undodir))
     call system('mkdir ' . &undodir)
 endif
-
-" MISC
-set formatoptions-=or " turn off auto-comment prefix on o/O
-set backspace=2 " help cygwin out with backspace
-set mouse=a
-
-set exrc            " enable per-directory .vimrc files
-set secure          " disable unsafe commands in local .vimrc files
 
 " Per project setting overrides
 if filereadable(expand("~/.vimrc.projects"))

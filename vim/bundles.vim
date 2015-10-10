@@ -80,4 +80,4 @@ Bundle "reedes/vim-wordy"
 Bundle "chooh/brightscript.vim"
 
 
-filetype on
+filetype plugin indent on
