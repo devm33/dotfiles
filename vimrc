@@ -166,8 +166,7 @@ nnoremap <leader>2 :diffget BASE<cr>
 nnoremap <leader>3 :diffget REMOTE<cr>
 
 " Copy/pasting from system registers
-nnoremap <leader>p "+
-vnoremap <leader>p "+
+noremap <leader>p "+
 
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
@@ -188,8 +187,7 @@ nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
-nnoremap <leader><leader>q :q!<CR>
-vnoremap <leader><leader>q :q!<CR>
+noremap <leader><leader>q :q!<CR>
 
 " Close the quickfix list and loc list
 nnoremap <leader>c :ccl <bar> lcl<cr>
