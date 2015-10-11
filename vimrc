@@ -1,15 +1,15 @@
 set nocompatible " vi improved
 
 " Bootstrap this vimrc
-source ~/.dotfiles/vim/bootstrap.vim
+source ~/.vim/bootstrap.vim
 
 " Load vundle plugins
-source ~/.dotfiles/vim/bundles.vim
+source ~/.vim/bundles.vim
 
 " Colors
 syntax enable " source system syntax file
 syntax on " use background setting for highlight
-set t_Co=256 " always use 
+set t_Co=256 " always use 256 colors (FIXME doesnt degrade well)
 fun! ToggleColor()
     if &background == "dark"
         set background=light
@@ -27,12 +27,13 @@ set relativenumber " note using plugin jeffkreeftmeijer/vim-numbertoggle
 set showcmd " show incomplete commands at bottom right
 set showmatch " briefly highlight matched bracket when pair completed
 set ruler " display line and col numbers in bottom right
-set wildmenu
+set wildmenu " tab complete in command line
 set wildmode=list:longest,list:full
 set lazyredraw " save some cycles: dont redraw during macros
 set list listchars=tab:»·,trail:· " show trailing whitespace
-set colorcolumn=80
-set cursorline
+set nofoldenable " dont like code folding
+set colorcolumn=80 " draw line at 80 cols
+set cursorline " highlight the line we are currently on
 
 " Whitespace (should normally be overriden by local editorconfig)
 set autoindent
@@ -50,8 +51,8 @@ set splitbelow " and bottom, which feels more natural
 set nobackup
 set nowritebackup
 set noswapfile
-set nofoldenable
 set autoread
+set autowrite
 set autowriteall
 autocmd FocusLost * silent! wa " write all on lost focus
 
@@ -64,21 +65,39 @@ if empty(glob(&undodir))
     call system('mkdir ' . &undodir)
 endif
 
+" Searching
+set incsearch " Find the next match as we type the search
+set ignorecase " Ignore case when searching...
+set smartcase " ...unless we type a capital
+
 " Other settings
 set mouse=a " use the mouse
 set exrc " enable per-directory .vimrc files
 set secure " disable unsafe commands in local .vimrc files
 set backspace=2 " help cygwin out with backspace
+set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
 set formatoptions-=r " dont add comment prefix on <cr>
-set formatoptions+=j " remove comment prefixes when joining lines
 
 " Non-leader mappings
 nnoremap ; :
 nnoremap q; q: " much easier to hit
-command! Q q " Bind :Q to :q
+command! Q q
+nnoremap <F5> :e %<CR> " reload file
+set pastetoggle=<F12>
+" find selection in visual mode
+vnoremap // y/<C-R>"<CR>
 
-" Leader mappings
+" Saving and Exiting
+inoremap jk <esc>
+" note maybe remove kj
+inoremap kj <esc>:w<cr>
+inoremap <C-d> <esc>:w<CR>:e %:p:h<CR>
+inoremap <C-c> <esc>:x<CR>
+nnoremap <C-c> :x<CR>
+nnoremap <C-d> :w<CR>:e %:p:h<CR>
+
+" Leader mappings (use :map <leader> to see all mappings in order)
 let mapleader=" "
 
 " White space
@@ -121,18 +140,14 @@ nnoremap <leader>o :e **/*
 nnoremap <leader>O :tabe **/*
 
 " File search
-set grepprg=ag
+set grepprg=ag " note using rking/ag.vim
 nnoremap <leader>gc :Ag <c-r>=expand('<cword>'><cr>
-" using rking/ag.vim
 nnoremap <leader>gg :Ag 
 nnoremap <leader>gh :Ag --html 
 nnoremap <leader>gj :Ag --js 
 nnoremap <leader>gp :Ag --python 
 nnoremap <leader>gr :Ag --ruby 
 nnoremap <leader>gs :Ag --sass 
-
-" Find
-vnoremap // y/<C-R>"<CR>
 
 " Replace all
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
@@ -145,25 +160,24 @@ nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
 nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
 nnoremap <leader>cp :Gpush<cr>
 
-" vimdiff for git mergetool
-if &diff
-    nnoremap <leader>1 :diffget LOCAL<cr>
-    nnoremap <leader>2 :diffget BASE<cr>
-    nnoremap <leader>3 :diffget REMOTE<cr>
-endif
+" For vimdiff
+nnoremap <leader>1 :diffget LOCAL<cr>
+nnoremap <leader>2 :diffget BASE<cr>
+nnoremap <leader>3 :diffget REMOTE<cr>
 
-" Registers
+" Copy/pasting from system registers
 nnoremap <leader>p "+
 vnoremap <leader>p "+
 
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
+" on macosx
 nnoremap <leader>mo :!open '%'<CR>
 
 " Edit/reload the vimrc file
-nnoremap <leader>va :tabe ~/.dotfiles/vimrc<CR>:vsp ~/.dotfiles/vimrc.bundles<CR><c-w>h
+nnoremap <leader>va :tabe ~/.dotfiles/vimrc<CR>:vsp ~/.dotfiles/vim/bundles.vim<CR><c-w>h
 nnoremap <leader>ve :tabe ~/.dotfiles/vimrc<CR>
-nnoremap <leader>vb :tabe ~/.dotfiles/vimrc.bundles<CR>
+nnoremap <leader>vb :tabe ~/.dotfiles/vim/bundles.vim<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 
@@ -171,36 +185,17 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
 
 " Saving and Exiting
-inoremap jk <esc>
-inoremap kj <esc>:w<cr>
-
-inoremap <C-d> <esc>:w<CR>:e %:p:h<CR>
-inoremap <C-z> <esc>:w<CR>
-inoremap <C-c> <esc>:x<CR>
-
-nnoremap <C-c> :x<CR>
-nnoremap <C-d> :w<CR>:e %:p:h<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
 nnoremap <leader><leader>q :q!<CR>
 vnoremap <leader><leader>q :q!<CR>
 
+" Close the quickfix list and loc list
 nnoremap <leader>c :ccl <bar> lcl<cr>
 
-" Run file
+" Run current file
 nnoremap <leader>x :!./%<cr>
-
-" Reload file
-nnoremap <F5> :e %<CR>
-
-" Function key functions
-nnoremap <F3> :set hlsearch!<CR>
-nnoremap <F7> :set spell!<CR>
-nnoremap <F10> :set nonumber!<CR>
-set pastetoggle=<F12>
-
-
 
 " Word wrapping
 function! ToggleWrap()
@@ -224,47 +219,5 @@ function! TxtMode()
 endfunction
 command! English call TxtMode()
 
-
-" NERDTree settings
-let NERDTreeShowLineNumbers=1
-let NERDTreeMinimalUI=1
-let NERDTreeIgnore=['\.pyc$']
-
-" Syntastic settings
-let g:syntastic_check_on_open = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_python_checkers=['flake8', 'pyflakes']
-let g:syntastic_python_flake8_exec = 'python2.7'
-let g:syntastic_python_flake8_args='--ignore=E501,E401,E302,E261,E128,E265'
-let g:syntastic_python_python_exec = 'python2.7'
-let g:syntastic_html_checkers=[]
-
-" Python-mode settings
-let g:pymode_lint=1
-let g:pymode_lint_checkers=['pep8']
-let g:pymode_lint_ignore='E501,E401,E302,E261,E128,E265'
-let g:pymode_indent=1
-let g:pymode_run_bind = '<leader>gpr'
-let g:pymode_rope = 1 " too slow and buggy
-
-" Jedi.vim settings
-let g:jedi#goto_command = "<leader>jd"
-let g:jedi#goto_assignments_command = "<leader>jg"
-let g:jedi#goto_definitions_command = ""
-let g:jedi#documentation_command = "K"
-let g:jedi#usages_command = "<leader>jn"
-let g:jedi#completions_command = "<C-Space>"
-let g:jedi#rename_command = "<leader>jr"
-
-" YouCompleteMe
-let g:ycm_key_list_select_completion=['<tab>', '<Down>']
-let g:ycm_key_list_previous_completion=['<s-tab>', '<Up>']
-
-" Utisnips
-let g:UltiSnipsExpandTrigger="<c-j>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-
-" Extra config files
+" Extra config files " note: deprecate: move to .vim/autoload/
 runtime! '~/.vimrc.*'
