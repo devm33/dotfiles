@@ -52,9 +52,9 @@ set nobackup
 set nowritebackup
 set noswapfile
 set autoread
-set autowrite
 set autowriteall
 autocmd FocusLost * silent! wa " write all on lost focus
+autocmd TabLeave * silent! wa " autowriteall doesn't capture tab changing
 
 " Undo
 set undofile
