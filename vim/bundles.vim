@@ -27,7 +27,6 @@ Bundle "tpope/vim-unimpaired"
 " Snippets
 Bundle "sirver/ultisnips"
 
-
 " Javascript
 Bundle "marijnh/tern_for_vim"
 Bundle "pangloss/vim-javascript"
