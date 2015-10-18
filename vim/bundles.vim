@@ -65,6 +65,9 @@ Bundle "tpope/vim-fireplace"
 Bundle "guns/vim-clojure-highlight"
 Bundle "junegunn/rainbow_parentheses.vim"
 
+" Scala
+Bundle 'derekwyatt/vim-scala'
+
 " Haskell
 Bundle "haskell.vim"
 Bundle "dag/vim2hs"
