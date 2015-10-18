@@ -5,6 +5,21 @@ alias g5="git5"
 alias g5e="git5 export"
 alias g5s="git5 submit"
 
+function gsls {
+    gsutil ls $1 gs://mps-storage/devrajm
+}
+
+function gsadd {
+    if [ -z "$1" ]
+    then
+        echo 'Specifiy file to upload'
+    fi
+    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm
+    gsutil acl ch -u 'AllUsers:R' "gs://bigstore-codelab-devrajm/$1"
+    echo "https://storage.googleapis.com/mps-storage/devrajm/$1"
+}
+alias gs+='gsadd'
+
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
 fi
