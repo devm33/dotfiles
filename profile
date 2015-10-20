@@ -4,4 +4,6 @@ else
         export TERM='xterm-color'
 fi
 
+export PATH="$HOME/bin:$PATH"
+
 export SSLKEYLOGFILE='/usr/local/google/home/devrajm/.sslkey.log'
