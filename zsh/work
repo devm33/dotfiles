@@ -1,10 +1,13 @@
 #vim:ft=bash
 
-alias p="prodaccess"
-alias g5="git5"
-alias g5e="git5 export"
-alias g5s="git5 submit"
-alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
+if [[ `uname` ==  'Linux' ]]
+then
+    alias p="prodaccess"
+    alias g5="git5"
+    alias g5e="git5 export"
+    alias g5s="git5 submit"
+    alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
+fi
 
 function gsls {
     gsutil ls $1 gs://mps-storage/devrajm
