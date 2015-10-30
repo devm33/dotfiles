@@ -6,6 +6,7 @@ then
     alias g5="git5"
     alias g5e="git5 export"
     alias g5s="git5 submit"
+    alias g5d="git5 submit -y -d"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 fi
 
