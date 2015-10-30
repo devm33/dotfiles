@@ -5,5 +5,6 @@ else
 fi
 
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/lib/node-v4.2.1-linux-x86/bin:$PATH"
 
 export SSLKEYLOGFILE='/usr/local/google/home/devrajm/.sslkey.log'
