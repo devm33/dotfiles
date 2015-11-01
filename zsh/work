@@ -16,6 +16,7 @@ alias g5d=git5_submit_msg
 function git5_send_all {
     git add -A
     git commit -m "$*"
+    prodcertstatus -q || prodaccess
     git5 submit -y -d "$*"
 }
 alias g5a=git5_send_all
