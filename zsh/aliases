@@ -89,6 +89,9 @@ alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*
 # add version with hard delete
 alias gbDa='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -D'
 
+# Overwrite alias of ag btw omz debian plugin to use for silver searcher
+alias ag=Ag
+
 git_copy_commit () {
     git rev-parse HEAD | tr -d '\n' | xclip -sel clip
 }

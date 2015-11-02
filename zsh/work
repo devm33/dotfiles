@@ -1,9 +1,40 @@
 #vim:ft=bash
 
-alias p="prodaccess"
+if [[ `uname` ==  'Linux' ]]
+then
+    alias p="prodaccess"
+    alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
+fi
+
 alias g5="git5"
 alias g5e="git5 export"
 alias g5s="git5 submit"
+function git5_submit_msg {
+    git5 submit -y -d "$*"
+}
+alias g5d=git5_submit_msg
+function git5_send_all {
+    git add -A
+    git commit -m "$*"
+    prodcertstatus -q || prodaccess
+    git5 submit -y -d "$*"
+}
+alias g5a=git5_send_all
+
+function gsls {
+    gsutil ls $1 gs://mps-storage/devrajm
+}
+
+function gsadd {
+    if [ -z "$1" ]
+    then
+        echo 'Specifiy file to upload'
+    fi
+    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm
+    gsutil acl ch -u 'AllUsers:R' "gs://mps-storage/devrajm/$1"
+    echo "https://storage.googleapis.com/mps-storage/devrajm/$1"
+}
+alias gs+='gsadd'
 
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
