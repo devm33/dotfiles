@@ -68,8 +68,10 @@ else
 fi
 
 # Use bash completion scripts
-autoload bashcompinit
+autoload -U bashcompinit
 bashcompinit
-autoload compinit
+autoload -U compinit
 compinit
-source $HOME/.zsh/python-argcomplete.sh
+# source $HOME/.zsh/python-argcomplete.sh
+# Global doesnt work for zsh have to use specified
+eval "$(register-python-argcomplete md.py)"
