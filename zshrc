@@ -38,9 +38,15 @@ export LANG=en_US.UTF-8
 # Preferred editor for local and remote sessions
 export EDITOR='vim'
 
-# work stuff
-if [ -f $HOME/.zsh/work ]; then
-    source $HOME/.zsh/work
+# Use bash completion scripts
+autoload -U bashcompinit && bashcompinit
+autoload -U compinit && compinit
+
+# Configure color term
+if [ -e /usr/share/terminfo/x/xterm-256color ]; then
+        export TERM='xterm-256color'
+else
+        export TERM='xterm-color'
 fi
 
 # Save a ton of history
@@ -53,22 +59,14 @@ if [ -f $HOME/.zsh/aliases ]; then
     source $HOME/.zsh/aliases;
 fi
 
+# include work stuff
+if [ -f $HOME/.zsh/work ]; then
+    source $HOME/.zsh/work
+fi
+
 # if on cygwin include crutches
 if [[  "$(uname -s)" == CYGWIN* ]]; then
     if [ -f $HOME/.zsh/cygwin ]; then
         source $HOME/.zsh/cygwin;
     fi
 fi
-
-# Configure color term
-if [ -e /usr/share/terminfo/x/xterm-256color ]; then
-        export TERM='xterm-256color'
-else
-        export TERM='xterm-color'
-fi
-
-# Use bash completion scripts
-autoload -U bashcompinit
-bashcompinit
-autoload -U compinit
-compinit
