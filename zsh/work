@@ -50,3 +50,8 @@ function drive {
         ln -s $DRIVE$1 ./
     fi
 }
+
+# source $HOME/.zsh/python-argcomplete.sh
+# Global doesnt work for zsh have to use specified
+eval "$(register-python-argcomplete md.py)"
+alias m='md.py'

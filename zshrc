@@ -72,6 +72,3 @@ autoload -U bashcompinit
 bashcompinit
 autoload -U compinit
 compinit
-# source $HOME/.zsh/python-argcomplete.sh
-# Global doesnt work for zsh have to use specified
-eval "$(register-python-argcomplete md.py)"
