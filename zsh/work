@@ -71,6 +71,7 @@ compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
 alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
 
 # Use adb.turbo when possible, otherwise use standard adb.
+unalias adb
 function adb() {
   EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
   ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
