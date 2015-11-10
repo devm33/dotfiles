@@ -61,3 +61,24 @@ _python_argcomplete() {
 }
 complete -o nospace -o default -F _python_argcomplete "md.py"
 alias m='md.py'
+
+# Android studio
+
+# Crow (Android emulator)
+fpath=(  /google/data/ro/teams/mobile_eng_prod/crow $fpath )
+autoload _crow
+compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
+alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
+
+# Use adb.turbo when possible, otherwise use standard adb.
+function adb() {
+  EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
+  ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
+  EMU_SUPPORT=${EMU_DEPS}/tools/android/emulator/support/
+  ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
+  ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
+}
+
+# Add the internal Android SDK to your PATH
+export SDK_LOC=/google/data/ro/teams/as-with-blaze/android-sdk-linux
+export PATH=${PATH}:${SDK_LOC}/tools:${SDK_LOC}/platform-tools
