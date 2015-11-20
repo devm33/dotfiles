@@ -33,3 +33,5 @@
     tool = vimdiff
 [fetch]
     prune = true
+[http]
+	cookiefile = /usr/local/google/home/devrajm/.gitcookies
