@@ -6,6 +6,7 @@ then
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 fi
 
+# git5
 alias g5="git5"
 alias g5e="git5 export"
 alias g5s="git5 submit"
@@ -20,6 +21,15 @@ function git5_send_all {
     git5 submit -y -d "$*"
 }
 alias g5a=git5_send_all
+
+# g4
+function g4dd {
+    g4d $1
+    clear
+    cd $(g4 opened | head -n 1 | cut  -d' ' -f1 | sed 's/^\/\/depot\/google3\///' | xargs dirname)
+}
+compdef g4dd=g4d
+
 
 function gsls {
     gsutil ls $1 gs://mps-storage/devrajm
