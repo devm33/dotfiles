@@ -34,9 +34,9 @@ function g4dd {
 compdef g4dd=g4d
 
 # blaze
-if [ -r /etc/bash_completion.d/blaze ]; then
-    source /etc/bash_completion.d/blaze
-fi
+#cache-path must exist
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
 
 # gsutil
 function gsls {
