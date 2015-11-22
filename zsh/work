@@ -23,6 +23,9 @@ function git5_send_all {
 alias g5a=git5_send_all
 
 # g4
+if [ -r /etc/bash_completion.d/g4d ]; then
+    source /etc/bash_completion.d/g4d
+fi
 function g4dd {
     g4d $1
     clear
@@ -45,10 +48,6 @@ function gsadd {
     echo "https://storage.googleapis.com/mps-storage/devrajm/$1"
 }
 alias gs+='gsadd'
-
-if [ -r /etc/bash_completion.d/g4d ]; then
-    source /etc/bash_completion.d/g4d
-fi
 
 function drive {
     DRIVE="$HOME/Google Drive/"
