@@ -33,11 +33,15 @@ function g4dd {
 }
 compdef g4dd=g4d
 
+# blaze
+if [ -r /etc/bash_completion.d/blaze ]; then
+    source /etc/bash_completion.d/blaze
+fi
 
+# gsutil
 function gsls {
     gsutil ls $1 gs://mps-storage/devrajm
 }
-
 function gsadd {
     if [ -z "$1" ]
     then
