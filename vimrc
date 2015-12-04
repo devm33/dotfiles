@@ -10,6 +10,7 @@ source ~/.vim/bundles.vim
 syntax enable " source system syntax file
 syntax on " use background setting for highlight
 set t_Co=256 " always use 256 colors (FIXME doesnt degrade well)
+set term=xterm-256color " really force it
 fun! ToggleColor()
     if &background == "dark"
         set background=light
