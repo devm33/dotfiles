@@ -26,13 +26,13 @@ alias g5a=git5_send_all
 export P4DIFF='vimdiff'
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
+    function g4dd {
+        g4d $1
+        clear
+        cd $(g4 opened | head -n 1 | cut  -d' ' -f1 | sed 's/^\/\/depot\/google3\///' | xargs dirname)
+    }
+    compdef g4dd=g4d
 fi
-function g4dd {
-    g4d $1
-    clear
-    cd $(g4 opened | head -n 1 | cut  -d' ' -f1 | sed 's/^\/\/depot\/google3\///' | xargs dirname)
-}
-compdef g4dd=g4d
 
 # blaze
 #cache-path must exist
@@ -79,10 +79,13 @@ alias m='md.py'
 # Android studio
 
 # Crow (Android emulator)
-fpath=(  /google/data/ro/teams/mobile_eng_prod/crow $fpath )
-autoload _crow
-compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
-alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
+if [[ `uname` ==  'Linux' ]]
+then
+    fpath=(  /google/data/ro/teams/mobile_eng_prod/crow $fpath )
+    autoload _crow
+    compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
+    alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
+fi
 
 # Use adb.turbo when possible, otherwise use standard adb.
 function adb() {
