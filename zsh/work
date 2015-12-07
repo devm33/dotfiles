@@ -23,6 +23,7 @@ function git5_send_all {
 alias g5a=git5_send_all
 
 # g4
+export P4DIFF='vimdiff'
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
 fi
