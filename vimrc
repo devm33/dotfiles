@@ -217,6 +217,3 @@ function! TxtMode()
     setlocal spell
 endfunction
 command! English call TxtMode()
-
-" Extra config files " note: deprecate: move to .vim/autoload/
-runtime! '~/.vimrc.*'
