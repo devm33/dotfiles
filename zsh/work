@@ -47,9 +47,10 @@ function gsadd {
     then
         echo 'Specifiy file to upload'
     fi
-    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm
-    gsutil acl ch -u 'AllUsers:R' "gs://mps-storage/devrajm/$1"
-    echo "https://storage.googleapis.com/mps-storage/devrajm/$1"
+    safename=`echo $1 | sed -e "s/[^a-zA-Z0-9.~_-]/_/g"`
+    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm/$safename
+    gsutil acl ch -u 'AllUsers:R' "gs://mps-storage/devrajm/$safename"
+    echo "https://storage.googleapis.com/mps-storage/devrajm/$safename"
 }
 alias gs+='gsadd'
 
