@@ -75,6 +75,9 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-]", onScreen 1 W.view)
          , ("M-S-[", onScreen 0 W.shift)
          , ("M-S-]", onScreen 1 W.shift)
+         , ("M-<F4>", spawn "google-chrome --new-window \"https://hangouts.google.com/hangouts/_/google.com/?hl=en\"")
+         , ("M-=", spawn "amixer -D pulse set Master 5%+")
+         , ("M--", spawn "amixer -D pulse set Master 5%-")
          ]
 
 onScreen d f = do mws <- screenWorkspace d
