@@ -119,6 +119,3 @@ if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
 then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
-
-alias cbsn-media='md.py cbsn manifest | grep ^http | xargs curl -s | grep MEDIA-SEQ | sort | uniq'
-alias cbsn-disc='md.py cbsn manifest | grep ^http | xargs curl -s | grep ITY-SEQ | sort | uniq'
