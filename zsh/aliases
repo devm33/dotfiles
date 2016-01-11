@@ -84,6 +84,8 @@ alias gra='git remote add'
 alias gmm='git merge master'
 alias gwc='git whatchanged -p'
 
+alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
+
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
 # add version with hard delete
@@ -199,6 +201,11 @@ extract_archive () {
 
 alias ex=extract_archive
 compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_archive
+
+# Curl
+alias curls='curl -o /dev/null -i'
+alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
+alias curlcodel='curl -s -o /dev/null -I -w "%{http_code}" -L'
 
 # Functions to help manage dotfiles
 alias s.z='source $HOME/.zshrc'
