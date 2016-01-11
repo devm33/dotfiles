@@ -65,3 +65,7 @@ Install:
 - the vim install script should do the rest:
     - download and install bundles
     - compile tern and ycm
+
+
+
+[![ghit.me](https://ghit.me/badge.svg?repo=devm33/dotfiles)](https://ghit.me/repo/devm33/dotfiles)
