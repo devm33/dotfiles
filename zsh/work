@@ -111,3 +111,14 @@ function adb() {
 # Add the internal Android SDK to your PATH
 export SDK_LOC=/google/data/ro/teams/as-with-blaze/android-sdk-linux
 export PATH=${PATH}:${SDK_LOC}/tools:${SDK_LOC}/platform-tools
+
+# mDialog
+
+# mdialog scripts
+if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
+then
+    export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
+fi
+
+alias cbsn-media='md.py cbsn manifest | grep ^http | xargs curl -s | grep MEDIA-SEQ | sort | uniq'
+alias cbsn-disc='md.py cbsn manifest | grep ^http | xargs curl -s | grep ITY-SEQ | sort | uniq'
