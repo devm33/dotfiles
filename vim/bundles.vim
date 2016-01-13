@@ -11,6 +11,7 @@ call vundle#rc()
 Bundle "gmarik/vundle"
 
 " General
+Bundle "ctrlpvim/ctrlp.vim"
 Bundle "editorconfig/editorconfig-vim"
 Bundle "Valloric/YouCompleteMe"
 Bundle "flazz/vim-colorschemes"
