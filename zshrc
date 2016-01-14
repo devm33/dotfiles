@@ -43,11 +43,7 @@ autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
 # Configure color term
-if [ -e /usr/share/terminfo/x/xterm-256color ]; then
-        export TERM='xterm-256color'
-else
-        export TERM='xterm-color'
-fi
+export TERM="screen-256color"
 
 # Save a ton of history
 HISTSIZE=20000
