@@ -207,6 +207,9 @@ alias curls='curl -o /dev/null -i'
 alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
 alias curlcodel='curl -s -o /dev/null -I -w "%{http_code}" -L'
 
+# Tmux
+alias tmux="tmux -2"
+
 # Functions to help manage dotfiles
 alias s.z='source $HOME/.zshrc'
 
