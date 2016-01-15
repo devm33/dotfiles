@@ -43,7 +43,7 @@ autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
 # Configure color term
-export TERM="screen-256color"
+export TERM="xterm-256color"
 
 # Save a ton of history
 HISTSIZE=20000
