@@ -58,7 +58,11 @@ alias bx='bundle exec'
 # Util / Misc
 alias untar='tar xvf '
 alias xo='xdg-open '
-alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+if [ -e '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome' ]; then
+    alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+else
+    alias co='google-chrome'
+fi
 alias json='python -mjson.tool'
 
 markdown_preview() {
@@ -206,6 +210,8 @@ compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_arc
 alias curls='curl -o /dev/null -i'
 alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
 alias curlcodel='curl -s -o /dev/null -I -w "%{http_code}" -L'
+alias curll='curl -L'
+alias curlvl='curl -vL'
 
 # Tmux
 alias tmux="tmux -2"
