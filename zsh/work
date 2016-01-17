@@ -49,6 +49,8 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 if [ -r /etc/bash_completion.d/flag_completion ]; then
     source /etc/bash_completion.d/flag_completion
 fi
+alias bb='blaze build'
+alias br='blaze run'
 
 # gsutil
 function gsls {
