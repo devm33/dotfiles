@@ -18,7 +18,7 @@ Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
 Bundle "scrooloose/nerdtree"
-" Bundle "scrooloose/syntastic" sadly turned off for now
+Bundle "scrooloose/syntastic"
 Bundle "skwp/greplace.vim"
 Bundle "tomtom/tcomment_vim"
 Bundle "tpope/vim-fugitive"
