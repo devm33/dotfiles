@@ -4,6 +4,9 @@ if [[ `uname` ==  'Linux' ]]
 then
     alias p="prodaccess"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
+else
+    alias gssh="certstatus || gcert; ssh desk"
+    alias p=gssh
 fi
 
 # git5
