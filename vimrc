@@ -150,6 +150,7 @@ nnoremap <leader>O :tabe **/*
 set grepprg=ag " note using rking/ag.vim
 nnoremap <leader>gc :Ag <c-r>=expand('<cword>'><cr>
 nnoremap <leader>gg :Ag 
+nnoremap <leader>ag :Ag 
 nnoremap <leader>gh :Ag --html 
 nnoremap <leader>gj :Ag --js 
 nnoremap <leader>gp :Ag --python 
