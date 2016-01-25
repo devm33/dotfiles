@@ -176,6 +176,19 @@ nnoremap <leader>3 :diffget REMOTE<cr>
 " Copy/pasting from system registers
 noremap <leader>p "+
 
+" Copy/pasting over ssh to osx
+function! PropagatePasteBufferToOSX()
+    let @n=getreg('"')
+    call system('pbcopy-remote', @n)
+    echo "done"
+endfunction
+function! PopulatePasteBufferFromOSX()
+    let @" = system('pbpaste-remote')
+    echo "done"
+endfunction
+nnoremap <leader>bp :call PopulatePasteBufferFromOSX()<cr>
+nnoremap <leader>bc :call PropagatePasteBufferToOSX()<cr>
+
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
 " on macosx

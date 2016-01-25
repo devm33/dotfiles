@@ -2,6 +2,7 @@
 
 if [[ `uname` ==  'Linux' ]]
 then
+    prodcertstatus -q || prodaccess
     alias p="prodaccess"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 else
@@ -26,19 +27,26 @@ function git5_send_all {
 alias g5a=git5_send_all
 
 # g4
-export P4DIFF='vimdiff'
 if [ -r /etc/bash_completion.d/g4d ]; then
     source /etc/bash_completion.d/g4d
+    compdef '_files -W /google/src/cloud/devrajm' g4d
+    export P4DIFF='vimdiff'
+    alias g4D='g4 citc -d'
+    compdef g4D=g4d
     function g4g {
-        cd ..
-        g4 reopen
-        cd $(g4 opened | head -n 1 | cut  -d' ' -f1 | sed 's/^\/\/depot\///' | xargs dirname)
-    }
-    function g4dd {
+        if [ -z "$1" ]; then
+            return
+        fi
         g4d $1
-        clear
-        g4g
+        g4 reopen
+        opened=$(g4 opened | head -n1 | cut -d' ' -f1 | sed 's/^\/\/depot\///')
+        if [ "$opened" ]; then
+            cd ..
+            cd $(dirname $opened)
+        fi
     }
+    compdef g4g=g4d
+    alias g4dd=g4g
     compdef g4dd=g4d
 fi
 if [ -r /etc/bash_completion.d/p4 ]; then
@@ -85,15 +93,7 @@ function drive {
 }
 
 # Note global doesnt work for zsh, have to use specified
-_python_argcomplete() {
-    local IFS=''
-    COMPREPLY=( $(IFS="$IFS"                   COMP_LINE="$COMP_LINE"                   COMP_POINT="$COMP_POINT"                   _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS"                   _ARGCOMPLETE=1                   "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null) )
-    if [[ $? != 0 ]]; then
-        unset COMPREPLY
-    fi
-}
-complete -o nospace -o default -F _python_argcomplete "md.py"
-alias m='md.py'
+# TODO readd once rebuilt
 
 # Android studio
 
