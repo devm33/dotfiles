@@ -2,6 +2,7 @@
 
 if [[ `uname` ==  'Linux' ]]
 then
+    prodcertstatus -q || prodaccess
     alias p="prodaccess"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 else
