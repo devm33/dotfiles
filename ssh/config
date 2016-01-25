@@ -1,1 +1,20 @@
-/Users/devrajm/Google Drive/dotfiles/ssh/config
+PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
+
+Host ubi
+    HostName devrajm.hot.corp.google.com
+    User devrajm
+
+Host desk
+    HostName devrajm04.nyc.corp.google.com
+    User devrajm
+    RemoteForward 2224 127.0.0.1:2224
+    RemoteForward 2225 127.0.0.1:2225
+
+Host unlock-devrajm04.nyc.corp.google.com
+  HostName devrajm04.nyc.corp.google.com
+  User root
+  PreferredAuthentications=publickey
+  StrictHostKeyChecking=yes
+  IdentitiesOnly=yes
+  IdentityFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/id_rsa
+  UserKnownHostsFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/known_hosts
