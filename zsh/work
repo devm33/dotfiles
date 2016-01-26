@@ -149,3 +149,6 @@ if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
 then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
+
+# want GAE on path
+export PATH="$PATH:/usr/local/google/home/devrajm/lib/google_appengine"
