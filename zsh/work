@@ -62,9 +62,31 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 if [ -r /etc/bash_completion.d/flag_completion ]; then
     source /etc/bash_completion.d/flag_completion
 fi
-alias bb='blaze build'
-alias br='blaze run'
-alias bt='blaze test'
+
+function bb() {
+    if [ -z "$*" ];
+    then
+        blaze build :all
+    else
+        blaze build $*
+    fi
+}
+function br() {
+    if [ -z "$*" ];
+    then
+        blaze run :all
+    else
+        blaze run $*
+    fi
+}
+function bt() {
+    if [ -z "$*" ];
+    then
+        blaze test :all
+    else
+        blaze test $*
+    fi
+}
 
 # gsutil
 function gsls {
