@@ -107,13 +107,16 @@ then
 fi
 
 # Use adb.turbo when possible, otherwise use standard adb.
-function adb() {
-  EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
-  ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
-  EMU_SUPPORT=${EMU_DEPS}/tools/android/emulator/support/
-  ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
-  ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
-}
+if [[ `uname` ==  'Linux' ]]
+then
+    function adb() {
+        EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
+        ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
+        EMU_SUPPORT=${EMU_DEPS}/tools/android/emulator/support/
+        ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
+        ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
+    }
+fi
 
 # Add the internal Android SDK to your PATH
 export SDK_LOC=/google/data/ro/teams/as-with-blaze/android-sdk-linux
