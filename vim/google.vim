@@ -12,14 +12,12 @@ Glug codefmt-google
 " http://learnvimscriptthehardway.stevelosh.com/chapters/14.html
 augroup autoformat
   autocmd!
-  " Autoformat BUILD files on write.
   autocmd FileType bzl AutoFormatBuffer buildifier
-  " Autoformat go files on write.
   autocmd FileType go AutoFormatBuffer gofmt
-  " Autoformat proto files on write.
   autocmd FileType proto AutoFormatBuffer clang-format
-  " Autoformat c and c++ files on write.
   autocmd FileType c,cpp AutoFormatBuffer clang-format
+  " autocmd FileType python AutoFormatBuffer pyformat
+  autocmd FileType markdown AutoFormatBuffer mdformat
 augroup END
 
 " Load the G4 plugin, which allows G4MoveFile, G4Edit, G4Pending, etc.
