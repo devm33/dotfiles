@@ -48,6 +48,11 @@ if [ -r /etc/bash_completion.d/g4d ]; then
     compdef g4g=g4d
     alias g4dd=g4g
     compdef g4dd=g4d
+
+    alias g4c='g4 change'
+    alias g4m='g4 mail'
+    alias g4p='g4 presubmit'
+    alias g4s='g4 sync'
 fi
 if [ -r /etc/bash_completion.d/p4 ]; then
     source /etc/bash_completion.d/p4
@@ -152,3 +157,9 @@ fi
 
 # want GAE on path
 export PATH="$PATH:/usr/local/google/home/devrajm/lib/google_appengine"
+
+# The next line updates PATH for the Google Cloud SDK.
+source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc'
+
+# The next line enables shell command completion for gcloud.
+source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc'
