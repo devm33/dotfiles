@@ -48,6 +48,11 @@ if [ -r /etc/bash_completion.d/g4d ]; then
     compdef g4g=g4d
     alias g4dd=g4g
     compdef g4dd=g4d
+
+    alias g4c='g4 change'
+    alias g4m='g4 mail'
+    alias g4p='g4 presubmit'
+    alias g4s='g4 sync'
 fi
 if [ -r /etc/bash_completion.d/p4 ]; then
     source /etc/bash_completion.d/p4
@@ -62,8 +67,31 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 if [ -r /etc/bash_completion.d/flag_completion ]; then
     source /etc/bash_completion.d/flag_completion
 fi
-alias bb='blaze build'
-alias br='blaze run'
+
+function bb() {
+    if [ -z "$*" ];
+    then
+        blaze build :all
+    else
+        blaze build $*
+    fi
+}
+function br() {
+    if [ -z "$*" ];
+    then
+        blaze run :all
+    else
+        blaze run $*
+    fi
+}
+function bt() {
+    if [ -z "$*" ];
+    then
+        blaze test :all
+    else
+        blaze test $*
+    fi
+}
 
 # gsutil
 function gsls {
@@ -129,3 +157,12 @@ if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
 then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
+
+# want GAE on path
+export PATH="$PATH:/usr/local/google/home/devrajm/lib/google_appengine"
+
+# The next line updates PATH for the Google Cloud SDK.
+source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc'
+
+# The next line enables shell command completion for gcloud.
+source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc'

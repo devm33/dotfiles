@@ -208,6 +208,7 @@ nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
+nnoremap <leader>qa :qall<CR>
 noremap <leader><leader>q :q!<CR>
 
 " Close the quickfix list and loc list
