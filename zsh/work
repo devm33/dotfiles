@@ -38,11 +38,14 @@ if [ -r /etc/bash_completion.d/g4d ]; then
             return
         fi
         g4d $1
-        g4 reopen
         opened=$(g4 opened | head -n1 | cut -d' ' -f1 | sed 's/^\/\/depot\///')
+        if [ -z "$opened" ]; then
+            g4 reopen
+            opened=$(g4 opened | head -n1 | cut -d' ' -f1 | sed 's/^\/\/depot\///')
+        fi
         if [ "$opened" ]; then
-            cd ..
-            cd $(dirname $opened)
+            echo;echo;echo "goto file $opened";echo;echo;
+            cd ../$(dirname $opened)
         fi
     }
     compdef g4g=g4d
