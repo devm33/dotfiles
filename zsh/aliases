@@ -8,6 +8,9 @@ alias zw='vim ~/.dotfiles/zsh/work'
 autoload -U zmv
 alias mmv='noglob zmv -W'
 
+# edit tmux conf
+alias vt='vim ~/.dotfiles/tmux.conf'
+
 # I alway want this for some reason
 alias lh='ls -lsh'
 
@@ -58,9 +61,13 @@ alias bx='bundle exec'
 # Util / Misc
 alias wmin='watch -n0.1'
 alias untar='tar xvf '
-alias xo='xdg-open '
-if [ -e '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome' ]; then
-    alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+if [[ "$(uname)" == "Linux" ]]; then
+    alias xo='xdg-open'
+else
+    alias xo='open'
+fi
+if [ -e '/Applications/Google\ Chrome.app' ]; then
+    alias co='open  -a /Applications/Google\ Chrome.app'
 else
     alias co='google-chrome'
 fi
