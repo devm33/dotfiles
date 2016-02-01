@@ -9,6 +9,7 @@ Host desk
     User devrajm
     RemoteForward 2224 127.0.0.1:2224
     RemoteForward 2225 127.0.0.1:2225
+    RemoteForward 2226 127.0.0.1:2226
 
 Host unlock-devrajm04.nyc.corp.google.com
   HostName devrajm04.nyc.corp.google.com
