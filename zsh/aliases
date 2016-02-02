@@ -70,6 +70,7 @@ if [ -e '/Applications/Google\ Chrome.app' ]; then
     alias co='open  -a /Applications/Google\ Chrome.app'
 else
     alias co='google-chrome'
+    alias cr='chropen-remote'
 fi
 alias json='python -mjson.tool'
 
