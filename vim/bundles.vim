@@ -68,6 +68,7 @@ Bundle "junegunn/rainbow_parentheses.vim"
 
 " Scala
 Bundle 'derekwyatt/vim-scala'
+Bundle 'GEverding/vim-hocon'
 
 " Haskell
 Bundle "haskell.vim"
