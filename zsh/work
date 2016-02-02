@@ -6,7 +6,7 @@ then
     alias p="prodaccess"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 else
-    alias gssh="certstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmux a || tmux new'"
+    alias gssh="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmux a || tmux new'"
     alias p=gssh
 fi
 
