@@ -188,6 +188,7 @@ function! PopulatePasteBufferFromOSX()
 endfunction
 nnoremap <leader>bp :call PopulatePasteBufferFromOSX()<cr>
 nnoremap <leader>bc :call PropagatePasteBufferToOSX()<cr>
+vnoremap <leader>bc y:call PropagatePasteBufferToOSX()<cr>
 
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
