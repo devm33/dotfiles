@@ -67,11 +67,16 @@ else
     alias xo='open'
 fi
 if [ -e '/Applications/Google\ Chrome.app' ]; then
-    alias co='open  -a /Applications/Google\ Chrome.app'
+    alias co='open -a /Applications/Google\ Chrome.app'
 else
     alias co='google-chrome'
     alias cr='chropen-remote'
 fi
+chrome_pipe() {
+    read url
+    co "$url"
+}
+alias cop=chrome_pipe
 alias json='python -mjson.tool'
 
 markdown_preview() {
