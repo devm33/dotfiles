@@ -63,7 +63,7 @@ alias wmin='watch -n0.1'
 alias untar='tar xvf '
 if [[ "$(uname)" == "Linux" ]]; then
     alias xo='xdg-open'
-    alias copy='xclip -o v'
+    alias copy='xclip -selection c'
 else
     alias xo='open'
     alias copy='pbcopy'
