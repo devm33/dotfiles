@@ -162,6 +162,9 @@ if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
 then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
+if [ -d $HOME/lib/md ]; then
+    alias vn='vim $HOME/lib/md/networks.py'
+fi
 
 # want GAE on path
 if [ -d /usr/local/google/home/devrajm/lib/google_appengine ]
