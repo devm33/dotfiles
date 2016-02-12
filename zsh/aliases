@@ -222,6 +222,9 @@ extract_archive () {
 alias ex=extract_archive
 compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_archive
 
+# tail
+alias tf='tail -F'
+
 # Curl
 alias curls='curl -o /dev/null -i'
 alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
