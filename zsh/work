@@ -56,6 +56,7 @@ if [ -r /etc/bash_completion.d/g4d ]; then
     alias g4m='g4 mail'
     alias g4p='g4 presubmit'
     alias g4s='g4 sync'
+    alias g4f='g4 reopen; g4 submit'
 fi
 if [ -r /etc/bash_completion.d/p4 ]; then
     source /etc/bash_completion.d/p4
