@@ -6,8 +6,8 @@ source ~/.vim/bootstrap.vim
 " Load vundle plugins
 source ~/.vim/bundles.vim
 
-" Optionally load google plugins
-if expand('%:p') =~ 'google3'
+" Load google plugins on goobuntu
+if isdirectory('/usr/share/vim/google/google.vim')
     source ~/.vim/google.vim
 endif
 
