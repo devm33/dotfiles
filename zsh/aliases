@@ -62,17 +62,23 @@ alias bx='bundle exec'
 alias wmin='watch -n0.1'
 alias untar='tar xvf '
 if [[ "$(uname)" == "Linux" ]]; then
-    alias xo='xdg-open'
-    alias copy='xclip -selection c'
+    if [ -n "$SSH_CONNECTION" ]; then
+        alias xo='open-remote'
+        alias copy='pbcopy-remote'
+    else
+        alias xo='xdg-open'
+        alias copy='xclip -selection c'
+    fi
 else
     alias xo='open'
     alias copy='pbcopy'
 fi
 if [ -e '/Applications/Google\ Chrome.app' ]; then
     alias co='open -a /Applications/Google\ Chrome.app'
+elif [ -n "$SSH_CONNECTION" ]; then
+    alias co='chropen-remote'
 else
     alias co='google-chrome'
-    alias cr='chropen-remote'
 fi
 chrome_pipe() {
     read url
