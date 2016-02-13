@@ -201,6 +201,7 @@ nnoremap <leader>ve :tabe ~/.dotfiles/vimrc<CR>
 nnoremap <leader>vb :tabe ~/.dotfiles/vim/bundles.vim<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
+nnoremap <leader>vt :w<CR>:!tmux source-file ~/.tmux.conf<CR>
 
 " Using vundle
 nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
