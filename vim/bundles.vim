@@ -25,6 +25,7 @@ Bundle "tpope/vim-fugitive"
 Bundle "tpope/vim-repeat"
 Bundle "tpope/vim-surround"
 Bundle "tpope/vim-unimpaired"
+Bundle "tpope/vim-abolish"
 " Snippets
 Bundle "sirver/ultisnips"
 
