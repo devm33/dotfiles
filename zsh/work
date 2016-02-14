@@ -52,10 +52,11 @@ if [ -r /etc/bash_completion.d/g4d ]; then
     compdef g4dd=g4d
 
     alias g4c='g4 change'
+    alias g4f='g4 reopen; g4 submit'
+    alias g4l='g4 lint'
     alias g4m='g4 mail'
     alias g4p='g4 presubmit'
     alias g4s='g4 sync'
-    alias g4f='g4 reopen; g4 submit'
 fi
 if [ -r /etc/bash_completion.d/p4 ]; then
     source /etc/bash_completion.d/p4
