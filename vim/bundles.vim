@@ -11,9 +11,9 @@ call vundle#rc()
 Bundle "gmarik/vundle"
 
 " General
+Bundle "Valloric/YouCompleteMe"
 Bundle "ctrlpvim/ctrlp.vim"
 Bundle "editorconfig/editorconfig-vim"
-Bundle "Valloric/YouCompleteMe"
 Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
@@ -21,11 +21,11 @@ Bundle "scrooloose/nerdtree"
 Bundle "scrooloose/syntastic"
 Bundle "skwp/greplace.vim"
 Bundle "tomtom/tcomment_vim"
+Bundle "tpope/vim-abolish"
 Bundle "tpope/vim-fugitive"
 Bundle "tpope/vim-repeat"
 Bundle "tpope/vim-surround"
 Bundle "tpope/vim-unimpaired"
-Bundle "tpope/vim-abolish"
 " Snippets
 Bundle "sirver/ultisnips"
 
