@@ -204,7 +204,7 @@ nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 nnoremap <leader>vt :w<CR>:!tmux source-file ~/.tmux.conf<CR>
 
 " Using vundle
-nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
+nnoremap <leader>vi :w<CR>:so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>
