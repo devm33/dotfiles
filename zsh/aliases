@@ -11,8 +11,11 @@ alias mmv='noglob zmv -W'
 # edit tmux conf
 alias vt='vim ~/.dotfiles/tmux.conf'
 
-# I alway want this for some reason
+# ls
 alias lh='ls -lsh'
+
+# alias
+alias alg='alias | grep '
 
 # Show contents of directory after cd-ing into it
 chpwd() {
