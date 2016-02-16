@@ -4,6 +4,7 @@ if [[ `uname` ==  'Linux' ]]
 then
     prodcertstatus -q || prodaccess
     alias p="prodaccess"
+    alias p?="prodcertstatus"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
 else
     alias gssh="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmux a || tmux new'"
