@@ -45,10 +45,11 @@ set cursorline " highlight the line we are currently on
 " Whitespace (should normally be overriden by local editorconfig)
 set autoindent
 set expandtab
-set tabstop=4
-set shiftwidth=4
-set shiftround
-set softtabstop=4
+" Messing up with google.vim settings
+" set tabstop=4
+" set shiftwidth=4
+" set shiftround
+" set softtabstop=4
 
 " Windows
 set splitright " Open new split panes to right
