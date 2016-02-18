@@ -24,13 +24,17 @@ source $ZSH/oh-my-zsh.sh
 export PATH="/usr/local/bin:$PATH"
 
 # for mac I sometimes store homebrew packages are stored here
-export PATH="$HOME/homebrew/bin:$PATH"
+if [ -d "$HOME/homebrew/bin" ]; then
+    export PATH="$HOME/homebrew/bin:$PATH"
+fi
 
 # prepend my bin to path so it's checked first because I'm important
 export PATH="$HOME/bin:$PATH"
 
 # gems on path
-export PATH="$PATH:$HOME/.gem/ruby/1.8/bin"
+if [ -d "$HOME/.gem/ruby/1.8/bin" ]; then
+    export PATH="$PATH:$HOME/.gem/ruby/1.8/bin"
+fi
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
@@ -66,3 +70,9 @@ if [[  "$(uname -s)" == CYGWIN* ]]; then
         source $HOME/.zsh/cygwin;
     fi
 fi
+
+# tmux unsets this and then xclip gets confused
+if [ -n "$DISPLAY" ]; then
+    export DISPLAY=:0
+fi
+
