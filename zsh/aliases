@@ -89,6 +89,7 @@ chrome_pipe() {
 }
 alias cop=chrome_pipe
 alias json='python -mjson.tool'
+alias ipy='ipython'
 
 markdown_preview() {
     TMPFILE="/tmp/$1.html"
