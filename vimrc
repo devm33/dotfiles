@@ -167,7 +167,7 @@ nnoremap <leader>gh :Ag --html
 nnoremap <leader>gj :Ag --js 
 nnoremap <leader>gp :Ag --python 
 nnoremap <leader>gr :Ag --ruby 
-nnoremap <leader>gs :Ag --sass 
+nnoremap <leader>gs :Ag --scala 
 
 " Replace all
 nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
