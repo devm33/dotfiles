@@ -49,6 +49,18 @@ set shiftround
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
+fun! ToggleTab()
+    if &shiftwidth == '2'
+        set tabstop=4
+        set shiftwidth=4
+        set softtabstop=4
+    else
+        set tabstop=2
+        set shiftwidth=2
+        set softtabstop=2
+    endif
+endf
+nnoremap <leader>c<tab> :call ToggleTab()<cr>
 
 " Windows
 set splitright " Open new split panes to right
