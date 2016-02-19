@@ -188,3 +188,6 @@ if [ -e /usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc ]
 then
     source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc'
 fi
+
+# This is import for gerrit code review
+alias gerrit='git push origin HEAD:refs/for/master'
