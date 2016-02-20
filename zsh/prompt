@@ -96,7 +96,7 @@ _PROD_FINE="["
 _PROD_SUFFIX="%{$reset_color%}]"
 
 prodaccess_remaining() {
-  if [ -d /google ]; then
+  if [ -d /google/data ]; then
     local remaining="$(prodcertstatus --nocheck_loas | cut -d' ' -f5,6)"
     local hours="$(echo $remaining | sed -n 's/\(\d*\)h.*/\1/p')"
     STATUS="$_PROD_FINE"
