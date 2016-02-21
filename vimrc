@@ -1,5 +1,8 @@
 set nocompatible " vi improved
 
+" Set leader, needs to be set before any mappings
+let mapleader=" "
+
 " Bootstrap this vimrc
 source ~/.vim/bootstrap.vim
 
@@ -72,8 +75,11 @@ set nowritebackup
 set noswapfile
 set autoread
 set autowriteall
-autocmd FocusLost * silent! wa " write all on lost focus
-autocmd TabLeave * silent! wa " autowriteall doesn't capture tab changing
+augroup autosave
+  autocmd!
+  autocmd FocusLost * silent! wa " write all on lost focus
+  autocmd TabLeave * silent! wa " autowriteall doesn't capture tab changing
+augroup END
 
 " Undo
 set undofile
@@ -117,7 +123,6 @@ nnoremap <C-c> :x<CR>
 nnoremap <C-d> :w<CR>:e %:p:h<CR>
 
 " Leader mappings (use :map <leader> to see all mappings in order)
-let mapleader=" "
 
 " White space
 nnoremap <leader>S :%s/\s\+$//<CR>
@@ -214,6 +219,12 @@ nnoremap <leader>vb :tabe ~/.dotfiles/vim/bundles.vim<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
 nnoremap <leader>vt :w<CR>:!tmux source-file ~/.tmux.conf<CR>
+augroup sourcereload
+  autocmd!
+  autocmd BufWritePost $MYVIMRC source $MYVIMRC
+  autocmd BufWritePost *.vim source $MYVIMRC
+  autocmd BufWritePost .tmux.conf :!tmux source-file ~/.tmux.conf
+augroup END
 
 " Using vundle
 nnoremap <leader>vi :w<CR>:so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
