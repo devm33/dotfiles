@@ -177,8 +177,8 @@ nnoremap <leader>gr :Ag --ruby
 nnoremap <leader>gs :Ag --scala 
 
 " Replace all
-nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
-vnoremap <leader>r "sy:%s/<c-r>s/
+nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/<c-r>=expand("<cword>")<cr>
+vnoremap <leader>r "sy:%s/<c-r>s/<c-r>s
 
 " Replace in line
 nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
