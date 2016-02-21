@@ -76,9 +76,11 @@ set noswapfile
 set autoread
 set autowriteall
 augroup autosave
+  " autowriteall doesn't capture tab changing, write all on lost focus
   autocmd!
-  autocmd FocusLost * silent! wa " write all on lost focus
-  autocmd TabLeave * silent! wa " autowriteall doesn't capture tab changing
+  autocmd FocusLost * silent! wa
+  autocmd TabLeave * silent! wa
+  autocmd WinLeave * silent! wa
 augroup END
 
 " Undo
