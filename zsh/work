@@ -90,12 +90,18 @@ function br() {
     fi
 }
 function bt() {
-    if [ -z "$*" ];
-    then
-        blaze test :all
-    else
-        blaze test $*
+    args="$*"
+    if [ -z "$args" ]; then
+        args=':all'
     fi
+    blaze test --test_output=errors $args
+}
+function ibt() {
+    args="$*"
+    if [ -z "$args" ]; then
+        args=':all'
+    fi
+    iblaze test --test_output=errors $args
 }
 
 # gsutil
