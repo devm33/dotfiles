@@ -20,6 +20,11 @@ augroup autoformat
   autocmd FileType markdown AutoFormatBuffer mdformat
 augroup END
 
+" Linting
+Glug syntastic-google checkers=`{'python': 'gpylint'}`
+" disable import errors because gpylint fails with appengine imports
+let g:syntastic_python_gpylint_args='--disable=import-errror'
+
 " Load the G4 plugin, which allows G4MoveFile, G4Edit, G4Pending, etc.
 " Use :h g4 for more details about this plugin
 Glug g4
