@@ -13,6 +13,7 @@ alias vt='vim ~/.dotfiles/tmux.conf'
 
 # ls
 alias lh='ls -lsh'
+alias cls='clear;ls'
 
 # alias
 alias alg='alias | grep '
