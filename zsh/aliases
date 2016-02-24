@@ -15,8 +15,13 @@ alias vt='vim ~/.dotfiles/tmux.conf'
 alias lh='ls -lsh'
 alias cls='clear;ls'
 
-# alias
+# aliases
 alias alg='alias | grep '
+
+# show path
+path() {
+    echo "${PATH//:/$'\n'}"'
+}
 
 # Show contents of directory after cd-ing into it
 chpwd() {
