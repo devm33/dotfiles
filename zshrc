@@ -27,8 +27,8 @@ export GEM_PATH="$HOME/.gem"
 if [ -d "$HOME/.gem/ruby/1.8/bin" ]; then
     export PATH="$PATH:$HOME/.gem/ruby/1.8/bin"
 fi
-if [ -d "$HOME/.gem/ruby/1.9/bin" ]; then
-    export PATH="$PATH:$HOME/.gem/ruby/1.9/bin"
+if [ -d "$HOME/.gem/bin" ]; then
+    export PATH="$PATH:$HOME/.gem/bin"
 fi
 
 # You may need to manually set your language environment
