@@ -13,13 +13,14 @@ source $HOME/.zsh/prompt
 # ensure /usr/local/bin on $PATH
 export PATH="/usr/local/bin:$PATH"
 
-# for mac I sometimes store homebrew packages are stored here
+# for mac I sometimes store homebrew packages here
 if [ -d "$HOME/homebrew/bin" ]; then
     export PATH="$HOME/homebrew/bin:$PATH"
 fi
 
 # prepend my bin to path so it's checked first because I'm important
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.bin:$PATH"
 
 # gems on path
 export GEM_HOME="$HOME/.gem"

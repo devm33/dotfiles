@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -n "$1" ]; then
+  url="$1"
+else
+  read url
+fi
+
+
+if [ -n "$SSH_CONNECTION" ]; then
+    echo "$url" | nc -q1 localhost 2226
+else
+    google-chrome "$url"
+fi
