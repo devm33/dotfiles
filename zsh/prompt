@@ -91,24 +91,16 @@ get_space () {
 }
 
 # add to right-side prompt if on goobuntu
-_PROD_LOW="[%{$fg_bold[red]%}"
-_PROD_FINE="["
-_PROD_SUFFIX="%{$reset_color%}]"
+_PROD_FILE='/tmp/devrajm_prodcertstatus'
 
-prodaccess_remaining() {
-  if [ -d /google/data ]; then
-    local remaining="$(prodcertstatus --nocheck_loas | cut -d' ' -f5,6)"
-    local hours="$(echo $remaining | sed -n 's/\(\d*\)h.*/\1/p')"
-    STATUS="$_PROD_FINE"
-    if [ $hours -eq 0 ]; then
-      STATUS="$_PROD_LOW"
-    fi
-    echo -n "$STATUS$remaining$_PROD_SUFFIX "
+output_prodaccess() {
+  if [ -f "$_PROD_FILE" ]; then
+    cat $_PROD_FILE
   fi
 }
 
 _1LEFT="$_USERNAME $_PATH"
-_1RIGHT='$(prodaccess_remaining)[%*] '
+_1RIGHT='$(output_prodaccess)[%*] '
 
 bureau_precmd () {
   _1SPACES=`get_space $_1LEFT $_1RIGHT`
