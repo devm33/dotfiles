@@ -20,7 +20,7 @@ alias alg='alias | grep '
 
 # show path
 path() {
-    echo "${PATH//:/$'\n'}"
+    echo "${PATH//:/\n}"
 }
 
 # Show contents of directory after cd-ing into it
