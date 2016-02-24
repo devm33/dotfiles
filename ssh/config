@@ -13,10 +13,19 @@ Host desk
     RemoteForward 2227 127.0.0.1:2227
 
 Host unlock-devrajm04.nyc.corp.google.com
-  HostName devrajm04.nyc.corp.google.com
-  User root
-  PreferredAuthentications=publickey
-  StrictHostKeyChecking=yes
-  IdentitiesOnly=yes
-  IdentityFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/id_rsa
-  UserKnownHostsFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/known_hosts
+    HostName devrajm04.nyc.corp.google.com
+    User root
+    PreferredAuthentications=publickey
+    StrictHostKeyChecking=yes
+    IdentitiesOnly=yes
+    IdentityFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/id_rsa
+    UserKnownHostsFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/known_hosts
+
+Host vm
+    Hostname localhost
+    Port 27322
+    User root
+
+Host devm33
+    Hostname ssh.phx.nearlyfreespeech.net
+    User devm33_devm33
