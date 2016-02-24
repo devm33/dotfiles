@@ -171,7 +171,7 @@ then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
 if [ -d $HOME/lib/md ]; then
-    alias vn='vim $HOME/lib/md/networks.py'
+    alias vn='vim $HOME/code/mdtool/networks.py'
 fi
 if [ -d /usr/local/google/home/devrajm/code/cbsnmon ]; then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/cbsnmon"
