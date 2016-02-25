@@ -255,6 +255,9 @@ alias curlvl='curl -vL'
 # Tmux
 alias tmux="tmux -2"
 alias ta="tmux a || tmux new"
+if command -v tmx >/dev/null 2>&1; then
+    alias ta="tmx -2 a || tmx -2 new"
+fi
 
 # Functions to help manage dotfiles
 alias s.z='source $HOME/.zshrc'
