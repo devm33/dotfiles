@@ -17,3 +17,6 @@ then
 
     export STUDIO_VM_OPTIONS='/usr/local/google/home/devrajm/.studio64.vmoptions'
 fi
+
+# Go for it, it's the 60's! (disable ctrl-s freeze)
+stty -ixon
