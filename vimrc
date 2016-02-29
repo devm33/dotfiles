@@ -186,6 +186,12 @@ nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
 " Using fugitive
 nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
 nnoremap <leader>cp :Gpush<cr>
+function! PushIt()
+    Gwrite
+    Gcommit
+    Gpush
+endfunction
+command! PushIt call PushIt()
 
 " For vimdiff
 nnoremap <leader>1 :diffget LOCAL<cr>
