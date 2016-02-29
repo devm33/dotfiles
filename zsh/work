@@ -136,8 +136,6 @@ function drive {
 # Crow (Android emulator)
 if [ -d /google/data/ro/teams/mobile_eng_prod/crow ];
 then
-    autoload _crow
-    compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
     alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
 fi
 
