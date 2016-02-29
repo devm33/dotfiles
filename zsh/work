@@ -138,7 +138,7 @@ function drive {
 # Android studio
 
 # Crow (Android emulator)
-if [[ `uname` ==  'Linux' ]]
+if [ -d /google/data/ro/teams/mobile_eng_prod/crow ];
 then
     fpath=(  /google/data/ro/teams/mobile_eng_prod/crow $fpath )
     autoload _crow
@@ -147,7 +147,7 @@ then
 fi
 
 # Use adb.turbo when possible, otherwise use standard adb.
-if [ -d /google/data/ro/teams/mobile_eng_prod/emu/live/google3/ ];
+if [ -d /google/data/ro/teams/mobile_eng_prod/emu/live/google3 ];
 then
     function adb() {
         EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
