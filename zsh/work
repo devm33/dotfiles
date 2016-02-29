@@ -2,10 +2,17 @@
 
 if [[ `uname` ==  'Linux' ]]
 then
+    prodcertstatus -q || prodaccess
     alias p="prodaccess"
+    alias pc="prodcertstatus"
     alias gsutil='/google/data/ro/projects/cloud/bigstore/tools/gsutil.par'
+    alias ta="tmx -2 a -t 0|| tmx -2 new -s 0"
+else
+    alias p="gcert"
+    alias ta="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmx -2 a -t 0 || tmx -2 new -s 0'"
 fi
 
+# git5
 alias g5="git5"
 alias g5e="git5 export"
 alias g5s="git5 submit"
@@ -21,24 +28,98 @@ function git5_send_all {
 }
 alias g5a=git5_send_all
 
+# g4
+if [ -r /etc/bash_completion.d/g4d ]; then
+    source /etc/bash_completion.d/g4d
+    compdef '_files -W /google/src/cloud/devrajm' g4d
+    alias g4D='g4 citc -d'
+    compdef g4D=g4d
+    function g4g {
+        if [ -z "$1" ]; then
+            return
+        fi
+        g4d $1
+        opened=$(g4 opened | head -n1 | cut -d' ' -f1 | sed 's/^\/\/depot\///')
+        if [ -z "$opened" ]; then
+            g4 reopen
+            opened=$(g4 opened | head -n1 | cut -d' ' -f1 | sed 's/^\/\/depot\///')
+        fi
+        if [ "$opened" ]; then
+            echo;echo;echo "goto file $opened";echo;echo;
+            cd ../$(dirname $opened)
+        fi
+    }
+    compdef g4g=g4d
+    alias g4dd=g4g
+    compdef g4dd=g4d
+    export P4DIFF='git --git-dir=/blah diff -U9999999'
+    alias g4c='g4 change'
+    alias g4f='g4 reopen; g4 submit'
+    alias g4l='g4 lint'
+    alias g4m='g4 mail'
+    alias g4p='g4 presubmit'
+    alias g4s='g4 sync'
+fi
+if [ -r /etc/bash_completion.d/p4 ]; then
+    source /etc/bash_completion.d/p4
+fi
+
+# blaze
+#cache-path must exist
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+# flag tab completion for blaze binaries niiice
+if [ -r /etc/bash_completion.d/flag_completion ]; then
+    source /etc/bash_completion.d/flag_completion
+fi
+
+function bb() {
+    if [ -z "$*" ];
+    then
+        blaze build :all
+    else
+        blaze build $*
+    fi
+}
+function br() {
+    if [ -z "$*" ];
+    then
+        blaze run :all
+    else
+        blaze run $*
+    fi
+}
+function bt() {
+    args="$*"
+    if [ -z "$args" ]; then
+        args=':all'
+    fi
+    blaze test --test_output=errors $args
+}
+function ibt() {
+    args="$*"
+    if [ -z "$args" ]; then
+        args=':all'
+    fi
+    iblaze test --test_output=errors $args
+}
+
+# gsutil
 function gsls {
     gsutil ls $1 gs://mps-storage/devrajm
 }
-
 function gsadd {
     if [ -z "$1" ]
     then
         echo 'Specifiy file to upload'
     fi
-    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm
-    gsutil acl ch -u 'AllUsers:R' "gs://mps-storage/devrajm/$1"
-    echo "https://storage.googleapis.com/mps-storage/devrajm/$1"
+    safename=`echo $1 | sed -e "s/[^a-zA-Z0-9.~_-]/_/g"`
+    gsutil -m -o 'GSUtil:parallel_composite_upload_threshold=157286400' cp $1 gs://mps-storage/devrajm/$safename
+    gsutil acl ch -u 'AllUsers:R' "gs://mps-storage/devrajm/$safename"
+    echo "https://storage.googleapis.com/mps-storage/devrajm/$safename"
 }
 alias gs+='gsadd'
-
-if [ -r /etc/bash_completion.d/g4d ]; then
-    source /etc/bash_completion.d/g4d
-fi
 
 function drive {
     DRIVE="$HOME/Google Drive/"
@@ -50,3 +131,63 @@ function drive {
         ln -s $DRIVE$1 ./
     fi
 }
+
+# Android studio
+# Crow (Android emulator)
+if [ -d /google/data/ro/teams/mobile_eng_prod/crow ];
+then
+    alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
+fi
+
+# Use adb.turbo when possible, otherwise use standard adb.
+if [ -d /google/data/ro/teams/mobile_eng_prod/emu/live/google3 ];
+then
+    function adb() {
+        EMU_DEPS=/google/data/ro/teams/mobile_eng_prod/emu/live/google3/
+        ANDROID_SDK=${EMU_DEPS}/third_party/java/android/android_sdk_linux/
+        EMU_SUPPORT=${EMU_DEPS}/tools/android/emulator/support/
+        ANDROID_ADB=${ANDROID_SDK}/platform-tools/adb
+        ANDROID_ADB=${ANDROID_ADB} $EMU_SUPPORT/adb.turbo "$@"
+    }
+fi
+
+# Add the internal Android SDK to your PATH
+export SDK_LOC=/google/data/ro/teams/as-with-blaze/android-sdk-linux
+if [ -d $SDK_LOC ]
+then
+    export PATH=${PATH}:${SDK_LOC}/tools:${SDK_LOC}/platform-tools
+fi
+
+# mDialog
+# mdialog scripts
+if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
+then
+    export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
+fi
+if [ -d $HOME/lib/md ]; then
+    alias vn='vim $HOME/code/mdtool/networks.py'
+fi
+if [ -d /usr/local/google/home/devrajm/code/cbsnmon ]; then
+    export PATH="$PATH:/usr/local/google/home/devrajm/code/cbsnmon"
+fi
+
+# want GAE on path
+if [ -d /usr/local/google/home/devrajm/lib/google_appengine ]
+then
+    export PATH="$PATH:/usr/local/google/home/devrajm/lib/google_appengine"
+fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -e /usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc ]
+then
+    source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc'
+fi
+
+# The next line enables shell command completion for gcloud.
+if [ -e /usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc ]
+then
+    source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc'
+fi
+
+# This is import for gerrit code review
+alias gerrit='git push origin HEAD:refs/for/master'

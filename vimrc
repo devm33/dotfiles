@@ -1,15 +1,25 @@
 set nocompatible " vi improved
 
+" Set leader, needs to be set before any mappings
+let mapleader=" "
+
 " Bootstrap this vimrc
 source ~/.vim/bootstrap.vim
 
 " Load vundle plugins
 source ~/.vim/bundles.vim
 
+" Load google plugins on goobuntu
+if filereadable('/usr/share/vim/google/google.vim')
+    source ~/.vim/google.vim
+endif
+
 " Colors
 syntax enable " source system syntax file
 syntax on " use background setting for highlight
-set t_Co=256 " always use 256 colors (FIXME doesnt degrade well)
+set t_Co=256 " always use 256 colors
+set term=screen-256color " really force it
+let g:solarized_termcolors=256
 fun! ToggleColor()
     if &background == "dark"
         set background=light
@@ -38,10 +48,22 @@ set cursorline " highlight the line we are currently on
 " Whitespace (should normally be overriden by local editorconfig)
 set autoindent
 set expandtab
+set shiftround
 set tabstop=4
 set shiftwidth=4
-set shiftround
 set softtabstop=4
+fun! ToggleTab()
+    if &shiftwidth == '2'
+        set tabstop=4
+        set shiftwidth=4
+        set softtabstop=4
+    else
+        set tabstop=2
+        set shiftwidth=2
+        set softtabstop=2
+    endif
+endf
+nnoremap <leader>c<tab> :call ToggleTab()<cr>
 
 " Windows
 set splitright " Open new split panes to right
@@ -53,8 +75,13 @@ set nowritebackup
 set noswapfile
 set autoread
 set autowriteall
-autocmd FocusLost * silent! wa " write all on lost focus
-autocmd TabLeave * silent! wa " autowriteall doesn't capture tab changing
+augroup autosave
+  " autowriteall doesn't capture tab changing, write all on lost focus
+  autocmd!
+  autocmd FocusLost * silent! wa
+  autocmd TabLeave * silent! wa
+  autocmd WinLeave * silent! wa
+augroup END
 
 " Undo
 set undofile
@@ -98,7 +125,6 @@ nnoremap <C-c> :x<CR>
 nnoremap <C-d> :w<CR>:e %:p:h<CR>
 
 " Leader mappings (use :map <leader> to see all mappings in order)
-let mapleader=" "
 
 " White space
 nnoremap <leader>S :%s/\s\+$//<CR>
@@ -143,15 +169,16 @@ nnoremap <leader>O :tabe **/*
 set grepprg=ag " note using rking/ag.vim
 nnoremap <leader>gc :Ag <c-r>=expand('<cword>'><cr>
 nnoremap <leader>gg :Ag 
+nnoremap <leader>ag :Ag 
 nnoremap <leader>gh :Ag --html 
 nnoremap <leader>gj :Ag --js 
 nnoremap <leader>gp :Ag --python 
 nnoremap <leader>gr :Ag --ruby 
-nnoremap <leader>gs :Ag --sass 
+nnoremap <leader>gs :Ag --scala 
 
 " Replace all
-nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/
-vnoremap <leader>r "sy:%s/<c-r>s/
+nnoremap <leader>r :%s/<c-r>=expand("<cword>")<cr>/<c-r>=expand("<cword>")<cr>
+vnoremap <leader>r "sy:%s/<c-r>s/<c-r>s
 
 " Replace in line
 nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
@@ -159,6 +186,12 @@ nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
 " Using fugitive
 nnoremap <leader>cf :Gwrite<cr>:Gcommit<cr>
 nnoremap <leader>cp :Gpush<cr>
+function! PushIt()
+    Gwrite
+    Gcommit
+    Gpush
+endfunction
+command! PushIt call PushIt()
 
 " For vimdiff
 nnoremap <leader>1 :diffget LOCAL<cr>
@@ -167,6 +200,20 @@ nnoremap <leader>3 :diffget REMOTE<cr>
 
 " Copy/pasting from system registers
 noremap <leader>p "+
+
+" Copy/pasting over ssh to osx
+function! PropagatePasteBufferToOSX()
+    let @n=getreg('"')
+    call system('pbcopy-remote', @n)
+    echo "done"
+endfunction
+function! PopulatePasteBufferFromOSX()
+    let @" = system('pbpaste-remote')
+    echo "done"
+endfunction
+nnoremap <leader>bp :call PopulatePasteBufferFromOSX()<cr>
+nnoremap <leader>bc :call PropagatePasteBufferToOSX()<cr>
+vnoremap <leader>bc y:call PropagatePasteBufferToOSX()<cr>
 
 " Open file in browser
 nnoremap <leader>co :!google-chrome '%'<CR>
@@ -179,14 +226,22 @@ nnoremap <leader>ve :tabe ~/.dotfiles/vimrc<CR>
 nnoremap <leader>vb :tabe ~/.dotfiles/vim/bundles.vim<CR>
 nnoremap <leader>vs :so $MYVIMRC<CR>
 nnoremap <leader>vw :w<CR>:so $MYVIMRC<CR>
+nnoremap <leader>vt :w<CR>:!tmux source-file ~/.tmux.conf<CR>
+augroup sourcereload
+  autocmd!
+  autocmd BufWritePost $MYVIMRC source $MYVIMRC
+  autocmd BufWritePost *.vim source $MYVIMRC
+  autocmd BufWritePost .tmux.conf :!tmux source-file ~/.tmux.conf
+augroup END
 
 " Using vundle
-nnoremap <leader>vi :PluginClean<CR>:PluginInstall<CR>
+nnoremap <leader>vi :w<CR>:so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
+nnoremap <leader>qa :qall<CR>
 noremap <leader><leader>q :q!<CR>
 
 " Close the quickfix list and loc list
@@ -216,6 +271,3 @@ function! TxtMode()
     setlocal spell
 endfunction
 command! English call TxtMode()
-
-" Extra config files " note: deprecate: move to .vim/autoload/
-runtime! '~/.vimrc.*'

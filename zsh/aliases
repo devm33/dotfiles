@@ -8,8 +8,20 @@ alias zw='vim ~/.dotfiles/zsh/work'
 autoload -U zmv
 alias mmv='noglob zmv -W'
 
-# I alway want this for some reason
+# edit tmux conf
+alias vt='vim ~/.dotfiles/tmux.conf'
+
+# ls
 alias lh='ls -lsh'
+alias cls='clear;ls'
+
+# aliases
+alias alg='alias | grep '
+
+# show path
+path() {
+    echo "${PATH//:/\n}"
+}
 
 # Show contents of directory after cd-ing into it
 chpwd() {
@@ -56,10 +68,34 @@ alias npmdev='npm install --save-dev '
 alias bx='bundle exec'
 
 # Util / Misc
+alias wmin='watch -n0.1'
 alias untar='tar xvf '
-alias xo='xdg-open '
-alias co='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+if [[ "$(uname)" == "Linux" ]]; then
+    if [ -n "$SSH_CONNECTION" ]; then
+        alias xo='open-remote'
+        alias copy='pbcopy-remote'
+    else
+        alias xo='xdg-open'
+        alias copy='xclip -selection c'
+    fi
+else
+    alias xo='open'
+    alias copy='pbcopy'
+fi
+if [ -e '/Applications/Google\ Chrome.app' ]; then
+    alias co='open -a /Applications/Google\ Chrome.app'
+elif [ -n "$SSH_CONNECTION" ]; then
+    alias co='chropen-remote'
+else
+    alias co='google-chrome'
+fi
+chrome_pipe() {
+    read url
+    co "$url"
+}
+alias cop=chrome_pipe
 alias json='python -mjson.tool'
+alias ipy='ipython'
 
 markdown_preview() {
     TMPFILE="/tmp/$1.html"
@@ -84,13 +120,22 @@ alias gra='git remote add'
 alias gmm='git merge master'
 alias gwc='git whatchanged -p'
 
+alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
+
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
 # add version with hard delete
 alias gbDa='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -D'
 
 # Overwrite alias of ag btw omz debian plugin to use for silver searcher
-alias ag=Ag
+if [ -e /usr/bin/ag ];
+then
+    unalias ag
+    alias Ag=ag
+else
+    # on osx brew installs ag as Ag
+    alias ag=Ag
+fi
 
 git_copy_commit () {
     git rev-parse HEAD | tr -d '\n' | xclip -sel clip
@@ -192,6 +237,20 @@ extract_archive () {
 
 alias ex=extract_archive
 compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_archive
+
+# processes
+alias psg='ps ax | grep -v grep | grep '
+alias psga='ps ax | grep '
+
+# tail
+alias tf='tail -F'
+
+# Curl
+alias curls='curl -o /dev/null -i'
+alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
+alias curlcodel='curl -s -o /dev/null -I -w "%{http_code}" -L'
+alias curll='curl -L'
+alias curlvl='curl -vL'
 
 # Functions to help manage dotfiles
 alias s.z='source $HOME/.zshrc'

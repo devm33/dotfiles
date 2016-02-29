@@ -1,0 +1,31 @@
+PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
+
+Host ubi
+    HostName devrajm.hot.corp.google.com
+    User devrajm
+
+Host desk
+    HostName devrajm04.nyc.corp.google.com
+    User devrajm
+    RemoteForward 2224 127.0.0.1:2224
+    RemoteForward 2225 127.0.0.1:2225
+    RemoteForward 2226 127.0.0.1:2226
+    RemoteForward 2227 127.0.0.1:2227
+
+Host unlock-devrajm04.nyc.corp.google.com
+    HostName devrajm04.nyc.corp.google.com
+    User root
+    PreferredAuthentications=publickey
+    StrictHostKeyChecking=yes
+    IdentitiesOnly=yes
+    IdentityFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/id_rsa
+    UserKnownHostsFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/known_hosts
+
+Host vm
+    Hostname localhost
+    Port 27322
+    User root
+
+Host devm33
+    Hostname ssh.phx.nearlyfreespeech.net
+    User devm33_devm33

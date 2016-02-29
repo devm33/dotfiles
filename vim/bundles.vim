@@ -11,8 +11,9 @@ call vundle#rc()
 Bundle "gmarik/vundle"
 
 " General
-Bundle "editorconfig/editorconfig-vim"
 Bundle "Valloric/YouCompleteMe"
+Bundle "ctrlpvim/ctrlp.vim"
+Bundle "editorconfig/editorconfig-vim"
 Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
@@ -20,6 +21,7 @@ Bundle "scrooloose/nerdtree"
 Bundle "scrooloose/syntastic"
 Bundle "skwp/greplace.vim"
 Bundle "tomtom/tcomment_vim"
+Bundle "tpope/vim-abolish"
 Bundle "tpope/vim-fugitive"
 Bundle "tpope/vim-repeat"
 Bundle "tpope/vim-surround"
@@ -67,6 +69,7 @@ Bundle "junegunn/rainbow_parentheses.vim"
 
 " Scala
 Bundle 'derekwyatt/vim-scala'
+Bundle 'GEverding/vim-hocon'
 
 " Haskell
 Bundle "haskell.vim"

@@ -1,5 +1,9 @@
 priority -50
 
+snippet pdb "Insert debugger statement"
+import pdb; pdb.set_trace()
+endsnippet
+
 #! header
 snippet #! "Shebang header for python scripts" b
 #!/usr/bin/env python
@@ -233,6 +237,17 @@ endglobal
 ########################################
 # Class & Special Method Name Snippets #
 ########################################
+
+snippet goog "header for google python file"
+# Copyright `date +%Y` Google Inc. All Rights Reserved.
+
+`!p snip.rv = triple_quotes(snip)`${1:Docstring for module. }`!p snip.rv = triple_quotes(snip)`
+
+__author__ = [
+    '${2:devrajm@google.com (Devraj Mehta)}'
+]
+endsnippet
+
 
 snippet class "class with docstrings" b
 class ${1:MyClass}(${2:object}):
