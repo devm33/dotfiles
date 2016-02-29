@@ -132,15 +132,10 @@ function drive {
     fi
 }
 
-# Note global doesnt work for zsh, have to use specified
-# TODO readd once rebuilt
-
 # Android studio
-
 # Crow (Android emulator)
 if [ -d /google/data/ro/teams/mobile_eng_prod/crow ];
 then
-    fpath=(  /google/data/ro/teams/mobile_eng_prod/crow $fpath )
     autoload _crow
     compdef _crow /google/data/ro/teams/mobile_eng_prod/crow/crow.par
     alias crow=/google/data/ro/teams/mobile_eng_prod/crow/crow.par
