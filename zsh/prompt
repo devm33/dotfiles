@@ -99,10 +99,19 @@ output_prodaccess() {
   fi
 }
 
+# add red x to ride-side if last command failed
+_CMD_FAILED="%{$fg_bold[red]%}x%{$reset_color%} "
+cmd_failed() {
+  if [ "$1" -ne 0 ]; then
+    echo $_CMD_FAILED
+  fi
+}
+
 _1LEFT="$_USERNAME $_PATH"
-_1RIGHT='$(output_prodaccess)[%*] '
+_1RIGHT='$(cmd_failed $retval)$(output_prodaccess)[%*] '
 
 bureau_precmd () {
+  retval="$?"
   _1SPACES=`get_space $_1LEFT $_1RIGHT`
   print
   print -rP "$_1LEFT$_1SPACES$_1RIGHT"
