@@ -10,6 +10,7 @@ source $ZSH/oh-my-zsh.sh
 # prompt config
 source $HOME/.zsh/prompt
 
+# TODO path entries are not idempotent, maybe should move to zshenv
 # ensure /usr/local/bin on $PATH
 export PATH="/usr/local/bin:$PATH"
 
