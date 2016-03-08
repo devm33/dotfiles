@@ -34,8 +34,8 @@ if [ -d "$HOME/.gem/bin" ]; then
 fi
 
 # android sdk
-if [ -d "$HOME/Library/Android/sdk/tools" ]; then
-    export ANDROID_HOME="$HOME/Library/Android/sdk/tools"
+if [ -d "$HOME/Library/Android/sdk" ]; then
+    export ANDROID_HOME="$HOME/Library/Android/sdk"
     export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
 fi
 
