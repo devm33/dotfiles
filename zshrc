@@ -33,6 +33,12 @@ if [ -d "$HOME/.gem/bin" ]; then
     export PATH="$PATH:$HOME/.gem/bin"
 fi
 
+# android sdk
+if [ -d "$HOME/Library/Android/sdk/tools" ]; then
+    export ANDROID_HOME="$HOME/Library/Android/sdk/tools"
+    export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
+fi
+
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
