@@ -21,9 +21,10 @@ augroup autoformat
 augroup END
 
 " Linting
-Glug syntastic-google checkers=`{'python': 'gpylint'}`
+" Glug syntastic-google checkers=`{'python': 'gpylint'}`
 " disable import errors because gpylint fails with appengine imports
 let g:syntastic_python_gpylint_args='--disable=import-errror'
+let g:syntastic_python_checkers=['gpylint', 'flake8']
 
 " Load the G4 plugin, which allows G4MoveFile, G4Edit, G4Pending, etc.
 " Use :h g4 for more details about this plugin
