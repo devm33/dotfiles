@@ -133,6 +133,9 @@ function drive {
 }
 
 # Android studio
+# save a screenshot
+alias adb-screen='adb shell screencap -p | perl -pe \'s/\x0D\x0A/\x0A/g\' > screen.png'
+
 # Crow (Android emulator)
 if [ -d /google/data/ro/teams/mobile_eng_prod/crow ];
 then
