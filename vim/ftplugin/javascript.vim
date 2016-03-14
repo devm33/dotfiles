@@ -10,5 +10,5 @@ if filereadable('./.jslintrc')
     let g:syntastic_javascript_checkers=['jslint']
 endif
 if filereadable('./.jscsrc')
-    add(g:syntastic_javascript_checkers, 'jscs')
+    call add(g:syntastic_javascript_checkers, 'jscs')
 endif
