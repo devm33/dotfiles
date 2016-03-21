@@ -9,7 +9,8 @@ then
     alias ta="tmx -2 a -t 0|| tmx -2 new -s 0"
 else
     alias p="gcert"
-    alias ta="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmx -2 a -t 0 || tmx -2 new -s 0'"
+    alias sta="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmx -2 a -t 0 || tmx -2 new -s 0'"
+    alias ta="tmux a || tmux new"
 fi
 
 # git5
