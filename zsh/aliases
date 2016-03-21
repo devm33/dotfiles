@@ -66,6 +66,8 @@ alias npmdev='npm install --save-dev '
 
 # Bundler
 alias bx='bundle exec'
+alias js='bundle exec jekyll serve --incremental'
+
 
 # Util / Misc
 alias wmin='watch -n0.1'
