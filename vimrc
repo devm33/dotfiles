@@ -49,9 +49,9 @@ set cursorline " highlight the line we are currently on
 set autoindent
 set expandtab
 set shiftround
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 fun! ToggleTab()
     if &shiftwidth == '2'
         set tabstop=4
