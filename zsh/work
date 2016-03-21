@@ -12,6 +12,9 @@ else
     alias ta="gcertstatus -ssh_cert_comment=corp/normal -q || gcert; ssh desk -t 'tmx -2 a -t 0 || tmx -2 new -s 0'"
 fi
 
+# gosso
+alias gcurl='gosso -url'
+
 # git5
 alias g5="git5"
 alias g5e="git5 export"
