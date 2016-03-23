@@ -106,6 +106,9 @@ set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
 set formatoptions-=r " dont add comment prefix on <cr>
 
+" golang
+set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
+
 " Non-leader mappings
 nnoremap ; :
 nnoremap q; q: " much easier to hit
