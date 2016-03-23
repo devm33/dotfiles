@@ -85,5 +85,8 @@ Bundle "tpope/vim-liquid"
 " Roku Brightscript
 Bundle "chooh/brightscript.vim"
 
+" Go
+Bundle "fatih/vim-go"
+
 
 filetype plugin indent on
