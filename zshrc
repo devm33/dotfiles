@@ -79,5 +79,8 @@ if [ -n "$DISPLAY" ]; then
     export DISPLAY=:0
 fi
 
+# golang needs this
+export GOPATH="$HOME/Code/gocode"
+
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
