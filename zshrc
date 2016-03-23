@@ -82,7 +82,8 @@ fi
 # golang needs this
 if [ -d "$HOME/Code/gocode" ]; then
   export GOPATH="$HOME/Code/gocode"
-  export PATH="$PATH:$GOPATH/bin"
+  export GOBIN="$GOPATH/bin"
+  export PATH="$PATH:$GOBIN"
 fi
 
 # Go for it, it's the 60's! (disable ctrl-s freeze)
