@@ -79,5 +79,14 @@ if [ -n "$DISPLAY" ]; then
     export DISPLAY=:0
 fi
 
+# golang needs this
+if [ -d "$HOME/Code/gocode" ]; then
+  export GOPATH="$HOME/Code/gocode"
+elif [ -d "$HOME/code/gocode" ]; then
+  export GOPATH="$HOME/code/gocode"
+fi
+export GOBIN="$GOPATH/bin"
+export PATH="$PATH:$GOBIN"
+
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon

@@ -80,9 +80,13 @@ Bundle "reedes/vim-wordy"
 " Bundle "vim-pandoc/vim-pandoc"
 " Bundle "vim-pandoc/vim-pandoc-syntax"
 " bug in ftplugin with tabstop/shiftwidth Bundle "PProvost/vim-markdown-jekyll"
+Bundle "tpope/vim-liquid"
 
 " Roku Brightscript
 Bundle "chooh/brightscript.vim"
+
+" Go
+Bundle "fatih/vim-go"
 
 
 filetype plugin indent on

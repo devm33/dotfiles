@@ -40,7 +40,7 @@ set ruler " display line and col numbers in bottom right
 set wildmenu " tab complete in command line
 set wildmode=list:longest,list:full
 set lazyredraw " save some cycles: dont redraw during macros
-set list listchars=tab:»·,trail:· " show trailing whitespace
+set list listchars=tab:»·,trail:· " show trailing whitespace and tabs
 set nofoldenable " dont like code folding
 set colorcolumn=80 " draw line at 80 cols
 set cursorline " highlight the line we are currently on
@@ -105,6 +105,9 @@ set backspace=2 " help cygwin out with backspace
 set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
 set formatoptions-=r " dont add comment prefix on <cr>
+
+" golang
+set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
 
 " Non-leader mappings
 nnoremap ; :
