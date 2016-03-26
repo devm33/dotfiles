@@ -86,5 +86,11 @@ if [ -d "$HOME/Code/gocode" ]; then
   export PATH="$PATH:$GOBIN"
 fi
 
+# scala needs these
+if [ -d '/usr/local/share/scala' ]; then
+  export SCALA_HOME='/usr/local/share/scala' 
+  export PATH="$PATH:$SCALA_HOME/bin"
+fi
+
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
