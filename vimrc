@@ -29,7 +29,9 @@ fun! ToggleColor()
         colorscheme hybrid
     endif
 endf
-call ToggleColor() " set default to dark
+" set default to dark
+set background=dark
+colorscheme hybrid
 
 " UI Config
 set number " line numbers on
@@ -40,7 +42,7 @@ set ruler " display line and col numbers in bottom right
 set wildmenu " tab complete in command line
 set wildmode=list:longest,list:full
 set lazyredraw " save some cycles: dont redraw during macros
-set list listchars=tab:»·,trail:· " show trailing whitespace
+set list listchars=tab:»·,trail:· " show trailing whitespace and tabs
 set nofoldenable " dont like code folding
 set colorcolumn=80 " draw line at 80 cols
 set cursorline " highlight the line we are currently on
@@ -233,12 +235,14 @@ nnoremap <leader>vt :w<CR>:!tmux source-file ~/.tmux.conf<CR>
 augroup sourcereload
   autocmd!
   autocmd BufWritePost $MYVIMRC source $MYVIMRC
+  autocmd BufWritePost vimrc source $MYVIMRC
   autocmd BufWritePost *.vim source $MYVIMRC
   autocmd BufWritePost .tmux.conf :!tmux source-file ~/.tmux.conf
 augroup END
 
 " Using vundle
-nnoremap <leader>vi :w<CR>:so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
+nnoremap <leader>vi :so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
+nnoremap <leader>vu :so $MYVIMRC<CR>:PluginClean<CR>:PluginUpdate<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>

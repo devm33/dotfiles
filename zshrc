@@ -82,9 +82,11 @@ fi
 # golang needs this
 if [ -d "$HOME/Code/gocode" ]; then
   export GOPATH="$HOME/Code/gocode"
-  export GOBIN="$GOPATH/bin"
-  export PATH="$PATH:$GOBIN"
+elif [ -d "$HOME/code/gocode" ]; then
+  export GOPATH="$HOME/code/gocode"
 fi
+export GOBIN="$GOPATH/bin"
+export PATH="$PATH:$GOBIN"
 
 # scala needs these
 if [ -d '/usr/local/share/scala' ]; then
