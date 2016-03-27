@@ -171,7 +171,7 @@ if [ -d /usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts ]
 then
     export PATH="$PATH:/usr/local/google/home/devrajm/code/src_mdialog/sandbox/shell_scripts"
 fi
-if [ -d $HOME/lib/md ]; then
+if [ -d $HOME/code/mdtool ]; then
     alias vn='vim $HOME/code/mdtool/networks.py'
 fi
 if [ -d /usr/local/google/home/devrajm/code/cbsnmon ]; then
