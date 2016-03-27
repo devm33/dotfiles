@@ -197,6 +197,7 @@ function! PushIt()
     Gpush
 endfunction
 command! PushIt call PushIt()
+nnoremap <leader>cc :PushIt<cr>
 
 " For vimdiff
 nnoremap <leader>1 :diffget LOCAL<cr>
@@ -252,7 +253,7 @@ nnoremap <leader>qa :qall<CR>
 noremap <leader><leader>q :q!<CR>
 
 " Close the quickfix list and loc list
-nnoremap <leader>c :ccl <bar> lcl<cr>
+nnoremap <leader>lc :ccl <bar> lcl<cr>
 
 " Run current file
 nnoremap <leader>x :!./%<cr>
