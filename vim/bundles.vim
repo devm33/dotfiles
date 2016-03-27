@@ -10,8 +10,12 @@ call vundle#rc()
 " Let Vundle manage Vundle
 Bundle "gmarik/vundle"
 
+" only not on google
+if !filereadable('/usr/share/vim/google/google.vim')
+    Bundle "Valloric/YouCompleteMe"
+endif
+
 " General
-Bundle "Valloric/YouCompleteMe"
 Bundle "ctrlpvim/ctrlp.vim"
 Bundle "editorconfig/editorconfig-vim"
 Bundle "flazz/vim-colorschemes"
