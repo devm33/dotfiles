@@ -34,10 +34,16 @@
 [fetch]
     prune = true
 [http]
-    cookiefile = /usr/local/google/home/devrajm/.gitcookies
+    cookiefile = $HOME/.gitcookies
 [url "sso://user/devrajm/"]
     insteadof = my:
 [web]
     browser = chropen
 [browser "chropen"]
     cmd = chropen
+[alias]
+gerrit-init = "!f() { \
+  curl -sSLo `git rev-parse --git-dir`/hooks/commit-msg \
+      https://gerrit-review.googlesource.com/tools/hooks/commit-msg && \
+  chmod +x `git rev-parse --git-dir`/hooks/commit-msg; \
+}; f"
