@@ -7,7 +7,7 @@ fun! FirstRunOnEnter()
     let oldpath = getcwd()
     execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
     " NOTE this need cmake to be installed
-    silent !./install.sh
+    silent !./install.py
     execute "cd ../tern_for_vim"
     silent !npm install
     execute "cd " . oldpath
