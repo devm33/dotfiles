@@ -3,6 +3,8 @@ filetype off
 source /usr/share/vim/google/google.vim
 filetype plugin indent on
 
+Glug youcompleteme-google
+
 Glug blaze plugin[mappings]='<leader>b'
 Glug codefmt
 Glug codefmt-google

@@ -1,15 +1,23 @@
 " Determines if this is the first time vimrc has been loaded and if so
-" installs dependencies.
+" installs some dependencies.
+" NOTE: Things will fail if missing:
+" - homebrew
+" - npm/node
+" - python
 
 fun! FirstRunOnEnter()
     PluginInstall
     source $MYVIMRC
     let oldpath = getcwd()
     execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
-    " NOTE this need cmake to be installed
-    silent !./install.py
-    execute "cd ../tern_for_vim"
-    silent !npm install
+    if s:uname == "Darwin"
+      silent !xcode-select --install
+      silent !brew install cmake
+    else
+      " assuming ubuntu/debian
+      silent !sudo apt-get install cmake build-essential python-dev python3-dev
+    endif
+    silent !./install.py --gocode-completer --tern-completer
     execute "cd " . oldpath
 endf
 

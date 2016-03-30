@@ -10,15 +10,19 @@ call vundle#rc()
 " Let Vundle manage Vundle
 Bundle "gmarik/vundle"
 
+" only not on google
+if !filereadable('/usr/share/vim/google/google.vim')
+    Bundle "Valloric/YouCompleteMe"
+endif
+
 " General
-Bundle "Valloric/YouCompleteMe"
 Bundle "ctrlpvim/ctrlp.vim"
 Bundle "editorconfig/editorconfig-vim"
 Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
 Bundle "scrooloose/nerdtree"
-" Bundle "scrooloose/syntastic"
+Bundle "scrooloose/syntastic"
 Bundle "skwp/greplace.vim"
 Bundle "tomtom/tcomment_vim"
 Bundle "tpope/vim-abolish"
@@ -30,7 +34,6 @@ Bundle "tpope/vim-unimpaired"
 Bundle "sirver/ultisnips"
 
 " Javascript
-Bundle "marijnh/tern_for_vim"
 Bundle "pangloss/vim-javascript"
 Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
