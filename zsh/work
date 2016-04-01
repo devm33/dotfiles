@@ -25,8 +25,8 @@ function gob-new {
 }
 
 function gob-desc {
-    read -p "repo name:   " repo
-    read -p "description: " desc
+    read 'repo?repo name:   '
+    read 'desc?description: '
     gob-ctl <<EOF
 update {
     repo: "user/$USER/$repo"
