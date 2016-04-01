@@ -16,6 +16,12 @@ fi
 # gosso
 alias gcurl='gosso -url'
 
+# git-on-borg
+alias gob-new() {
+    gob-ctl create "user/$USER/$1"
+    gob-ctl acl "user/$USER/$1" -reader all_users
+}
+
 # git5
 alias g5="git5"
 alias g5e="git5 export"
