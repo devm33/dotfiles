@@ -23,6 +23,10 @@ path() {
     echo "${PATH//:/\n}"
 }
 
+# apt
+alias acs='apt-cache search'
+alias aci='apt-cache show'
+
 # Show contents of directory after cd-ing into it
 chpwd() {
   if [ -d .git ]; then
