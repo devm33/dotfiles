@@ -80,10 +80,9 @@ if [ -n "$DISPLAY" ]; then
 fi
 
 # golang needs this
+export GOPATH="$HOME/code/gocode"
 if [ -d "$HOME/Code/gocode" ]; then
   export GOPATH="$HOME/Code/gocode"
-elif [ -d "$HOME/code/gocode" ]; then
-  export GOPATH="$HOME/code/gocode"
 fi
 export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
