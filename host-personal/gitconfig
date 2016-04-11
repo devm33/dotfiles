@@ -1,6 +1,7 @@
 [user]
     name = Devraj Mehta
     email = devm33@gmail.com
+	signingkey = C4A21F02
 [core]
     text = auto
     excludesfile = ~/.gitignore
