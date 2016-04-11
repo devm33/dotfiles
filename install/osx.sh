@@ -21,12 +21,12 @@ make && \
 sudo make install
 
 cd $HOME
-echo -n 'Use hostname [p]ersonal or [D]efault'
+echo -n 'Enter w to use hostname work instead of default'
 read host
-if [ "$host" == "p" ]; then
-    ln -s .dotfiles/host-personal/rcrc .rcrc
-else
+if [ "$host" == "w" ]; then
     ln -s .dotfiles/host-work/rcrc .rcrc
+else
+    ln -s .dotfiles/host-personal/rcrc .rcrc
 fi
 rcup -v
 
