@@ -26,7 +26,7 @@ read host
 if [ "$host" == "p" ]; then
     ln -s .dotfiles/host-personal/rcrc .rcrc
 else
-    ln -s .dotfiles/rcrc .rcrc
+    ln -s .dotfiles/host-work/rcrc .rcrc
 fi
 rcup -v
 

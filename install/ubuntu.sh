@@ -21,7 +21,13 @@ make && \
 sudo make install
 
 cd $HOME
-ln -s .dotfiles/rcrc .rcrc
+echo -n 'Use hostname [p]ersonal or [D]efault'
+read host
+if [ "$host" == "p" ]; then
+    ln -s .dotfiles/host-personal/rcrc .rcrc
+else
+    ln -s .dotfiles/host-work/rcrc .rcrc
+fi
 rcup -v
 
 
