@@ -34,7 +34,7 @@
 [fetch]
     prune = true
 [http]
-	cookiefile = /usr/local/google/home/devrajm/.gitcookies
+    cookiefile = /usr/local/google/home/devrajm/.gitcookies
 [url "sso://user/devrajm/"]
     insteadof = my:
 [web]
