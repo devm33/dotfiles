@@ -125,8 +125,14 @@ alias gpr='git remote prune origin'
 alias gra='git remote add'
 alias gmm='git merge master'
 alias gwc='git whatchanged -p'
-
+alias gcX='git clean -dfX'
 alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
+
+git_commit_all_message() {
+    git commit -a -m "$@"
+}
+alias gcam=git_commit_all_message
+
 
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
