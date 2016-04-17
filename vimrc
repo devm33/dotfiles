@@ -124,10 +124,8 @@ vnoremap // y/<C-R>"<CR>
 inoremap jk <esc>
 " note maybe remove kj
 inoremap kj <esc>:w<cr>
-inoremap <C-d> <esc>:w<CR>:e %:p:h<CR>
 inoremap <C-c> <esc>:x<CR>
 nnoremap <C-c> :x<CR>
-nnoremap <C-d> :w<CR>:e %:p:h<CR>
 
 " Leader mappings (use :map <leader> to see all mappings in order)
 
