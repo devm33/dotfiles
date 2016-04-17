@@ -24,7 +24,13 @@ cd $HOME
 echo -n 'Enter w to use hostname work instead of default'
 read host
 if [ "$host" == "w" ]; then
-    ln -s .dotfiles/host-work/rcrc .rcrc
+    echo -n 'Enter m for gmac otherwise using goobuntu'
+    read os
+    if [ "$os" == "m" ]; then
+        ln -s .dotfiles/host-gmac/rcrc .rcrc
+    else
+        ln -s .dotfiles/host-work/rcrc .rcrc
+    fi
 else
     ln -s .dotfiles/host-personal/rcrc .rcrc
 fi
