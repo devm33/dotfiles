@@ -129,7 +129,8 @@ alias gcX='git clean -dfX'
 alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
 
 git_commit_all_message() {
-    git commit -a -m "$@"
+    git add -A
+    git commit -m "$*"
 }
 alias gcam=git_commit_all_message
 
