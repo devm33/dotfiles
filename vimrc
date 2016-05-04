@@ -161,11 +161,11 @@ nnoremap <leader>} :tabm +1<CR>
 nnoremap <leader>T :tabc<CR>
 
 " File nav
-nnoremap <leader>f :NERDTreeToggle<CR>
-nnoremap <leader>F :NERDTreeFind<CR>
+nnoremap <leader>f :CtrlPBufTag<CR>
+nnoremap <leader>F :CtrlPBufTagAll<CR>
 nnoremap <leader>d :e %:p:h<CR>
 nnoremap <leader>D :e .<CR>
-nnoremap <leader>o :e **/*
+nnoremap <leader>o :CtrlP
 nnoremap <leader>O :tabe **/*
 
 " File search
@@ -245,10 +245,9 @@ nnoremap <leader>vu :so $MYVIMRC<CR>:PluginClean<CR>:PluginUpdate<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
+nnoremap <leader>q :w<CR>:bd<CR>
 nnoremap <leader><esc> :qall<CR>
 nnoremap <leader>qa :qall<CR>
-noremap <leader><leader>q :q!<CR>
 
 " Close the quickfix list and loc list
 nnoremap <leader>lc :ccl <bar> lcl<cr>
