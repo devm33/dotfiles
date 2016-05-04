@@ -51,8 +51,10 @@ Bundle "hail2u/vim-css3-syntax"
 Bundle "groenewege/vim-less"
 
 " Python
-" Bundle "davidhalter/jedi-vim" " trying out ycm instead
+" trying out ycm instead
+" Bundle "davidhalter/jedi-vim"
 " Bundle "klen/python-mode"
+Bundle "Glench/Vim-Jinja2-Syntax"
 
 " Ruby
 " HAML
