@@ -245,9 +245,8 @@ nnoremap <leader>vu :so $MYVIMRC<CR>:PluginClean<CR>:PluginUpdate<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>
-nnoremap <leader>q :w<CR>:bd<CR>
+nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
-nnoremap <leader>qa :qall<CR>
 
 " Close the quickfix list and loc list
 nnoremap <leader>lc :ccl <bar> lcl<cr>
