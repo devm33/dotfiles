@@ -19,7 +19,8 @@ endif
 Bundle "ctrlpvim/ctrlp.vim"
 Bundle "editorconfig/editorconfig-vim"
 Bundle "flazz/vim-colorschemes"
-Bundle "ldx/vim-indentfinder"
+" not sure this is accurate enough to be worth it
+" Bundle "ldx/vim-indentfinder"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "rking/ag.vim"
 Bundle "scrooloose/nerdtree"
