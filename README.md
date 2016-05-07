@@ -63,8 +63,12 @@ Dependencies:
 -   cmake
 -   vim needs to be >7.4 (use brew on mac)
 
-Install: - open vim and press enter to ignore warnings - the vim install script
-should do the rest: - download and install bundles - compile tern and ycm
+Install:
+
+-   open vim and press enter to ignore warnings
+-   the vim install script should do the rest:
+    -   download and install bundles
+    -   compile tern and ycm
 
 [![ghit.me](https://ghit.me/badge.svg?repo=devm33/dotfiles)]
 (https://ghit.me/repo/devm33/dotfiles)
