@@ -19,9 +19,14 @@ alias gcurl='gosso -url'
 # gob git-on-borg
 
 function gob-new {
-    gob-ctl create "user/$USER/$1"
-    gob-ctl acl "user/$USER/$1" -reader all_users
-    git clone "sso://user/$USER/$1"
+    if [ "$1" ]; then
+        gob-ctl create "user/$USER/$1"
+        gob-ctl acl "user/$USER/$1" -reader all_users
+        git clone "sso://user/$USER/$1"
+        cd $1
+    else
+        echo "Specify name of repo to create"
+    fi
 }
 
 function gob-desc {
