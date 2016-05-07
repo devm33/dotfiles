@@ -20,18 +20,28 @@ alias gcurl='gosso -url'
 
 function gob-new {
     if [ "$1" ]; then
-        gob-ctl create "user/$USER/$1"
-        gob-ctl acl "user/$USER/$1" -reader all_users
-        git clone "sso://user/$USER/$1"
-        cd $1
+        repo="$1"
     else
-        echo "Specify name of repo to create"
+        read 'repo?repo name: '
     fi
+    gob-ctl create "user/$USER/$repo"
+    gob-ctl acl "user/$USER/$repo" -reader all_users
+    git clone "sso://user/$USER/$repo"
+    cd "$repo"
+    gob-desc "$repo"
 }
 
 function gob-desc {
-    read 'repo?repo name:   '
-    read 'desc?description: '
+    if [ "$1" ]; then
+        repo="$1"
+    else
+        read 'repo?repo name:   '
+    fi
+    if [ "$2" ]; then
+        desc="${*:2}"
+    else
+        read 'desc?description: '
+    fi
     gob-ctl <<EOF
 update {
     repo: "user/$USER/$repo"
