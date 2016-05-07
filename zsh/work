@@ -19,11 +19,7 @@ alias gcurl='gosso -url'
 # gob git-on-borg
 
 function gob-new {
-    if [ "$1" ]; then
-        repo="$1"
-    else
-        read 'repo?repo name: '
-    fi
+    if [ "$1" ]; then repo="$1"; else read 'repo?repo name: '; fi
     gob-ctl create "user/$USER/$repo"
     gob-ctl acl "user/$USER/$repo" -reader all_users
     git clone "sso://user/$USER/$repo"
@@ -32,16 +28,8 @@ function gob-new {
 }
 
 function gob-desc {
-    if [ "$1" ]; then
-        repo="$1"
-    else
-        read 'repo?repo name:   '
-    fi
-    if [ "$2" ]; then
-        desc="${*:2}"
-    else
-        read 'desc?description: '
-    fi
+    if [ "$1" ]; then repo="$1"; else read 'repo?repo name:   '; fi
+    if [ "$2" ]; then desc="${*:2}"; else read 'desc?description: '; fi
     gob-ctl <<EOF
 update {
     repo: "user/$USER/$repo"
