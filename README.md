@@ -12,12 +12,23 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
 -   Add a github authorized ssh key
 -   Then run the script tailored to the environment
 
+    -   For Ubuntu-like environments:
+
     ```bash
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/ubuntu.sh)"
     ```
 
+    -   For OSX:
+
     ```bash
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/osx.sh)"
+    ```
+
+    -   For generic posix environment, where post-install of dependencies is
+        done manually:
+
+    ```bash
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)"
     ```
 
 ## Detailed Installation
@@ -53,7 +64,13 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
     https://github.com/thoughtbot/rcm#installation Note: can also be installed
     through brew formula
 
--   run `rcup -v` from $HOME
+-   Link the right rcrc config file for the host, e.g.
+
+    ```
+    ln -s .dotfiles/host-personal/rcrc .rcrc
+    ```
+
+-   run `rcup -v` from `$HOME`
 
 ### Vim Specific Post-Install
 
