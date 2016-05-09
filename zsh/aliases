@@ -270,18 +270,16 @@ alias s.z='source $HOME/.zshrc'
 dotup () {
     pushd ~/.dotfiles
     git pull
+    if [ "$1" ]; then
+        git commit -v -a
+        git push
+    fi
     rcup -v
     . ~/.zshrc
     popd
 }
 
-dotca () {
-    pushd ~/.dotfiles
-    git pull
-    git commit -v -a
-    git push
-    popd
-}
+alias dotca='dotup 1'
 
 dotall () {
     if [ ! -r ~/.rcrc ]; then
