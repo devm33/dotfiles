@@ -268,8 +268,7 @@ alias curlvl='curl -vL'
 alias s.z='source $HOME/.zshrc'
 
 dotup () {
-    pushd .
-    cd ~/.dotfiles
+    pushd ~/.dotfiles
     git pull
     rcup -v
     . ~/.zshrc
@@ -277,9 +276,40 @@ dotup () {
 }
 
 dotca () {
-    pushd .
-    cd ~/.dotfiles
+    pushd ~/.dotfiles
+    git pull
     git commit -v -a
     git push
     popd
 }
+
+dotupall () {
+    if [ ! -r ~/.rcrc ]; then
+        dotup
+        return
+    fi
+    for df in `sed -n 's/DOTFILES_DIRS="\(.*\)"/\1/p' ~/.rcrc`; do
+        pushd $df
+        git pull
+        popd
+    done
+    rcup -v
+}
+
+dotcall () {
+    if [ ! -r ~/.rcrc ]; then
+        dotup
+        return
+    fi
+    for df in `sed -n 's/DOTFILES_DIRS="\(.*\)"/\1/p' ~/.rcrc`; do
+        pushd $df
+        git pull
+        git commit -v -a
+        git push
+        popd
+    done
+}
+
+
+
+
