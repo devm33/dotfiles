@@ -265,8 +265,6 @@ alias curll='curl -L'
 alias curlvl='curl -vL'
 
 # Functions to help manage dotfiles
-alias s.z='source $HOME/.zshrc'
-
 dotup () {
     pushd ~/.dotfiles
     git pull
