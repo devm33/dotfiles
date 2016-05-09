@@ -283,33 +283,22 @@ dotca () {
     popd
 }
 
-dotupall () {
+dotall () {
     if [ ! -r ~/.rcrc ]; then
-        dotup
+        if [ "$1" ]; then dotca; else dotup; fi
         return
     fi
-    for df in `sed -n 's/DOTFILES_DIRS="\(.*\)"/\1/p' ~/.rcrc`; do
+    for d in `sed -n 's/DOTFILES_DIRS="\(.*\)"/\1/p' ~/.rcrc`; do
+        eval df=$d
         pushd $df
         git pull
+        if [ "$1" ]; then
+            git commit -v -a
+            git push
+        fi
         popd
     done
     rcup -v
 }
 
-dotcall () {
-    if [ ! -r ~/.rcrc ]; then
-        dotup
-        return
-    fi
-    for df in `sed -n 's/DOTFILES_DIRS="\(.*\)"/\1/p' ~/.rcrc`; do
-        pushd $df
-        git pull
-        git commit -v -a
-        git push
-        popd
-    done
-}
-
-
-
-
+alias dotcall='dotall 1'
