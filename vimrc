@@ -10,7 +10,7 @@ source ~/.vim/bootstrap.vim
 source ~/.vim/bundles.vim
 
 " Load google plugins on goobuntu
-if filereadable('/usr/share/vim/google/google.vim')
+if filereadable(expand('~/.vim/google.vim'))
     source ~/.vim/google.vim
 endif
 

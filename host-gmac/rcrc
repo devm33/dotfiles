@@ -1,0 +1,3 @@
+DOTFILES_DIRS="$HOME/.dotfiles $HOME/code/dotfiles"
+EXCLUDES="README.md git install"
+HOSTNAME="gmac"
