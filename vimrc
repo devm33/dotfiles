@@ -122,8 +122,7 @@ vnoremap // y/<C-R>"<CR>
 
 " Saving and Exiting
 inoremap jk <esc>
-" note maybe remove kj
-inoremap kj <esc>:w<cr>
+inoremap jj <esc>:w<cr>
 inoremap <C-c> <esc>:x<CR>
 nnoremap <C-c> :x<CR>
 
