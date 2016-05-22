@@ -9,6 +9,7 @@ alias mmv='noglob zmv -W'
 
 # edit tmux conf
 alias vt='vim ~/.dotfiles/tmux.conf'
+alias ta='tmux attach || tmux'
 
 # ls
 alias lh='ls -lsh'
