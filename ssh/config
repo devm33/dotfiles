@@ -1,7 +1,7 @@
 PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
 
 Host ttb
-    HostName 10.10.0.1
+    HostName 100.100.41.163
     User videolab
 
 Host ubi
