@@ -4,6 +4,10 @@ Host ttb
     HostName 100.100.41.163
     User videolab
 
+Host webspy
+    HostName 10.10.0.1
+    User videolab
+
 Host ubi
     HostName devrajm.hot.corp.google.com
     User devrajm
