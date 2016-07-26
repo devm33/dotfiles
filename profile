@@ -17,3 +17,5 @@ then
 
     export STUDIO_VM_OPTIONS='/usr/local/google/home/devrajm/.studio64.vmoptions'
 fi
+
+export IBUS_ENABLE_SYNC_MODE=1
