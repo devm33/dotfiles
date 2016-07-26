@@ -219,7 +219,7 @@ nnoremap <leader>bc :call PropagatePasteBufferToOSX()<cr>
 vnoremap <leader>bc y:call PropagatePasteBufferToOSX()<cr>
 
 " Open file in browser
-nnoremap <leader>co :!google-chrome '%'<CR>
+nnoremap <leader>co :!chropen '%'<CR>
 " on macosx
 nnoremap <leader>mo :!open '%'<CR>
 
