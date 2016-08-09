@@ -74,6 +74,11 @@ if [[  "$(uname -s)" == CYGWIN* ]]; then
     fi
 fi
 
+# "cross-os" support
+if [[ "$(uname -s)" == Darwin ]]; then
+    alias xdg-open=open
+fi
+
 # tmux unsets this and then xclip gets confused
 if [ -n "$DISPLAY" ]; then
     export DISPLAY=:0
