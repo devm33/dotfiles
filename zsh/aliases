@@ -103,6 +103,13 @@ alias cop=chrome_pipe
 alias json='python -mjson.tool'
 alias ipy='ipython'
 
+encode() {
+    echo "$1" | base64
+}
+decode() {
+    echo "$1" | base64 --decode
+}
+
 markdown_preview() {
     TMPFILE="/tmp/$1.html"
     pandoc -o $TMPFILE "$1" && xdg-open $TMPFILE
