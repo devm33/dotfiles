@@ -1,5 +1,9 @@
 PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
 
+Host webspy-chel
+  HostName webspy-chel.hot.corp.google.com
+  User devrajm
+
 Host ttb
     HostName 100.100.41.163
     User videolab
