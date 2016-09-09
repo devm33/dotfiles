@@ -5,7 +5,7 @@ Host webspy-chel
   User devrajm
 
 Host ttb
-    HostName 100.100.41.163
+    HostName 172.26.0.117
     User videolab
 
 Host webspy
