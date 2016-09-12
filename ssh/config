@@ -4,8 +4,12 @@ Host webspy-chel
   HostName webspy-chel.hot.corp.google.com
   User devrajm
 
+Host webspy-nyc
+  HostName webspy-nyc-chel.nyc.corp.google.com
+  User videolab
+
 Host ttb
-    HostName 100.100.41.163
+    HostName 100.115.20.1
     User videolab
 
 Host webspy
