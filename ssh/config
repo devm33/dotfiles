@@ -1,4 +1,7 @@
 PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
+ServerAliveInterval 30
+ServerAliveCountMax 6
+TCPKeepAlive no
 
 Host webspy-chel
   HostName webspy-chel.hot.corp.google.com
@@ -27,15 +30,6 @@ Host desk
     RemoteForward 2225 127.0.0.1:2225
     RemoteForward 2226 127.0.0.1:2226
     RemoteForward 2227 127.0.0.1:2227
-
-Host unlock-devrajm04.nyc.corp.google.com
-    HostName devrajm04.nyc.corp.google.com
-    User root
-    PreferredAuthentications=publickey
-    StrictHostKeyChecking=yes
-    IdentitiesOnly=yes
-    IdentityFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/id_rsa
-    UserKnownHostsFile /Users/devrajm/.ssh/devrajm04.nyc.corp.google.com/known_hosts
 
 Host vm
     Hostname localhost
