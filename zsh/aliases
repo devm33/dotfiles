@@ -280,6 +280,7 @@ function server() {
     # npm install -g statik
     statik --port "$port" .
 }
+alias serve=server
 
 # Functions to help manage dotfiles
 dotup () {
