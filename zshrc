@@ -100,3 +100,13 @@ fi
 
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f /usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc ]; then
+  source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/path.zsh.inc'
+fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f /usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc ]; then
+  source '/usr/local/google/home/devrajm/lib/google-cloud-sdk/completion.zsh.inc'
+fi
