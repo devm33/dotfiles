@@ -112,6 +112,6 @@ if [ -f "$HOME/lib/google-cloud-sdk/completion.zsh.inc" ]; then
 fi
 # Also add the appengine go sdk to the path if found
 if [ -d "$HOME/lib/go_appengine" ]; then
-  export PATH="$PATH:$HOME/lib/go_appengine/"
+  export PATH="$PATH:$HOME/lib/go_appengine"
   export GOROOT="$HOME/lib/go_appengine/goroot"
 fi
