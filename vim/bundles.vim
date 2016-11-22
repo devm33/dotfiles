@@ -39,6 +39,10 @@ Bundle "sirver/ultisnips"
 Bundle "pangloss/vim-javascript"
 Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
+" Typescript
+Plugin 'Shougo/vimproc.vim'          " Force install a dependency of tsuquyomi.
+Plugin 'leafgarland/typescript-vim'  " enables TypeScript syntax-highlighting.
+Plugin 'Quramy/tsuquyomi'            " enables TypeScript auto-completion.
 " JSON
 Bundle "elzr/vim-json"
 
