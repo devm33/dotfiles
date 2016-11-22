@@ -7,7 +7,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Actions.GridSelect
 import XMonad.Actions.CycleWS
 -- import XMonad.Actions.Navigation2D
-import XMonad.Util.EZConfig (additionalKeysP)
+import XMonad.Util.EZConfig (additionalKeysP, additionalMouseBindings)
 import XMonad.Config.Gnome
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.SetWMName
@@ -48,8 +48,8 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
                                -- , fullscreenEventHook
                                ]
 
--- custom key bindings
-} `additionalKeysP` myKeys
+-- custom key bindings and mouse bindings
+} `additionalKeysP` myKeys `additionalMouseBindings` myButtons
 
 myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-n", sendMessage NextLayout)
@@ -81,6 +81,8 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-=", spawn "amixer -D pulse set Master 5%+")
          , ("M--", spawn "amixer -D pulse set Master 5%-")
          ]
+
+myButtons = [((0, 10), (\_ -> toggleWS))]
 
 onScreen d f = do mws <- screenWorkspace d
                   case mws of

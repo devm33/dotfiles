@@ -100,3 +100,18 @@ fi
 
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
+
+# Load the google cloud sdk
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f "$HOME/lib/google-cloud-sdk/path.zsh.inc" ]; then
+  source "$HOME/lib/google-cloud-sdk/path.zsh.inc"
+fi
+# The next line enables shell command completion for gcloud.
+if [ -f "$HOME/lib/google-cloud-sdk/completion.zsh.inc" ]; then
+  source "$HOME/lib/google-cloud-sdk/completion.zsh.inc"
+fi
+# Also add the appengine go sdk to the path if found
+if [ -d "$HOME/lib/go_appengine" ]; then
+  export PATH="$PATH:$HOME/lib/go_appengine"
+  export GOROOT="$HOME/lib/go_appengine/goroot"
+fi
