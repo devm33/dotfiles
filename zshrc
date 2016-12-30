@@ -4,7 +4,11 @@ ZSH_THEME="" # using zsh/prompt instead
 DISABLE_AUTO_UPDATE="true"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
-plugins=(git vagrant debian npm node pip django bundler brew)
+if [[ "$(uname -s)" == Darwin ]]; then
+    plugins=(git vagrant npm node pip django bundler brew)
+else
+    plugins=(git vagrant debian npm node pip django bundler)
+fi
 source $ZSH/oh-my-zsh.sh
 
 # prompt config
