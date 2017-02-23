@@ -11,6 +11,10 @@ Host webspy-nyc
   HostName webspy-nyc-chel.nyc.corp.google.com
   User videolab
 
+Host webspy-lss
+  HostName webspy-lss.mtv.corp.google.com
+  User vsc
+
 Host ttb
     HostName 100.115.20.1
     User videolab
