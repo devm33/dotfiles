@@ -150,7 +150,7 @@ alias gbDa='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*
 # Overwrite alias of ag btw omz debian plugin to use for silver searcher
 if [ -e /usr/bin/ag ];
 then
-    unalias ag
+    unalias ag 2>/dev/null
     alias Ag=ag
 else
     # on osx brew installs ag as Ag
