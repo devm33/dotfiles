@@ -11,7 +11,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/i
 
 # Ubuntu Specific post install
 
-sudo apt-get install --yes nodejs npm cmake
+sudo apt-get install --yes nodejs npm cmake tmux
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 
 
