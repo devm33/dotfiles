@@ -100,8 +100,15 @@ chrome_pipe() {
     co "$url"
 }
 alias cop=chrome_pipe
-alias json='python -mjson.tool'
 alias ipy='ipython'
+
+json() {
+    if [ "$1" ]; then
+        python -c "import sys,json; print json.load(sys.stdin)[\"$1\"]"
+    else
+        python -mjson.tool
+    fi
+}
 
 encode() {
     echo "$1" | base64
