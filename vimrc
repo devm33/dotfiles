@@ -29,6 +29,7 @@ fun! ToggleColor()
         colorscheme hybrid
     endif
 endf
+command! ToggleColor call ToggleColor()
 " set default to dark
 set background=dark
 colorscheme hybrid
