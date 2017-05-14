@@ -87,5 +87,4 @@ Install:
     -   download and install bundles
     -   compile tern and ycm
 
-[![ghit.me](https://ghit.me/badge.svg?repo=devm33/dotfiles)]
-(https://ghit.me/repo/devm33/dotfiles)
+[![ghit.me](https://ghit.me/badge.svg?repo=devm33/dotfiles)](https://ghit.me/repo/devm33/dotfiles)
