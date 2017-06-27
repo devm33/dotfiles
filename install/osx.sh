@@ -18,3 +18,5 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 
 brew install node
 brew install cmake
+brew install ffmpeg
+brew install vim
