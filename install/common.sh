@@ -5,7 +5,12 @@
 
 cd $HOME
 
-git clone git@github.com:devm33/dotfiles.git .dotfiles
+if git clone git@github.com:devm33/dotfiles.git .dotfiles ; then
+    echo "succesfully cloned config repo"
+else
+    echo "failed to clone config repo, make sure you have a ssh key authorized on github"
+    exit 1
+fi
 
 git clone git@github.com:robbyrussell/oh-my-zsh.git .oh-my-zsh
 
