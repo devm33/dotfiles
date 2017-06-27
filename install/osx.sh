@@ -10,7 +10,7 @@ sudo xcodebuild -license
 
 # Install common components
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
 
 # OSX Specific post install
 
