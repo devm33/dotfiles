@@ -5,6 +5,9 @@
 
 # before running ensure that there is a valid ssh key authorized for github
 
+# ensure dev tools setup
+sudo xcodebuild -license
+
 # Install common components
 
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)"
