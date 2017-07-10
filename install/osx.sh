@@ -16,6 +16,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/i
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+sudo chown $USERNAME /usr/local/bin
+sudo chown $USERNAME /usr/local/share
+
 brew install node
 brew install cmake
 brew install ffmpeg
