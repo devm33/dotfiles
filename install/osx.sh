@@ -20,3 +20,4 @@ brew install node
 brew install cmake
 brew install ffmpeg
 brew install vim
+brew install tmux
