@@ -18,6 +18,7 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 
 sudo chown $USERNAME /usr/local/bin
 sudo chown $USERNAME /usr/local/share
+sudo chown $USERNAME /usr/local/etc
 
 brew install node
 brew install cmake
