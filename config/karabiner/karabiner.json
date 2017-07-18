@@ -7,6 +7,9 @@
     "profiles": [
         {
             "complex_modifications": {
+                "parameters": {
+                    "basic.to_if_alone_timeout_milliseconds": 1000
+                },
                 "rules": [
                     {
                         "manipulators": [
@@ -28,6 +31,16 @@
                                             "left_control",
                                             "left_option"
                                         ]
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "escape",
+                                        "modifiers": {
+                                            "optional": [
+                                                "any"
+                                            ]
+                                        }
                                     }
                                 ],
                                 "type": "basic"
