@@ -3,7 +3,7 @@ ServerAliveInterval 30
 ServerAliveCountMax 6
 TCPKeepAlive no
 
-Match *.corp.google.com
+Match host *.corp.google.com
 ProxyCommand /usr/local/bin/corp-ssh-helper %h %p
 
 Host webspy-chel
