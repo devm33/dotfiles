@@ -88,7 +88,7 @@ else
     alias xo='open'
     alias copy='pbcopy'
 fi
-if [ -e '/Applications/Google\ Chrome.app' ]; then
+if [ -e '/Applications/Google Chrome.app' ]; then
     alias co='open -a /Applications/Google\ Chrome.app'
 elif [ -n "$SSH_CONNECTION" ]; then
     alias co='chropen-remote'
