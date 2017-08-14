@@ -26,3 +26,4 @@ brew install ffmpeg
 brew install vim
 brew install tmux
 brew install ag
+brew install reattach-to-user-namespace
