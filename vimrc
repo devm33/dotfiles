@@ -75,6 +75,7 @@ set splitbelow " and bottom, which feels more natural
 " File writing
 set nobackup
 set nowritebackup
+set backupcopy=yes
 set noswapfile
 set autoread
 set autowriteall
