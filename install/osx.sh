@@ -6,7 +6,7 @@
 # before running ensure that there is a valid ssh key authorized for github
 
 # ensure dev tools setup
-sudo xcodebuild -license
+sudo xcodebuild -license || exit
 
 # Install common components
 
