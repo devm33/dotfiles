@@ -48,6 +48,7 @@ if [ -d "$HOME/Library/Android/sdk" ]; then
 fi
 if [ -d "$HOME/lib/android/sdk" ]; then
     export ANDROID_HOME="$HOME/lib/android/sdk"
+    export ANDROID_SDK_HOME="$HOME/lib/android/sdk"
     export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
 fi
 
