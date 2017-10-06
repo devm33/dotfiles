@@ -73,8 +73,10 @@ set splitright " Open new split panes to right
 set splitbelow " and bottom, which feels more natural
 
 " File writing
+command! W w
 set nobackup
 set nowritebackup
+set backupcopy=yes
 set noswapfile
 set autoread
 set autowriteall
