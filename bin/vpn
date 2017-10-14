@@ -1,0 +1,26 @@
+#!/bin/bash
+
+STORAGE="$HOME/Movies/"
+
+mkdir -p $STORAGE
+
+source $HOME/.pia_credentials
+
+docker kill vpn
+docker rm vpn
+
+docker run \
+  --name=vpn \
+  --cap-add=NET_ADMIN \
+  --device=/dev/net/tun -d \
+  --dns 8.8.8.8 --dns 8.8.4.4 \
+  -v $STORAGE:/data \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e "OPENVPN_PROVIDER=PIA" \
+  -e "OPENVPN_CONFIG=US East" \
+  -e "OPENVPN_USERNAME=$PIA_USER" \
+  -e "OPENVPN_PASSWORD=$PIA_PASS" \
+  -e "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60" \
+  --restart=always \
+  -p 9091:9091 \
+  haugene/transmission-openvpn
