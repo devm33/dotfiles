@@ -46,6 +46,11 @@ if [ -d "$HOME/Library/Android/sdk" ]; then
     export ANDROID_HOME="$HOME/Library/Android/sdk"
     export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
 fi
+if [ -d "$HOME/lib/android/sdk" ]; then
+    export ANDROID_HOME="$HOME/lib/android/sdk"
+    export ANDROID_SDK_HOME="$HOME/lib/android/sdk"
+    export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
+fi
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
