@@ -51,3 +51,12 @@ Host vm
 Host devm33
     Hostname ssh.phx.nearlyfreespeech.net
     User devm33_devm33
+
+Host rama
+    Hostname rama.devm33.com
+    User user
+    Port 9933
+
+Host ramalocal
+    Hostname 192.168.0.33
+    User user
