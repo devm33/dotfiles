@@ -265,6 +265,9 @@ extract_archive () {
 alias ex=extract_archive
 compdef '_files -g "*.gz *.tgz *.bz2 *.tbz *.zip *.rar *.tar *.lha"' extract_archive
 
+# file sizes
+alias sizes='du -sh */ | sort -hr'
+
 # processes
 alias psg='ps ax | grep -v grep | grep '
 alias psga='ps ax | grep '
