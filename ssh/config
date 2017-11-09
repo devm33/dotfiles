@@ -56,7 +56,9 @@ Host rama
     Hostname rama.devm33.com
     User user
     Port 9933
+    LocalForward 9091 127.0.0.1:9091
 
 Host ramalocal
     Hostname 192.168.0.33
     User user
+    LocalForward 9091 127.0.0.1:9091
