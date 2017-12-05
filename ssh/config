@@ -57,8 +57,10 @@ Host rama
     User devraj
     Port 9933
     LocalForward 9091 127.0.0.1:9091
+    LocalForward 8080 127.0.0.1:8080
 
 Host ramalocal
     Hostname 192.168.0.33
     User devraj
     LocalForward 9091 127.0.0.1:9091
+    LocalForward 8080 127.0.0.1:8080
