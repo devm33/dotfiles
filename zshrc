@@ -136,3 +136,6 @@ fi
 
 # added by travis gem
 [ -f /Users/devrajm/.travis/travis.sh ] && source /Users/devrajm/.travis/travis.sh
+
+# pip3 install location on mac
+[ -f ~/Library/Python/3.6/bin ] && export PATH="$PATH:~/Library/Python/3.6/bin"
