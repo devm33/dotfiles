@@ -30,8 +30,8 @@ Host webspy
     HostName 10.10.0.1
     User videolab
 
-Host ubi
-    HostName devrajm.hot.corp.google.com
+Host desk
+    HostName devrajm.c.googlers.com
     User devrajm
     LocalForward 8080 127.0.0.1:8080
     LocalForward 8000 127.0.0.1:8000
