@@ -275,6 +275,9 @@ alias psga='ps ax | grep '
 # tail
 alias tf='tail -F'
 
+# wget
+alias wg='wget --no-check-certificate '
+
 # Curl
 alias curls='curl -o /dev/null -i'
 alias curlcode='curl -s -o /dev/null -I -w "%{http_code}"'
