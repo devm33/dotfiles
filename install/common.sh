@@ -15,7 +15,7 @@ fi
 git clone git@github.com:robbyrussell/oh-my-zsh.git .oh-my-zsh
 
 # Note: version here will become stale!
-RCMV='1.3.0'
+RCMV='1.3.1'
 curl -LO https://thoughtbot.github.io/rcm/dist/rcm-$RCMV.tar.gz && \
 tar -xvf rcm-$RCMV.tar.gz && \
 cd rcm-$RCMV && \
