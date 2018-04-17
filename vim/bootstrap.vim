@@ -17,7 +17,7 @@ fun! FirstRunOnEnter()
       " assuming ubuntu/debian
       silent !sudo apt-get install cmake build-essential python-dev python3-dev
     endif
-    silent !./install.py --gocode-completer --js-completer
+    silent !./install.py --go-completer --js-completer
     execute "cd " . oldpath
 endf
 
