@@ -331,3 +331,5 @@ dotall () {
 alias dotcall='dotall 1'
 
 alias rama='ssh rama'
+
+alias ytdl='youtube-dl -x --audio-format mp3 '
