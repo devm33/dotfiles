@@ -332,7 +332,7 @@ alias dotcall='dotall 1'
 
 rama () {
     chropen "http://localhost:9091"
-    if ping -c 192.168.0.33 &> /dev/null
+    if ping -c 1 192.168.0.33 &> /dev/null
     then
         ssh ramalocal
     else
