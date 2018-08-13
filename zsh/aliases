@@ -330,6 +330,14 @@ dotall () {
 
 alias dotcall='dotall 1'
 
-alias rama='ssh rama'
+rama () {
+    chropen "http://localhost:9091"
+    if ping -c 1 192.168.0.33 &> /dev/null
+    then
+        ssh ramalocal
+    else
+        ssh rama
+    fi
+}
 
 alias ytdl='youtube-dl -x --audio-format mp3 '
