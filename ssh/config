@@ -59,6 +59,8 @@ Host rama
     LocalForward 9091 127.0.0.1:9091
     LocalForward 8080 127.0.0.1:8080
     LocalForward 8081 127.0.0.1:8081
+    PermitLocalCommand yes
+    LocalCommand open http://localhost:9091
 
 Host ramalocal
     Hostname 192.168.0.33
@@ -66,6 +68,8 @@ Host ramalocal
     LocalForward 9091 127.0.0.1:9091
     LocalForward 8080 127.0.0.1:8080
     LocalForward 8081 127.0.0.1:8081
+    PermitLocalCommand yes
+    LocalCommand open http://localhost:9091
 
 Host ramal
     Hostname 192.168.0.33
