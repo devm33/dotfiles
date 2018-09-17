@@ -30,8 +30,12 @@ Host webspy
     HostName 10.10.0.1
     User videolab
 
-Host desk
+Host cloud
     HostName devrajm.c.googlers.com
+    User devrajm
+
+Host desk
+    HostName devrajm.hot.corp.google.com
     User devrajm
     Compression yes
     CheckHostIP no
