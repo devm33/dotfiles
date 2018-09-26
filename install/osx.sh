@@ -16,9 +16,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/i
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-sudo chown $USER /usr/local/bin
-sudo chown $USER /usr/local/share
-sudo chown $USER /usr/local/etc
+sudo chown -R $USER /usr/local/bin
+sudo chown -R $USER /usr/local/share
+sudo chown -R $USER /usr/local/etc
 
 brew install node
 brew install cmake
