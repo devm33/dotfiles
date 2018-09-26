@@ -10,6 +10,7 @@ fun! FirstRunOnEnter()
     source $MYVIMRC
     let oldpath = getcwd()
     execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
+    let s:uname = system("uname -s")
     if s:uname == "Darwin"
       silent !xcode-select --install
       silent !brew install cmake
