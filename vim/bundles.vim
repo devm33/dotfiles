@@ -37,6 +37,8 @@ Bundle "sirver/ultisnips"
 Bundle "pangloss/vim-javascript"
 Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
+" Dart
+Bundle "dart-lang/dart-vim-plugin"
 " React JSX
 Bundle "mxw/vim-jsx"
 " Typescript
