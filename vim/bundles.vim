@@ -39,6 +39,7 @@ Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
 " Dart
 Bundle "dart-lang/dart-vim-plugin"
+Bundle "natebosch/dartlang-snippets"
 " React JSX
 Bundle "mxw/vim-jsx"
 " Typescript
