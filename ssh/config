@@ -71,6 +71,11 @@ Host rama
     PermitLocalCommand yes
     LocalCommand open http://localhost:9091
 
+Host ramaplain
+    Hostname rama.devm33.com
+    User devraj
+    Port 9933
+
 Host ramalocal
     Hostname 192.168.0.33
     User devraj
