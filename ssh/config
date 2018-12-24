@@ -92,3 +92,6 @@ Host ramal
 Host lynn
     Hostname lynnmehta.duckdns.org
     User lynnmehta
+
+Host *.upload.akamai.com
+  HostKeyAlgorithms +ssh-dss
