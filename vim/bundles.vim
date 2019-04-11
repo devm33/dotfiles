@@ -37,6 +37,7 @@ Bundle "sirver/ultisnips"
 Bundle "pangloss/vim-javascript"
 Bundle "jelera/vim-javascript-syntax"
 Bundle "othree/javascript-libraries-syntax.vim"
+Bundle "prettier/vim-prettier"
 " Dart
 Bundle "dart-lang/dart-vim-plugin"
 Bundle "natebosch/dartlang-snippets"
