@@ -75,3 +75,8 @@ if [ -d "$HOME/lib/go_appengine" ]; then
   export GOROOT="$HOME/lib/go_appengine/goroot"
 fi
 
+# Add dart sdk bin
+if [ -d /usr/local/opt/dart/libexec ]; then
+  export PATH="$PATH:/usr/local/opt/dart/libexec"
+fi
+
