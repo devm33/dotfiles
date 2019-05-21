@@ -71,6 +71,8 @@ Bundle "tpope/vim-haml"
 " YAML
 Bundle "ingydotnet/yaml-vim"
 Bundle "chase/vim-ansible-yaml"
+" TOML
+Bundle "cespare/vim-toml"
 
 " Clojure
 Bundle "guns/vim-sexp"
