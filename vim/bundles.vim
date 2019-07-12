@@ -43,6 +43,7 @@ Bundle "dart-lang/dart-vim-plugin"
 Bundle "natebosch/dartlang-snippets"
 " React JSX
 Bundle "mxw/vim-jsx"
+Plugin 'styled-components/vim-styled-components'
 " Typescript
 Plugin 'Shougo/vimproc.vim'          " Force install a dependency of tsuquyomi.
 Plugin 'leafgarland/typescript-vim'  " enables TypeScript syntax-highlighting.
