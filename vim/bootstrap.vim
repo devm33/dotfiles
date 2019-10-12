@@ -1,25 +1,9 @@
 " Determines if this is the first time vimrc has been loaded and if so
-" installs some dependencies.
-" NOTE: Things will fail if missing:
-" - homebrew
-" - npm/node
-" - python
+" sets up vundle and installs plugins.
 
 fun! FirstRunOnEnter()
     PluginInstall
     source $MYVIMRC
-    let oldpath = getcwd()
-    execute "cd " . $HOME . "/.vim/bundle/YouCompleteMe"
-    let s:uname = system("echo -n \"$(uname)\"")
-    if s:uname == "Darwin"
-      silent !xcode-select --install
-      silent !brew install cmake
-    else
-      " assuming ubuntu/debian
-      silent !sudo apt-get install cmake build-essential python-dev python3-dev
-    endif
-    silent !./install.py --go-completer --js-completer
-    execute "cd " . oldpath
 endf
 
 let vdir = $HOME . '/.vim/bundle/vundle'

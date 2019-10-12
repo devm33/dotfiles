@@ -14,11 +14,13 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/i
 
 # OSX Specific post install
 
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# Install homebrew to home dir
+cd ~
+mkdir homebrew
+curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
 
-sudo chown -R $USER /usr/local/bin
-sudo chown -R $USER /usr/local/share
-sudo chown -R $USER /usr/local/etc
+# Temporarily add homebrew to path for install (permant add in zshenv)
+export PATH=$HOME/homebrew/bin:$PATH
 
 brew install node
 brew install cmake
