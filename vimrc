@@ -124,8 +124,6 @@ set pastetoggle=<F12>
 vnoremap // y/<C-R>"<CR>
 
 " Saving and Exiting
-inoremap jk <esc>
-inoremap jj <esc>:w<cr>
 inoremap <C-c> <esc>:x<CR>
 nnoremap <C-c> :x<CR>
 
