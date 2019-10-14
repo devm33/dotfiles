@@ -58,7 +58,7 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-n", sendMessage NextLayout)
          , ("M-s", spawn "gnome-screensaver-command -l")
          , ("M-o", spawn "gmrun")
-         , ("M-p", spawn "gnome-terminal -e prodaccess")
+         , ("M-p", gnomeRun)
          , ("M-S-p", gnomeRun)
          , ("M-<Space>", spawn "gmrun")
          , ("M-c", spawn "google-chrome --profile-directory=\"Default\"")
@@ -87,7 +87,12 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M--", spawn "amixer -D pulse set Master 5%-")
          ]
 
-myButtons = [((0, 10), (\_ -> toggleWS))]
+myButtons = [ ((mod4Mask, 10), (\_ -> toggleWS))
+            , ((mod4Mask, 5), (\_ -> nextWS))
+            , ((mod4Mask, 4), (\_ -> prevWS))
+            , ((mod4Mask .|. shiftMask, 5), (\_ -> shiftToNext >> nextWS))
+            , ((mod4Mask .|. shiftMask, 4), (\_ -> shiftToPrev >> prevWS))
+            ]
 
 onScreen d f = do mws <- screenWorkspace d
                   case mws of
