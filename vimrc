@@ -109,7 +109,6 @@ set secure " disable unsafe commands in local .vimrc files
 set backspace=2 " help cygwin out with backspace
 set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
-set formatoptions-=r " dont add comment prefix on <cr>
 
 " golang
 set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
