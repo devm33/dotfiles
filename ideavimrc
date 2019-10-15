@@ -1,0 +1,19 @@
+
+" Settings
+set relativenumber
+set surround
+
+
+" Mappings
+nnoremap ; :
+nnoremap <Space>w :w<CR>
+nnoremap <Space>q :x<CR>
+nnoremap <leader>sv :vs<CR>
+nnoremap <leader>sh :sp<CR>
+nnoremap <leader>j <C-w>j
+nnoremap <leader>k <C-w>k
+nnoremap <leader>h <C-w>h
+nnoremap <leader>l <C-w>l
+nnoremap <leader>[ :tabN<CR>
+nnoremap <leader>] :tabn<CR>
+
