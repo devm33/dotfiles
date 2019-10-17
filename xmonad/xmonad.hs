@@ -29,6 +29,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 , startupHook =
     do startupHook gnomeConfig
        -- Custom startup hooks:
+       spawn "autokey"
        spawn "xcompmgr -a"
        spawn "setxkbmap -option caps:super"
        spawn "xcape -e 'Super_L=Escape'"
