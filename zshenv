@@ -6,6 +6,7 @@ export PATH="/usr/local/bin:$PATH"
 # for mac I sometimes store homebrew packages here
 if [ -d "$HOME/homebrew/bin" ]; then
     export PATH="$HOME/homebrew/bin:$PATH"
+    export LD_LIBRARY_PATH=$HOME/homebrew/lib:$LD_LIBRARY_PATH
 fi
 
 # prepend my bin to path so it's checked first because I'm important
@@ -24,17 +25,6 @@ if [ -d "$HOME/.gem/ruby/1.8/bin" ]; then
 fi
 if [ -d "$HOME/.gem/bin" ]; then
     export PATH="$PATH:$HOME/.gem/bin"
-fi
-
-# android sdk
-if [ -d "$HOME/Library/Android/sdk" ]; then
-    export ANDROID_HOME="$HOME/Library/Android/sdk"
-    export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
-fi
-if [ -d "$HOME/lib/android/sdk" ]; then
-    export ANDROID_HOME="$HOME/lib/android/sdk"
-    export ANDROID_SDK_HOME="$HOME/lib/android/sdk"
-    export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
 fi
 
 # pip3 install location on mac

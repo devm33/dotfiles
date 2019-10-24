@@ -6,32 +6,12 @@ TCPKeepAlive no
 Match host *.corp.google.com
 ProxyCommand /usr/local/bin/corp-ssh-helper %h %p
 
-Host webspy-chel
-  HostName webspy-chel.hot.corp.google.com
-  User devrajm
-
-Host webspy-nyc
-  HostName webspy-nyc-chel.nyc.corp.google.com
-  User videolab
-
-Host webspy-lss
-  HostName webspy-lss.mtv.corp.google.com
-  User vsc
-
-Host webspy-8510
-  HostName webspy-8510.nyc.corp.google.com
-  User videolab
-
-Host ttb
-    HostName 100.115.20.1
-    User videolab
-
-Host webspy
-    HostName 10.10.0.1
-    User videolab
-
 Host cloud
     HostName devrajm.c.googlers.com
+    User devrajm
+
+Host pit
+    HostName devrajm.pit.corp.google.com
     User devrajm
 
 Host desk
@@ -88,10 +68,3 @@ Host ramalocal
 Host ramal
     Hostname 192.168.0.33
     User devraj
-
-Host lynn
-    Hostname lynnmehta.duckdns.org
-    User lynnmehta
-
-Host *.upload.akamai.com
-  HostKeyAlgorithms +ssh-dss

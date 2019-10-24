@@ -30,7 +30,7 @@ alias aci='apt-cache show'
 # Show contents of directory after cd-ing into it
 chpwd() {
   if [ -d .git ]; then
-      git status
+      git diff --quiet || echo 'git changes pending'
       echo '--'
   fi
   ls

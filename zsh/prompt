@@ -72,7 +72,7 @@ else
   _USERNAME="%{$fg_bold[white]%}%n"
   _LIBERTY="%{$fg[green]%}$"
 fi
-_USERNAME="$_USERNAME%{$reset_color%}@%m"
+_USERNAME="$_USERNAME%{$reset_color%}@%2m"
 _LIBERTY="$_LIBERTY%{$reset_color%}"
 
 
