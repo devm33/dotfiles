@@ -5,14 +5,29 @@
 
 cd $HOME
 
-if git clone git@github.com:devm33/dotfiles.git .dotfiles ; then
+
+if [ -z "$installreadonly" ]; then
+    repo='git@github.com:devm33/dotfiles.git'
+else 
+    repo='https://github.com/devm33/dotfiles.git'
+fi
+
+if git clone $repo .dotfiles ; then
     echo "succesfully cloned config repo"
 else
-    echo "failed to clone config repo, make sure you have a ssh key authorized on github"
+    cat <<-EOF
+        Failed to clone config repo!
+        Make sure you have a ssh key authorized on github
+        Or run again after running:
+
+        export installreadonly=1
+
+        For a readonly install (no commit access to repo)
+    EOF
     exit 1
 fi
 
-git clone git@github.com:robbyrussell/oh-my-zsh.git .oh-my-zsh
+git clone https://github.com/robbyrussell/oh-my-zsh.git .oh-my-zsh
 
 # Note: version here will become stale!
 RCMV='1.3.1'

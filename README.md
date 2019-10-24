@@ -31,6 +31,13 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)"
     ```
 
+    -  For a readonly install (no github authorized keys on the box) set this
+       flag before running the install script:
+
+    ```bash
+    export installreadonly=1
+    ```
+
 ## Detailed Installation
 
 -   Clone repo to expected location
