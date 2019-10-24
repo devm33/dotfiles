@@ -339,4 +339,13 @@ rama () {
     fi
 }
 
+yumi () {
+    if ping -c 1 192.168.1.3 &> /dev/null
+    then
+        ssh yumil
+    else
+        ssh yumi
+    fi
+}
+
 alias ytdl='youtube-dl -x --audio-format mp3 '

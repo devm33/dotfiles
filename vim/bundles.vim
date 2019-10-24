@@ -26,7 +26,7 @@ Bundle "scrooloose/syntastic"
 Bundle "tpope/vim-surround"
 " Bundle "tpope/vim-unimpaired"
 " Snippets
-Bundle "sirver/ultisnips"
+" Bundle "sirver/ultisnips"
 
 " Javascript
 " Bundle "pangloss/vim-javascript"

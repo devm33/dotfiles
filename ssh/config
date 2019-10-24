@@ -68,3 +68,12 @@ Host ramalocal
 Host ramal
     Hostname 192.168.0.33
     User devraj
+
+Host yumi
+    Hostname yumi.devm33.com
+    User devraj
+    Port 9933
+
+Host yumil
+    Hostname 192.168.1.3
+    User devraj
