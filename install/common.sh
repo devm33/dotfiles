@@ -15,7 +15,7 @@ fi
 if git clone $repo .dotfiles ; then
     echo "succesfully cloned config repo"
 else
-    cat <<-EOF
+    cat <<-'EOF'
         Failed to clone config repo!
         Make sure you have a ssh key authorized on github
         Or run again after running:
