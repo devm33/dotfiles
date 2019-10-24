@@ -23,7 +23,7 @@ else
         export installreadonly=1
 
         For a readonly install (no commit access to repo)
-    EOF
+EOF
     exit 1
 fi
 
