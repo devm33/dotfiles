@@ -1,7 +1,7 @@
 # Note path entries are not idempotent (TODO what did I mean by this?)
 # Setting PATH and other vars in zshenv to ensure consistent in all environs
 
-export PATH="/usr/local/bin:$PATH"
+export PATH="/usr/local/bin:/usr/sbin:$PATH"
 
 # for mac I sometimes store homebrew packages here
 if [ -d "$HOME/homebrew/bin" ]; then
