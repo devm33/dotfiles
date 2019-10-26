@@ -331,7 +331,7 @@ dotall () {
 alias dotcall='dotall 1'
 
 rama () {
-    if ping -c 1 192.168.0.33 &> /dev/null
+    if ping -t 1 -c 1 192.168.0.33 &> /dev/null
     then
         ssh ramalocal
     else
@@ -340,11 +340,11 @@ rama () {
 }
 
 yumi () {
-    if ping -c 1 192.168.1.3 &> /dev/null
+    if ping -t 1 -c 1 192.168.1.3 &> /dev/null
     then
-        ssh yumil
+        ssh openyumil
     else
-        ssh yumi
+        ssh openyumi
     fi
 }
 
