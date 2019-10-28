@@ -30,7 +30,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
     do startupHook gnomeConfig
        -- Custom startup hooks:
        spawn "autokey"
-       spawn "xcompmgr -a"
+       -- spawn "xcompmgr -a" -- not using this
        spawn "setxkbmap -option caps:super"
        spawn "xcape -e 'Super_L=Escape'"
        setWMName "LG3D"
