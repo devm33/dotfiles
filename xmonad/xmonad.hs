@@ -8,6 +8,7 @@ import XMonad.Actions.GridSelect
 import XMonad.Actions.CycleWS
 -- import XMonad.Actions.Navigation2D
 import XMonad.Util.EZConfig (additionalKeysP, additionalMouseBindings)
+import XMonad.Util.Paste (sendKey)
 import XMonad.Config.Gnome
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.SetWMName
@@ -29,11 +30,10 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 , startupHook =
     do startupHook gnomeConfig
        -- Custom startup hooks:
-       spawn "autokey"
        -- spawn "xcompmgr -a" -- not using this
-       spawn "setxkbmap -option caps:super"
+       -- spawn "setxkbmap -option caps:super" -- using xmodmap instead
        spawn "xcape -e 'Super_L=Escape'"
-       setWMName "LG3D"
+       setWMName "LG3D" -- hack for java GUIs
 
 , layoutHook =
     noBorders $ -- remove borders
@@ -64,6 +64,8 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-<Space>", spawn "gmrun")
          , ("M-c", spawn "google-chrome --profile-directory=\"Default\" --force-dark-mode")
          , ("M-m", spawn "google-chrome --profile-directory=\"Profile 1\" --force-dark-mode")
+         , ("M-d", sendKey controlMask xK_Page_Up)
+         , ("M-f", sendKey controlMask xK_Page_Down)
          , ("M-a", spawn "gnome-terminal")
          , ("M-i", spawn "/opt/intellij-ue-stable/bin/idea.sh")
          , ("M-<Return>", spawn "gnome-terminal")
