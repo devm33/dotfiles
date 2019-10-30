@@ -32,7 +32,9 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
        -- Custom startup hooks:
        -- spawn "xcompmgr -a" -- not using this
        -- spawn "setxkbmap -option caps:super" -- using xmodmap instead
-       spawn "xcape -e 'Super_L=Escape'"
+       -- So the first two below shouldn't be needed but I think that I am
+       -- running into race conditions sadly.
+       spawn "setxkbmap -option && xmodmap ~/.Xmodmap && xcape -e 'Super_L=Escape'"
        setWMName "LG3D" -- hack for java GUIs
 
 , layoutHook =
