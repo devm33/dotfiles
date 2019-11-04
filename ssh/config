@@ -27,6 +27,7 @@ Host desk
     LocalForward 8001 127.0.0.1:8001
     LocalForward 9000 127.0.0.1:9000
     LocalForward 9876 127.0.0.1:9876
+    LocalForward 9443 127.0.0.1:9443
     RemoteForward 2224 127.0.0.1:2224
     RemoteForward 2225 127.0.0.1:2225
     RemoteForward 2226 127.0.0.1:2226
