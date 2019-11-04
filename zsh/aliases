@@ -30,7 +30,7 @@ alias aci='apt-cache show'
 # Show contents of directory after cd-ing into it
 chpwd() {
   if [ -d .git ]; then
-      git status
+      git diff --quiet || echo 'git changes pending'
       echo '--'
   fi
   ls
@@ -331,11 +331,20 @@ dotall () {
 alias dotcall='dotall 1'
 
 rama () {
-    if ping -c 1 192.168.0.33 &> /dev/null
+    if ping -t 1 -c 1 192.168.0.33 &> /dev/null
     then
         ssh ramalocal
     else
         ssh rama
+    fi
+}
+
+yumi () {
+    if ping -t 1 -c 1 192.168.1.3 &> /dev/null
+    then
+        ssh openyumil
+    else
+        ssh openyumi
     fi
 }
 

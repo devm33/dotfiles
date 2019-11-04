@@ -8,9 +8,12 @@ import XMonad.Actions.GridSelect
 import XMonad.Actions.CycleWS
 -- import XMonad.Actions.Navigation2D
 import XMonad.Util.EZConfig (additionalKeysP, additionalMouseBindings)
+import XMonad.Util.Paste (sendKey)
 import XMonad.Config.Gnome
 import qualified XMonad.StackSet as W
 import XMonad.Hooks.SetWMName
+import System.Exit
+
 
 main = xmonad myConfig
 
@@ -27,9 +30,12 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
 , startupHook =
     do startupHook gnomeConfig
        -- Custom startup hooks:
-       spawn "xcompmgr -a"
-       spawn "setxkbmap -option caps:super"
-       setWMName "LG3D"
+       -- spawn "xcompmgr -a" -- not using this
+       -- spawn "setxkbmap -option caps:super" -- using xmodmap instead
+       -- So the first two below shouldn't be needed but I think that I am
+       -- running into race conditions sadly.
+       spawn "setxkbmap -option && xmodmap ~/.Xmodmap && xcape -e 'Super_L=Escape'"
+       setWMName "LG3D" -- hack for java GUIs
 
 , layoutHook =
     noBorders $ -- remove borders
@@ -55,17 +61,20 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-S-n", sendMessage NextLayout)
          , ("M-s", spawn "gnome-screensaver-command -l")
          , ("M-o", spawn "gmrun")
-         , ("M-p", spawn "gnome-terminal -e prodaccess")
+         , ("M-p", gnomeRun)
          , ("M-S-p", gnomeRun)
          , ("M-<Space>", spawn "gmrun")
-         , ("M-c", spawn "google-chrome --profile-directory=\"Profile 2\"")
-         , ("M-m", spawn "google-chrome --profile-directory=\"Profile 1\"")
-         , ("M-f", spawn "firefox")
+         , ("M-c", spawn "google-chrome --profile-directory=\"Default\" --force-dark-mode")
+         , ("M-m", spawn "google-chrome --profile-directory=\"Profile 1\" --force-dark-mode")
+         , ("M-d", sendKey controlMask xK_Page_Up)
+         , ("M-f", sendKey controlMask xK_Page_Down)
          , ("M-a", spawn "gnome-terminal")
+         , ("M-i", spawn "/opt/intellij-ue-stable/bin/idea.sh")
          , ("M-<Return>", spawn "gnome-terminal")
          , ("M-S-<Return>", windows W.swapMaster)
          , ("C-<Print>", spawn "gnome-screenshot -i")
          , ("M-x", kill)
+         , ("M-S-x", io (exitWith ExitSuccess))
          , ("M-S-h", spawn "halt")
          , ("M-S-r", spawn "reboot")
          , ("M-<Right>", nextWS)
@@ -77,12 +86,17 @@ myKeys = [ ("M-g", goToSelected defaultGSConfig)
          , ("M-]", onScreen 1 W.view)
          , ("M-S-[", onScreen 0 W.shift)
          , ("M-S-]", onScreen 1 W.shift)
-         , ("M-<F4>", spawn "google-chrome --new-window \"https://hangouts.google.com/hangouts/_/google.com/?hl=en\"")
+         , ("M-<F4>", spawn "google-chrome --new-window \"https://meet.google.com\"")
          , ("M-=", spawn "amixer -D pulse set Master 5%+")
          , ("M--", spawn "amixer -D pulse set Master 5%-")
          ]
 
-myButtons = [((0, 10), (\_ -> toggleWS))]
+myButtons = [ ((mod4Mask, 10), (\_ -> toggleWS))
+            , ((mod4Mask, 5), (\_ -> nextWS))
+            , ((mod4Mask, 4), (\_ -> prevWS))
+            , ((mod4Mask .|. shiftMask, 5), (\_ -> shiftToNext >> nextWS))
+            , ((mod4Mask .|. shiftMask, 4), (\_ -> shiftToPrev >> prevWS))
+            ]
 
 onScreen d f = do mws <- screenWorkspace d
                   case mws of
