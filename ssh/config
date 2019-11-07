@@ -22,6 +22,7 @@ Host desk
     ServerAliveInterval 10
     LocalForward 4080 127.0.0.1:4080
     LocalForward 4081 127.0.0.1:4081
+    LocalForward 5432 127.0.0.1:5432
     LocalForward 8000 127.0.0.1:8000
     LocalForward 8001 127.0.0.1:8001
     LocalForward 8080 127.0.0.1:8080
