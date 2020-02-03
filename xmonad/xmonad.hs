@@ -38,9 +38,7 @@ myConfig = gnomeConfig { modMask = mod4Mask -- use the super key
        -- Ok leaving the above in to reflect my level of confidence, but that
        -- setup kept failing everytime the system suspended some process so
        -- attempting to recreate the setup via xkb directly saved in the file
-       -- .myxkbmap.xkb
-       -- spawn "xkbcomp ~/.myxkbmap.xbp :0 && xcape -e 'Super_L=Escape'"
-       -- Ok totall new approach trying .xinitrc
+       spawn "xkbcomp ~/.myxkbcomp.xbp :0 && xcape -e 'Super_L=Escape'"
        setWMName "LG3D" -- hack for java GUIs
 
 , layoutHook =
