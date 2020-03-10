@@ -135,6 +135,10 @@ compdef '_files -g "*.md *.txt"' markdown_watch
 
 # Hg aliases
 alias hu='hg st | ifne hg amend && hg uploadchain'
+alias hl='hg xl'
+alias hs='hg st'
+alias hn='hg next'
+alias hp='hg prev'
 
 # Git functions and aliases
 alias gA='git add -A'
