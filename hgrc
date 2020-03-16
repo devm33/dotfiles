@@ -3,3 +3,6 @@ merge = :merge3
 
 [pager]
 pager = less -FRX
+
+[google]
+presubmit.default-rev=.
