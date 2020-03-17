@@ -3,29 +3,25 @@ set nocompatible
 " Set leader to spacebar, needs to be set before any mappings
 let mapleader=" "
 
-" Bootstrap this vimrc
-source ~/.vim/bootstrap.vim
-
-" Load vundle plugins
-source ~/.vim/bundles.vim
-
-"" Load google-specific config on goob
-if filereadable(expand('~/.vim/google.vim'))
-    source ~/.vim/google.vim
+" Load plugins
+if filereadable(expand('~/.vim/plugins.vim'))
+  source ~/.vim/plugins.vim
 endif
 
+" Load google-specific config on goob
+if filereadable(expand('~/.vim/google.vim'))
+  source ~/.vim/google.vim
+endif
 
 " Colors
 set t_Co=256 " always use 256 colors
-set term=screen-256color " really force it
 let g:solarized_termcolors=256 " im serious about this
 set background=dark
 colorscheme hybrid " set color scheme (depends on flazz/vim-colorschemes)
 
-
 " UI Config
 set number " line numbers on
-set relativenumber " make line numbers relative, note using plugin jeffkreeftmeijer/vim-numbertoggle
+set relativenumber " note using plugin jeffkreeftmeijer/vim-numbertoggle
 set showcmd " show incomplete commands at bottom right
 set showmatch " briefly highlight matched bracket when pair completed
 set ruler " display line and col numbers in bottom right
@@ -53,7 +49,6 @@ augroup autosave
   autocmd!
   autocmd FocusLost * silent! wa
   autocmd TabLeave * silent! wa
-  autocmd WinLeave * silent! wa
 augroup END
 
 " Undo
@@ -116,6 +111,7 @@ nnoremap <leader>} :tabm +1<CR>
 nnoremap <leader>T :tabc<CR>
 
 " File nav
+let g:netrw_banner = 0
 nnoremap <leader>d :e %:p:h<CR>
 
 " Replace all

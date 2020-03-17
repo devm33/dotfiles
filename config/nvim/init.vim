@@ -3,12 +3,6 @@ set nocompatible
 " Set leader to spacebar, needs to be set before any mappings
 let mapleader=" "
 
-" Bootstrap this vimrc
-source ~/.vim/bootstrap.vim
-
-" Load vundle plugins
-source ~/.vim/bundles.vim
-
 "" Load google-specific config on goob
 if filereadable(expand('~/.vim/google.vim'))
     source ~/.vim/google.vim
@@ -20,7 +14,7 @@ set t_Co=256 " always use 256 colors
 " set term=screen-256color " really force it
 let g:solarized_termcolors=256 " im serious about this
 set background=dark
-colorscheme hybrid " set color scheme (depends on flazz/vim-colorschemes)
+" colorscheme hybrid " set color scheme (depends on flazz/vim-colorschemes)
 
 
 " UI Config
