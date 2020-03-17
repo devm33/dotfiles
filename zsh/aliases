@@ -139,6 +139,7 @@ alias hl='hg xl'
 alias hs='hg st'
 alias hn='hg next'
 alias hp='hg prev'
+alias hd='hg diff'
 
 # Git functions and aliases
 alias gA='git add -A'
