@@ -80,6 +80,8 @@ set autochdir " change working directory to file
 
 " Non-leader mappings
 nnoremap ; :
+inoremap <C-c> <esc>:x<CR>
+nnoremap <C-c> :x<CR>
 
 " Leader mappings (use :map <leader> to see all mappings in alphabetical order)
 
