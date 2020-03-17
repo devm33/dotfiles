@@ -9,16 +9,11 @@ source ~/.vim/bootstrap.vim
 " Load vundle plugins
 source ~/.vim/bundles.vim
 
-" Load google-specific config on goob
+"" Load google-specific config on goob
 if filereadable(expand('~/.vim/google.vim'))
     source ~/.vim/google.vim
 endif
 
-" Enabled filetype: detection, indentation, and plugins.
-filetype plugin indent on
-
-" Enable syntax highlighting
-syntax on
 
 " Colors
 set t_Co=256 " always use 256 colors
@@ -46,6 +41,7 @@ set splitright " Open new split panes to right
 set splitbelow " and bottom, which feels more natural
 
 " File writing
+command! W w
 set nowritebackup
 set backupdir=/tmp//
 set backupcopy=yes
@@ -80,6 +76,10 @@ set exrc " enable per-directory .vimrc files
 set secure " disable unsafe commands in local .vimrc files
 set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
+set autochdir " change working directory to file
+
+" Non-leader mappings
+nnoremap ; :
 
 " Leader mappings (use :map <leader> to see all mappings in alphabetical order)
 
@@ -161,4 +161,11 @@ nnoremap <leader>vu :so $MYVIMRC<CR>:PluginClean<CR>:PluginUpdate<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 nnoremap <leader><esc> :qall<CR>
+command! Q q
 
+" Enable syntax highlighting
+syntax enable
+syntax on
+
+" Turn plugins back on (needs to be last line)
+filetype plugin indent on

@@ -1,7 +1,3 @@
-if &compatible
-  set nocompatible
-end
-
 filetype off
 
 set rtp+=~/.vim/bundle/vundle/
@@ -16,5 +12,4 @@ Bundle "flazz/vim-colorschemes"
 Bundle "jeffkreeftmeijer/vim-numbertoggle"
 Bundle "scrooloose/nerdtree"
 Bundle "tpope/vim-surround"
-
-filetype plugin indent on
+Bundle "vim-syntastic/syntastic"
