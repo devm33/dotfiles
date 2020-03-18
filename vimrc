@@ -151,9 +151,10 @@ augroup sourcereload
   autocmd BufWritePost .tmux.conf :!tmux source-file ~/.tmux.conf
 augroup END
 
-" Using vundle
-nnoremap <leader>vi :so $MYVIMRC<CR>:PluginClean<CR>:PluginInstall<CR>
-nnoremap <leader>vu :so $MYVIMRC<CR>:PluginClean<CR>:PluginUpdate<CR>
+" Using plug
+nnoremap <leader>vp :e ~/.vim/plugins.vim<CR>
+nnoremap <leader>vi :so $MYVIMRC<CR>:PlugClean!<CR>:PlugInstall<CR>
+nnoremap <leader>vu :so $MYVIMRC<CR>:PlugClean!<CR>:PlugUpgrade<CR>:PlugUpdate<CR>
 
 " Saving and Exiting
 nnoremap <leader>w :w<CR>

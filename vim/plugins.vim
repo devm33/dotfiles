@@ -10,6 +10,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'flazz/vim-colorschemes'
 Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'tpope/vim-surround'
-" Plug 'vim-syntastic/syntastic'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
 " Plug 'HerringtonDarkholme/yats.vim'
 call plug#end()
