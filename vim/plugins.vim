@@ -13,5 +13,6 @@ Plug 'tpope/vim-surround'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'preservim/nerdtree'
-" Plug 'HerringtonDarkholme/yats.vim'
+Plug 'HerringtonDarkholme/yats.vim'
+Plug 'ctrlpvim/ctrlp.vim'
 call plug#end()
