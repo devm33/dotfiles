@@ -111,7 +111,8 @@ nnoremap <leader>} :tabm +1<CR>
 nnoremap <leader>T :tabc<CR>
 
 " File nav
-let g:netrw_banner = 0
+nnoremap <leader>o :CtrlP<CR>
+nnoremap <leader>bo :CtrlPBuffer<CR>
 nnoremap <leader>d :e %:p:h<CR>
 
 " Replace all
