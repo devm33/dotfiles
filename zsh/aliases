@@ -37,7 +37,7 @@ chpwd() {
 }
 
 # ViM
-alias v='vim'
+alias v='nvim'
 alias vi='vim'
 
 # Vagrant
