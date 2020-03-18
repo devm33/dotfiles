@@ -2,6 +2,11 @@
 " METADATA file to delimit a project.
 let g:ctrlp_root_markers = ['METADATA']
 
+" Other settings
+let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:50,results:50'
+let g:ctrlp_reuse_window = 'NERD_tree'
+let g:ctrlp_max_files=0
+
 " Use AG for CtrlP
 if executable('ag')
   " Use ag over grep
