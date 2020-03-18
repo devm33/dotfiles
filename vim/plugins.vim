@@ -12,5 +12,6 @@ Plug 'jeffkreeftmeijer/vim-numbertoggle'
 Plug 'tpope/vim-surround'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
+Plug 'preservim/nerdtree'
 " Plug 'HerringtonDarkholme/yats.vim'
 call plug#end()
