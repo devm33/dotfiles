@@ -32,6 +32,14 @@ set list listchars=tab:»·,trail:· " show trailing whitespace and tabs
 set cursorline " highlight the line we are currently on
 set colorcolumn=80 " draw line at 80 cols
 
+" Whitespace
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set smarttab
+set expandtab
+set autoindent
+
 " Windows
 set splitright " Open new split panes to right
 set splitbelow " and bottom, which feels more natural
