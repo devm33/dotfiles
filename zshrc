@@ -19,7 +19,7 @@ autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
 # Configure color term
-export TERM="xterm-256color"
+export TERM="tmux-256color"
 
 # Save a ton of history
 HISTSIZE=20000
