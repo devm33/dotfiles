@@ -32,6 +32,11 @@ set list listchars=tab:»·,trail:· " show trailing whitespace and tabs
 set cursorline " highlight the line we are currently on
 set colorcolumn=80 " draw line at 80 cols
 
+if !has('nvim') && &ttimeoutlen == -1
+  set ttimeout
+  set ttimeoutlen=100
+endif
+
 " Whitespace
 set tabstop=2
 set shiftwidth=2
@@ -55,6 +60,7 @@ set autowriteall
 augroup autosave
   " autowriteall doesn't capture tab changing, write all on lost focus
   autocmd!
+  autocmd BufLeave * silent! wa
   autocmd FocusLost * silent! wa
   autocmd TabLeave * silent! wa
 augroup END
@@ -79,12 +85,14 @@ set exrc " enable per-directory .vimrc files
 set secure " disable unsafe commands in local .vimrc files
 set formatoptions+=j " remove comment prefixes when joining lines
 set formatoptions-=o " dont add comment prefix on o/O
-set autochdir " change working directory to file
 
 " Non-leader mappings
 nnoremap ; :
 inoremap <C-c> <esc>:x<CR>
 nnoremap <C-c> :x<CR>
+
+" Use <C-\> to clear the highlighting of :set hlsearch.
+nnoremap <silent> <C-\> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 
 " Leader mappings (use :map <leader> to see all mappings in alphabetical order)
 
@@ -134,6 +142,11 @@ nnoremap <leader>lr :s/<c-r>=expand("<cword>")<cr>/
 nnoremap <leader>1 :diffget LOCAL<cr>
 nnoremap <leader>2 :diffget BASE<cr>
 nnoremap <leader>3 :diffget REMOTE<cr>
+
+" Copy/pasting from system registers
+nnoremap <leader>p "+
+vnoremap <leader>p "+
+nnoremap <C-v> "+p
 
 " Copy/pasting over ssh to osx
 function! PropagatePasteBufferToOSX()
