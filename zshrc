@@ -18,9 +18,6 @@ source $HOME/.zsh/prompt
 autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
-# Configure color term
-export TERM="tmux-256color"
-
 # Save a ton of history
 HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history
