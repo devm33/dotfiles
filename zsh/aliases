@@ -157,6 +157,11 @@ git_commit_all_message() {
 }
 alias gcam=git_commit_all_message
 
+git_commit_message() {
+    git commit -m "$*"
+}
+alias GC=git_commit_message
+
 
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
