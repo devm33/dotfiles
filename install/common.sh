@@ -50,8 +50,8 @@ fi
 ln -s ".dotfiles/host-$host/rcrc" .rcrc
 rcup -v
 
-ln -s .vim .config/nvim
-ln -s .vimrc .config/nvim/init.vim
+ln -s ~/.vim ~/.config/nvim
+ln -s ~/.vimrc ~/.config/nvim/init.vim
 
 npm i -g tmux-cpu
 npm i -g tmux-mem
