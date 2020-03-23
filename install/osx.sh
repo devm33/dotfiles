@@ -22,6 +22,7 @@ brew install node
 brew install cmake
 brew install ffmpeg
 brew install vim
+brew install neovim
 brew install tmux
 brew install ag
 brew install reattach-to-user-namespace

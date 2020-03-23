@@ -6,7 +6,7 @@
 # before running ensure that there is a valid ssh key authorized for github
 
 # Ubuntu/Debian Specific install
-sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm
+sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim
 sudo npm i -g npm
 
 # Install common components
