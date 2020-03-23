@@ -13,6 +13,11 @@ Host cloud
 Host pit
     HostName devrajm.pit.corp.google.com
     User devrajm
+    LocalForward 9443 127.0.0.1:9443
+    LocalForward 19443 127.0.0.1:19443
+    LocalForward 34674 127.0.0.1:34674
+    LocalForward 35728 127.0.0.1:35728
+    LocalForward 44338 127.0.0.1:44338
 
 Host desk
     HostName devrajm.hot.corp.google.com
