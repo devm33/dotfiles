@@ -57,7 +57,7 @@ Host yumi
     Port 9933
 
 Host yumil
-    HostName 192.168.1.3
+    HostName 192.168.86.3
     User devraj
 
 Host openyumi
@@ -69,7 +69,7 @@ Host openyumi
     LocalCommand open http://localhost:9091
 
 Host openyumil
-    HostName 192.168.1.3
+    HostName 192.168.86.3
     User devraj
     LocalForward 9091 127.0.0.1:9091
     PermitLocalCommand yes
