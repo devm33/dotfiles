@@ -1,27 +1,15 @@
-PreferredAuthentications gssapi-with-mic,publickey,hostbased,keyboard-interactive,password
 ServerAliveInterval 30
 ServerAliveCountMax 6
 TCPKeepAlive no
 
-Match host *.corp.google.com
-ProxyCommand /usr/local/bin/corp-ssh-helper %h %p
-
-Host cloud
-    HostName devrajm.c.googlers.com
-    User devrajm
-
 Host pit
     HostName devrajm.pit.corp.google.com
-    User devrajm
-    Compression yes
-    CheckHostIP no
 
-Host desk
+Host hot
     HostName devrajm.hot.corp.google.com
-    User devrajm
-    Compression yes
-    CheckHostIP no
-    ServerAliveInterval 10
+
+Match host !localhost.corp.google.com,*.corp.google.com
+    ProxyCommand corp-ssh-helper %h %p
 
 Host vm
     HostName localhost
@@ -55,7 +43,3 @@ Host openyumil
     LocalForward 9091 127.0.0.1:9091
     PermitLocalCommand yes
     LocalCommand open http://localhost:9091
-
-Host devrajm.pit.corp.google.com
-    HostName devrajm.pit.corp.google.com
-    User devrajm
