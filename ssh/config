@@ -4,6 +4,7 @@ TCPKeepAlive no
 
 Host pit
     HostName devrajm.pit.corp.google.com
+    LocalForward 9876 127.0.0.1:9876
 
 Host hot
     HostName devrajm.hot.corp.google.com
