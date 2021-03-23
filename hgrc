@@ -6,6 +6,7 @@ pager = less -FRX
 
 [google]
 presubmit.default-rev=.
+mail.default-rev=.
 
 [experimental]
 uncommit.keep = false
