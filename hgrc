@@ -10,3 +10,6 @@ mail.default-rev=.
 
 [experimental]
 uncommit.keep = false
+
+[google-change-tags]
+default.bug={get_parent_cl_tag("bug")}
