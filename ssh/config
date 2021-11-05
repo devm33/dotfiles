@@ -8,6 +8,8 @@ Host pit
     LocalForward 9876 127.0.0.1:9876
     LocalForward 9879 127.0.0.1:9879
     LocalForward 9443 127.0.0.1:9443
+    LocalForward 35728 127.0.0.1:35728
+    LocalForward 35729 127.0.0.1:35729
 
 Host cloud
     HostName devrajm.c.googlers.com
@@ -15,6 +17,8 @@ Host cloud
     LocalForward 9876 127.0.0.1:9876
     LocalForward 9879 127.0.0.1:9879
     LocalForward 9443 127.0.0.1:9443
+    LocalForward 35728 127.0.0.1:35728
+    LocalForward 35729 127.0.0.1:35729
 
 Host hot
     HostName devrajm.hot.corp.google.com
