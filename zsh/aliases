@@ -137,6 +137,7 @@ compdef '_files -g "*.md *.txt"' markdown_watch
 alias hu='hg st | ifne hg amend && hg uploadchain'
 alias hl='hg xl'
 alias hs='hg st'
+alias hs4='hg st --rev p4base'
 alias hn='hg next'
 alias hp='hg prev'
 alias hd='hg diff'
