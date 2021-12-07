@@ -19,6 +19,7 @@ Host cloud
     LocalForward 9443 127.0.0.1:9443
     LocalForward 35728 127.0.0.1:35728
     LocalForward 35729 127.0.0.1:35729
+    LocalForward 47703 127.0.0.1:47703
 
 Host hot
     HostName devrajm.hot.corp.google.com
