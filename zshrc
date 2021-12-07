@@ -61,3 +61,6 @@ stty -ixon
 # added by travis gem
 [ -f /Users/devrajm/.travis/travis.sh ] && source /Users/devrajm/.travis/travis.sh
 
+# fzf
+[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+[ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
