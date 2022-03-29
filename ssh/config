@@ -13,6 +13,7 @@ Host pit
 
 Host cloud
     HostName devrajm.c.googlers.com
+    LocalForward 9000 127.0.0.1:9000
     LocalForward 9110 127.0.0.1:9110
     LocalForward 9876 127.0.0.1:9876
     LocalForward 9879 127.0.0.1:9879
