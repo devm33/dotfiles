@@ -27,7 +27,6 @@ brew install tmux
 brew install ag
 brew install reattach-to-user-namespace
 brew install imagemagick
-brew install zsh
 
 # Install common components
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
