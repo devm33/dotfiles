@@ -70,3 +70,7 @@ if [ -d /usr/local/opt/dart/libexec ]; then
   export PATH="$PATH:/usr/local/opt/dart/libexec"
 fi
 
+# blaze tab completion
+if [ -d /google/data ]; then
+   fpath=(/google/src/files/head/depot/google3/devtools/blaze/scripts/zsh_completion $fpath)
+fi
