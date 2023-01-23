@@ -38,6 +38,7 @@ Host yumi
 Host yumil
     HostName 192.168.86.3
     User devraj
+    LocalForward 32400 127.0.0.1:32400
 
 Host openyumi
     HostName yumi.devm33.com
