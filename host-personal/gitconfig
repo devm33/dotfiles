@@ -38,3 +38,5 @@
     browser = chropen
 [browser "chropen"]
     cmd = chropen
+[url "git@github.com:devm33/"]
+    insteadof = g:
