@@ -6,7 +6,14 @@ export PATH="/usr/local/bin:/usr/sbin:$PATH"
 # for mac I sometimes store homebrew packages here
 if [ -d "$HOME/homebrew/bin" ]; then
     export PATH="$HOME/homebrew/bin:$PATH"
+    export PATH="$HOME/homebrew/sbin:$PATH"
     export LD_LIBRARY_PATH=$HOME/homebrew/lib:$LD_LIBRARY_PATH
+fi
+
+# for mac homebrew should be installed here
+if [ -d "/opt/homebrew" ]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+    export PATH="/opt/homebrew/sbin:$PATH"
 fi
 
 # prepend my bin to path so it's checked first because I'm important
@@ -29,6 +36,7 @@ fi
 
 # pip3 install location on mac
 [ -d $HOME/Library/Python/3.6/bin ] && export PATH="$PATH:$HOME/Library/Python/3.6/bin"
+[ -d $HOME/Library/Python/3.9/bin ] && export PATH="$PATH:$HOME/Library/Python/3.9/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
