@@ -174,8 +174,8 @@ augroup sourcereload
 augroup END
 
 " Using plug
-nnoremap <leader>vp :e ~/.vim/plugins.vim<CR>
 nnoremap <leader>vi :so $MYVIMRC<CR>:PlugClean!<CR>:PlugInstall<CR>
+nnoremap <leader>vp :e ~/.vim/plugins.vim<CR>
 nnoremap <leader>vu :so $MYVIMRC<CR>:PlugClean!<CR>:PlugUpgrade<CR>:PlugUpdate<CR>
 
 " Saving and Exiting
