@@ -10,14 +10,10 @@ sudo xcodebuild -license || exit
 
 # OSX Specific install
 
-# Install homebrew to home dir
-cd ~
-mkdir homebrew
-curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+# Install homebrew
+NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || exit
 
-# Temporarily add homebrew to path for install (permanent add in zshenv)
-export PATH=$HOME/homebrew/bin:$PATH
-
+# Install homebrew packages
 brew install node
 brew install cmake
 brew install ffmpeg
