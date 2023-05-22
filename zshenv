@@ -3,13 +3,6 @@
 
 export PATH="/usr/local/bin:/usr/sbin:$PATH"
 
-# for mac I sometimes store homebrew packages here
-if [ -d "$HOME/homebrew/bin" ]; then
-    export PATH="$HOME/homebrew/bin:$PATH"
-    export PATH="$HOME/homebrew/sbin:$PATH"
-    export LD_LIBRARY_PATH=$HOME/homebrew/lib:$LD_LIBRARY_PATH
-fi
-
 # for mac homebrew should be installed here
 if [ -d "/opt/homebrew" ]; then
     export PATH="/opt/homebrew/bin:$PATH"
