@@ -13,6 +13,9 @@ sudo xcodebuild -license || exit
 # Install homebrew
 NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || exit
 
+# Manually add installed homebrew to path for installations below
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 # Install homebrew packages
 brew install node
 brew install cmake
@@ -24,7 +27,6 @@ brew install ag
 brew install reattach-to-user-namespace
 brew install imagemagick
 brew install --cask iglance
-
 
 # Install common components
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
