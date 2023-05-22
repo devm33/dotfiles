@@ -15,7 +15,7 @@ cd ~
 mkdir homebrew
 curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
 
-# Temporarily add homebrew to path for install (permant add in zshenv)
+# Temporarily add homebrew to path for install (permanent add in zshenv)
 export PATH=$HOME/homebrew/bin:$PATH
 
 brew install node
