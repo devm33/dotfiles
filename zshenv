@@ -31,8 +31,11 @@ if [ -d "$HOME/.gem/bin" ]; then
     export PATH="$PATH:$HOME/.gem/bin"
 fi
 
-# homebrew python location
+# homebrew python3 symlinks
 [ -d /opt/homebrew/opt/python@3.11/libexec/bin ] && export PATH="$PATH:/opt/homebrew/opt/python@3.11/libexec/bin"
+
+# pip packages
+[ -d $HOME/Library/Python/3.11/bin ] && export PATH="$PATH:$HOME/Library/Python/3.11/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
