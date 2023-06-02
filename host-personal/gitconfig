@@ -40,3 +40,5 @@
     cmd = chropen
 [url "git@github.com:devm33/"]
     insteadof = g:
+[url "git@github.com:github/"]
+    insteadof = gh:
