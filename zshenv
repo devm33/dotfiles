@@ -31,9 +31,8 @@ if [ -d "$HOME/.gem/bin" ]; then
     export PATH="$PATH:$HOME/.gem/bin"
 fi
 
-# pip3 install location on mac
-[ -d $HOME/Library/Python/3.6/bin ] && export PATH="$PATH:$HOME/Library/Python/3.6/bin"
-[ -d $HOME/Library/Python/3.9/bin ] && export PATH="$PATH:$HOME/Library/Python/3.9/bin"
+# homebrew python location
+[ -d /opt/homebrew/opt/python@3.11/libexec/bin ] && export PATH="$PATH:/opt/homebrew/opt/python@3.11/libexec/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
