@@ -26,6 +26,7 @@ brew install tmux
 brew install ag
 brew install reattach-to-user-namespace
 brew install imagemagick
+brew install gnupg
 brew install --cask iglance
 
 # Install common components
