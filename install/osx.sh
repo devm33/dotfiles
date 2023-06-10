@@ -27,6 +27,7 @@ brew install ag
 brew install reattach-to-user-namespace
 brew install imagemagick
 brew install gnupg
+brew install pinentry-mac
 brew install --cask iglance
 
 # Install common components
