@@ -1,7 +1,7 @@
 [user]
     name = Devraj Mehta
     email = devm33@gmail.com
-	signingkey = C4A21F02
+    signingkey = A2BFB1A5C52E3AB6
 [core]
     text = auto
     excludesfile = ~/.gitignore
@@ -42,3 +42,5 @@
     insteadof = g:
 [url "git@github.com:github/"]
     insteadof = gh:
+[commit]
+    gpgsign = true
