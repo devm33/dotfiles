@@ -64,6 +64,10 @@ augroup autosave
   autocmd FocusLost * silent! wa
   autocmd TabLeave * silent! wa
 augroup END
+augroup autoread
+  autocmd!
+  au FocusGained,BufEnter * :checktime
+augroup END
 
 " Undo
 set undofile
