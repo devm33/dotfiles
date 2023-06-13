@@ -15,4 +15,5 @@ Plug 'tpope/vim-surround'
 Plug 'preservim/nerdtree'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'ctrlpvim/ctrlp.vim'
+Plug 'ivalkeen/vim-ctrlp-tjump'
 call plug#end()
