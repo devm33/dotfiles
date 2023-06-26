@@ -36,6 +36,9 @@ chpwd() {
   ls
 }
 
+# navigation shortcuts
+alias cdc='cd ~/code'
+
 # ViM
 alias v='nvim'
 alias vi='vim'
