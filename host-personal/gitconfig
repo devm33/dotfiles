@@ -39,8 +39,10 @@
 [browser "chropen"]
     cmd = chropen
 [url "git@github.com:devm33/"]
-    insteadof = g:
+    insteadof = d:
 [url "git@github.com:github/"]
     insteadof = gh:
+[url "git@github.com:"]
+    insteadof = g:
 [commit]
     gpgsign = true
