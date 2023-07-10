@@ -81,3 +81,11 @@ fi
 if [ -d /google/data ]; then
    fpath=(/google/src/files/head/depot/google3/devtools/blaze/scripts/zsh_completion $fpath)
 fi
+
+# depot_tools
+export PATH="$PATH:$HOME/code/depot_tools"
+
+# copilot token
+if [ -f ~/.copilot-testing-gh-token ]; then
+  export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
+fi
