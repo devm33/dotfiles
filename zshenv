@@ -88,4 +88,5 @@ export PATH="$PATH:$HOME/code/depot_tools"
 # copilot token
 if [ -f ~/.copilot-testing-gh-token ]; then
   export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
+  export GH_COPILOT_TOKEN=""
 fi
