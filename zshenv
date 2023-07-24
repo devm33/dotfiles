@@ -90,3 +90,4 @@ if [ -f ~/.copilot-testing-gh-token ]; then
   export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
   export GH_COPILOT_TOKEN=""
 fi
+. "$HOME/.cargo/env"
