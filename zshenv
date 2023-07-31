@@ -91,3 +91,6 @@ if [ -f ~/.copilot-testing-gh-token ]; then
   export GH_COPILOT_TOKEN=""
 fi
 . "$HOME/.cargo/env"
+
+# node
+export PATH="/opt/homebrew/opt/node@16/bin:$PATH"
