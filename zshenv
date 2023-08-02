@@ -85,11 +85,17 @@ fi
 # depot_tools
 export PATH="$PATH:$HOME/code/depot_tools"
 
-# copilot token
+# github/copilot token
 if [ -f ~/.copilot-testing-gh-token ]; then
   export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
   export GH_COPILOT_TOKEN=""
 fi
+if [ -f ~/.github_token ]; then
+  # override with this one
+  export GITHUB_TOKEN=`cat ~/.github-token`
+fi
+
+# rust
 . "$HOME/.cargo/env"
 
 # node
