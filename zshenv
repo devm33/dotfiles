@@ -92,7 +92,7 @@ if [ -f ~/.copilot-testing-gh-token ]; then
 fi
 if [ -f ~/.github_token ]; then
   # override with this one
-  export GITHUB_TOKEN=`cat ~/.github-token`
+  export GITHUB_TOKEN=`cat ~/.github_token`
 fi
 
 # rust
