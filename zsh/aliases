@@ -41,7 +41,8 @@ alias cdc='cd ~/code'
 
 # ViM
 alias v='nvim'
-alias vi='vim'
+alias vi='nvim'
+alias vim='nvim'
 
 # Vagrant
 alias vg='vagrant'
