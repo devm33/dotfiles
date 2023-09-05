@@ -18,10 +18,10 @@ bureau_git_branch () {
 }
 
 bureau_git_status () {
-  if $(pwd | grep -q 'chromium'); then
+  if [[ "$PWD" == *"electron/src"* ]]; then
     return
   fi
-  if $(pwd | grep -q 'electron'); then
+  if [[ "$PWD" == *"chromium/src"* ]]; then
     return
   fi
   _INDEX=$(command git status --porcelain -b 2> /dev/null)

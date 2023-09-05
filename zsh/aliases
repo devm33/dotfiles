@@ -29,11 +29,16 @@ alias aci='apt-cache show'
 
 # Show contents of directory after cd-ing into it
 chpwd() {
-  if [ -d .git ]; then
-      git diff --quiet || echo 'git changes pending'
-      echo '--'
-  fi
   ls
+  if [[ "$PWD" == *"electron/src"* ]]; then
+    return
+  fi
+  if [[ "$PWD" == *"chromium/src"* ]]; then
+    return
+  fi
+  if [ -d .git ]; then
+      git diff --quiet || echo "--\ngit changes pending"
+  fi
 }
 
 # navigation shortcuts
