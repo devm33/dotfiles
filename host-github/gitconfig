@@ -28,6 +28,7 @@
     untracked = cyan
 [push]
     default = current
+	autoSetupRemote = true
 [branch]
     autosetupmerge = true
 [merge]
