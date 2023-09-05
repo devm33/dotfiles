@@ -38,6 +38,7 @@ chpwd() {
 
 # navigation shortcuts
 alias cdc='cd ~/code'
+alias cdcp='cd ~/code/copilot-client'
 
 # ViM
 alias v='nvim'
