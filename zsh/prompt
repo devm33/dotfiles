@@ -96,15 +96,6 @@ get_space () {
   echo $SPACES
 }
 
-# add to right-side prompt if on goobuntu
-_PROD_FILE='/tmp/devrajm_prodcertstatus'
-
-output_prodaccess() {
-  if [ -f "$_PROD_FILE" ]; then
-    cat $_PROD_FILE
-  fi
-}
-
 # add red x to ride-side if last command failed
 _CMD_FAILED="%{$fg_bold[red]%}x%{$reset_color%} "
 cmd_failed() {
@@ -114,7 +105,7 @@ cmd_failed() {
 }
 
 _1LEFT="$_USERNAME $_PATH"
-_1RIGHT='$(cmd_failed $retval)$(output_prodaccess)[%*] '
+_1RIGHT='$(cmd_failed $retval)[%*] '
 
 bureau_precmd () {
   retval="$?"
