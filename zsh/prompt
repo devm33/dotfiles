@@ -21,6 +21,9 @@ bureau_git_status () {
   if $(pwd | grep -q 'chromium'); then
     return
   fi
+  if $(pwd | grep -q 'electron'); then
+    return
+  fi
   _INDEX=$(command git status --porcelain -b 2> /dev/null)
   _STATUS=""
   if $(echo "$_INDEX" | grep '^[AMRD]. ' &> /dev/null); then
