@@ -47,3 +47,5 @@
     insteadof = g:
 [commit]
     gpgsign = true
+[pull]
+	rebase = true
