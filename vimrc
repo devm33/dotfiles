@@ -150,7 +150,6 @@ nnoremap <leader>3 :diffget REMOTE<cr>
 " Copy/pasting from system registers
 nnoremap <leader>p "+
 vnoremap <leader>p "+
-nnoremap <C-v> "+p
 
 " Copy/pasting over ssh to osx
 function! PropagatePasteBufferToOSX()
