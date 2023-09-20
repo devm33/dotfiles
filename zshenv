@@ -85,6 +85,9 @@ fi
 # depot_tools
 export PATH="$PATH:$HOME/code/depot_tools"
 
+# git cache
+export GIT_CACHE_PATH="${HOME}/.git_cache"
+
 # github/copilot token
 if [ -f ~/.copilot-testing-gh-token ]; then
   export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
