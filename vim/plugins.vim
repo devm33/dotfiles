@@ -17,4 +17,5 @@ Plug 'preservim/nerdtree'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ivalkeen/vim-ctrlp-tjump'
+Plug 'fatih/vim-go'
 call plug#end()
