@@ -88,13 +88,9 @@ export PATH="$PATH:$HOME/code/depot_tools"
 # git cache
 export GIT_CACHE_PATH="${HOME}/.git_cache"
 
-# github/copilot token
-if [ -f ~/.copilot-testing-gh-token ]; then
-  export GITHUB_TOKEN=`cat ~/.copilot-testing-gh-token`
-  export GH_COPILOT_TOKEN=""
-fi
+# github token
+export GH_COPILOT_TOKEN="" # silence some log noise
 if [ -f ~/.github_token ]; then
-  # override with this one
   export GITHUB_TOKEN=`cat ~/.github_token`
 fi
 
