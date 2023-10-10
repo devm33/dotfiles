@@ -78,6 +78,8 @@ alias b='grunt_and_gulp'
 # Npm
 alias npmdev='npm install --save-dev '
 alias nr='npm run'
+alias ns='npm start'
+alias nt='npm test'
 
 # Bundler
 alias bx='bundle exec'
