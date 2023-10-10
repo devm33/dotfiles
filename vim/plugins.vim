@@ -19,4 +19,5 @@ Plug 'HerringtonDarkholme/yats.vim'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ivalkeen/vim-ctrlp-tjump'
 Plug 'fatih/vim-go'
+Plug 'prettier/vim-prettier'
 call plug#end()
