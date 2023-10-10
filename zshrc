@@ -5,7 +5,7 @@ DISABLE_AUTO_UPDATE="true"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 if [[ "$(uname -s)" == Darwin ]]; then
-    plugins=(git vagrant npm node pip bundler docker)
+    plugins=(git npm node pip bundler docker)
 else
     plugins=(git vagrant debian npm node pip bundler docker)
 fi
