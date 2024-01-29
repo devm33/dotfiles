@@ -104,3 +104,6 @@ export CPPFLAGS="-I/opt/homebrew/opt/node@18/include"
 
 # less
 export LESS="-FRX"
+
+# ssl
+export SSLKEYLOGFILE='/private/tmp/ssl-key.log'
