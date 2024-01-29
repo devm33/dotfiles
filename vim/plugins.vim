@@ -20,4 +20,5 @@ Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ivalkeen/vim-ctrlp-tjump'
 Plug 'fatih/vim-go'
 Plug 'prettier/vim-prettier'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 call plug#end()
