@@ -44,7 +44,7 @@
 [url "git@github.com:github/"]
     insteadof = gh:
 [url "git@github.com:"]
-    insteadof = g:
+	insteadOf = https://github.com/
 [commit]
     gpgsign = true
 [pull]
