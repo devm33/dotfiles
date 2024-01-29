@@ -182,14 +182,25 @@ nnoremap <leader>vp :e ~/.vim/plugins.vim<CR>
 nnoremap <leader>vu :so $MYVIMRC<CR>:PlugClean!<CR>:PlugUpgrade<CR>:PlugUpdate<CR>
 
 " Saving and Exiting
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
-nnoremap <leader><esc> :qall<CR>
 command! Q q
+nnoremap <leader>q :q<CR>
+nnoremap <leader>w :w<CR>
 
 " Enable syntax highlighting
 syntax enable
 syntax on
+
+" Spell-check Markdown files and Git Commit Messages
+augroup spellchecking
+  autocmd!
+  autocmd FileType markdown setlocal spell
+  autocmd FileType gitcommit setlocal spell
+  autocmd FileType markdown syn match UrlNoSpell '\w\+:\/\/[^[:space:]]\+' contains=@NoSpell
+augroup END
+
+" Copilot
+" let g:copilot_proxy = 'http://localhost:8888'
+" let g:copilot_proxy = 'http://localhost:3128'
 
 " Turn plugins back on (needs to be last line)
 filetype plugin indent on
