@@ -43,11 +43,7 @@
     insteadof = d:
 [url "git@github.com:github/"]
     insteadof = gh:
-[url "git@github.com:"]
-	insteadOf = https://github.com/
 [commit]
     gpgsign = true
 [pull]
 	rebase = true
-[url "ssh://git@github.com/"]
-	insteadOf = https://github.com/
