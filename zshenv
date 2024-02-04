@@ -51,6 +51,12 @@ fi
 export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
 
+# golang goproxy
+export GOPROXY='https://goproxy.githubapp.com/mod,https://proxy.golang.org/,direct'
+export GOPRIVATE=''
+export GONOPROXY=''
+export GONOSUMDB='github.com/github/*'
+
 # scala needs these
 if [ -d '/usr/local/share/scala' ]; then
   export SCALA_HOME='/usr/local/share/scala' 
