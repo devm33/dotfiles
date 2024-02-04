@@ -95,7 +95,9 @@ if [ -f ~/.github_token ]; then
 fi
 
 # rust
-. "$HOME/.cargo/env"
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
 
 # node
 export PATH="/opt/homebrew/opt/node@18/bin:$PATH"
