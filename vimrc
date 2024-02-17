@@ -184,6 +184,7 @@ nnoremap <leader>vu :so $MYVIMRC<CR>:PlugClean!<CR>:PlugUpgrade<CR>:PlugUpdate<C
 " Saving and Exiting
 command! Q q
 nnoremap <leader>q :q<CR>
+nnoremap <leader>Q :qall!<CR>
 nnoremap <leader>w :w<CR>
 
 " Enable syntax highlighting
@@ -199,7 +200,8 @@ augroup spellchecking
 augroup END
 
 " Copilot
-" let g:copilot_proxy = 'http://localhost:8888'
+" let g:copilot_proxy = 'http://localhost:8080'
+" let g:copilot_proxy_strict_ssl = v:false
 " let g:copilot_proxy = 'http://localhost:3128'
 
 " Turn plugins back on (needs to be last line)
