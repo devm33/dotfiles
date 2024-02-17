@@ -100,6 +100,9 @@ if [ -f ~/.github_token ]; then
   export GITHUB_TOKEN=`cat ~/.github_token`
 fi
 
+# copilot
+export COPILOT_AGENT_VERBOSE='true'
+
 # rust
 if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
