@@ -1,14 +1,14 @@
 # Reload/edit zsh configuration
 alias rz='source ~/.zshrc'
-alias ze='vim ~/.dotfiles/zshrc'
-alias za='vim ~/.dotfiles/zsh/aliases'
+alias ze='$EDITOR ~/.dotfiles/zshrc'
+alias za='$EDITOR ~/.dotfiles/zsh/aliases'
 
 # zsh awesomeness
 autoload -U zmv
 alias mmv='noglob zmv -W'
 
 # edit tmux conf
-alias vt='vim ~/.dotfiles/tmux.conf'
+alias vt='$EDITOR ~/.dotfiles/tmux.conf'
 alias ta='tmux attach || tmux'
 
 # ls
