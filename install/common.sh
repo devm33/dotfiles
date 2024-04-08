@@ -30,7 +30,7 @@ fi
 git clone https://github.com/robbyrussell/oh-my-zsh.git .oh-my-zsh
 
 # Note: version here will become stale!
-RCMV='1.3.1'
+RCMV='1.3.4'
 curl -LO https://thoughtbot.github.io/rcm/dist/rcm-$RCMV.tar.gz && \
 tar -xvf rcm-$RCMV.tar.gz && \
 cd rcm-$RCMV && \
@@ -52,6 +52,3 @@ rcup -v
 
 ln -s ~/.vim ~/.config/nvim
 ln -s ~/.vimrc ~/.config/nvim/init.vim
-
-npm i -g tmux-cpu
-npm i -g tmux-mem
