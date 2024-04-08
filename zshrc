@@ -5,7 +5,7 @@ DISABLE_AUTO_UPDATE="true"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 if [[ "$(uname -s)" == Darwin ]]; then
-    plugins=(git npm node pip bundler docker)
+    plugins=(git npm node docker)
 else
     plugins=(git vagrant debian npm node pip bundler docker)
 fi
@@ -58,13 +58,13 @@ fi
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
 
-# added by travis gem
-[ -f /Users/devrajm/.travis/travis.sh ] && source /Users/devrajm/.travis/travis.sh
-
 # fzf
 [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
 [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# rbenv
+#eval "$(rbenv init - zsh)"
