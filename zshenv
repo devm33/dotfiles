@@ -96,9 +96,9 @@ export GIT_CACHE_PATH="${HOME}/.git_cache"
 
 # github token
 export GH_COPILOT_TOKEN="" # silence some log noise
-if [ -f ~/.github_token ]; then
-  export GITHUB_TOKEN=`cat ~/.github_token`
-fi
+# if [ -f ~/.github_token ]; then
+#   export GITHUB_TOKEN=`cat ~/.github_token`
+# fi
 
 # copilot
 export COPILOT_AGENT_VERBOSE='true'
