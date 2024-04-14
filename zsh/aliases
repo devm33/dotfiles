@@ -43,6 +43,7 @@ chpwd() {
 
 # navigation shortcuts
 alias cdc='cd ~/code'
+alias cd.='cd ~/.dotfiles'
 
 # ViM
 alias v='nvim'
