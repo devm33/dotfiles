@@ -1,3 +1,3 @@
 DOTFILES_DIRS="$HOME/.dotfiles"
-EXCLUDES="README.md git install"
+EXCLUDES="README.md git install oldvim"
 HOSTNAME="personal"
