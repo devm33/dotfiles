@@ -24,7 +24,6 @@ brew install vim
 brew install neovim
 brew install tmux
 brew install ag
-brew install reattach-to-user-namespace
 brew install imagemagick
 brew install gnupg
 brew install pinentry-mac
