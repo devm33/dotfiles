@@ -200,6 +200,7 @@ augroup spellchecking
 augroup END
 
 " Copilot
+let b:copilot_enabled = v:true
 " let g:copilot_proxy = 'http://localhost:8080'
 " let g:copilot_proxy_strict_ssl = v:false
 " let g:copilot_proxy = 'http://localhost:3128'
