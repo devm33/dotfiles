@@ -68,3 +68,6 @@ stty -ixon
 
 # rbenv
 #eval "$(rbenv init - zsh)"
+
+# vscode
+export VSCODE_VERBOSE_LOGGING="true"
