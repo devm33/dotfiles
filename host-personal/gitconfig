@@ -44,5 +44,3 @@
     insteadof = gh:
 [url "git@github.com:"]
     insteadof = g:
-[commit]
-    gpgsign = true
