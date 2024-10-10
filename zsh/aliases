@@ -158,6 +158,7 @@ alias hd='hg diff'
 alias ha='hg am'
 
 # Git functions and aliases
+alias glom='git log --oneline --decorate main..@'
 alias gA='git add -A'
 alias gpr='git remote prune origin'
 alias gra='git remote add'
