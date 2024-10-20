@@ -180,6 +180,13 @@ git_commit_message() {
 }
 alias GC=git_commit_message
 
+git_push_one_at_a_time() {
+    cb=$(git_current_branch)
+    for r in $(git rev-list --reverse origin/${cb}..${cb}); do
+        git push --force-with-lease --force-if-includes origin ${r}:${cb}
+    done
+}
+alias gp1b1=git_push_one_at_a_time
 
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
