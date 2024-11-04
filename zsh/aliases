@@ -182,8 +182,9 @@ alias GC=git_commit_message
 
 git_push_one_at_a_time() {
     cb=$(git_current_branch)
-    for r in $(git rev-list --reverse origin/${cb}..${cb}); do
-        git push --force-with-lease --force-if-includes origin ${r}:${cb}
+    mb=$(git_main_branch)
+    for r in $(git rev-list --reverse ${mb}..${cb}); do
+        git push --force-with-lease --force-if-includes origin ${r}:refs/heads/${cb}
     done
 }
 alias gp1b1=git_push_one_at_a_time
