@@ -7,6 +7,8 @@
     excludesfile = ~/.gitignore
     whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol,tab-in-indent
     autocrlf = input
+[merge]
+    conflictstyle = zdiff3
 [color]
     ui = always
     status = always
