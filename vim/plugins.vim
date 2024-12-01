@@ -22,4 +22,5 @@ Plug 'fatih/vim-go'
 Plug 'prettier/vim-prettier'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
 Plug 'darfink/vim-plist'
+Plug 'neovim/nvim-lspconfig'
 call plug#end()
