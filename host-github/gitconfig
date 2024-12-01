@@ -1,7 +1,7 @@
 [user]
     name = Devraj Mehta
     email = devm33@github.com
-    signingkey = F6E82AA3322E0FF6
+	signingkey = /Users/devm33/.ssh/id_ed25519.pub
 [core]
     text = auto
     excludesfile = ~/.gitignore
@@ -33,6 +33,7 @@
 	autoSetupRemote = true
 [branch]
     autosetupmerge = true
+	sort = -committerdate
 [merge]
     tool = vimdiff
 [fetch]
@@ -57,3 +58,7 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[rerere]
+	enabled = true
+[gpg]
+	format = ssh
