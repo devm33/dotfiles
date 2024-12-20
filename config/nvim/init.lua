@@ -38,6 +38,8 @@ lazy.setup({
   {'hrsh7th/nvim-cmp'},                  -- Autocomplete engine
   {'hrsh7th/cmp-nvim-lsp'},              -- Completion source for LSP
   {'L3MON4D3/LuaSnip'},                  -- Snippet engine
+  {'github/copilot.vim'},
+  {'tpope/vim-surround'},
 })
 
 vim.cmd.colorscheme('habamax')
@@ -93,7 +95,7 @@ local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 require('mason').setup({})
 require('mason-lspconfig').setup({
   ensure_installed = {
-    'tsserver',
+    'ts_ls',
     'eslint',
     'html',
     'cssls'
@@ -104,8 +106,8 @@ require('mason-lspconfig').setup({
         capabilities = lsp_capabilities,
       })
     end,
-    ['tsserver'] = function()
-      lspconfig.tsserver.setup({
+    ['ts_ls'] = function()
+      lspconfig.ts_ls.setup({
         capabilities = lsp_capabilities,
         settings = {
           completions = {
