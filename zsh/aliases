@@ -81,6 +81,7 @@ alias nri='npm run --ignore-scripts'
 alias ns='npm start'
 alias nt='npm test'
 alias nm='npx mocha'
+alias nb='npm run build'
 
 # Bundler
 alias bx='bundle exec'
