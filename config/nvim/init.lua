@@ -44,6 +44,7 @@ lazy.setup({
 
 vim.cmd.colorscheme('habamax')
 vim.opt.relativenumber = true
+vim.opt.spell = true
 
 local cmp = require('cmp')
 local luasnip = require('luasnip')
