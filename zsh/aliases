@@ -186,6 +186,7 @@ git_push_one_at_a_time() {
     mb=$(git_main_branch)
     for r in $(git rev-list --reverse ${mb}..${cb}); do
         git push --force-with-lease --force-if-includes origin ${r}:refs/heads/${cb}
+        sleep 90
     done
 }
 alias gp1b1=git_push_one_at_a_time
