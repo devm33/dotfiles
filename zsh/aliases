@@ -183,8 +183,11 @@ alias GC=git_commit_message
 
 git_push_one_at_a_time() {
     cb=$(git_current_branch)
-    mb=$(git_main_branch)
-    for r in $(git rev-list --reverse ${mb}..${cb}); do
+    start=$1
+    if [ -z $start ]; then
+        start=$(git_main_branch)
+    fi
+    for r in $(git rev-list --reverse ${start}..${cb}); do
         git push --force-with-lease --force-if-includes origin ${r}:refs/heads/${cb}
         sleep 300
     done
