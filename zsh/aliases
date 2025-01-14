@@ -187,10 +187,14 @@ git_push_one_at_a_time() {
     if [ -z $start ]; then
         start=$(git_main_branch)
     fi
+    will_sleep=$2
+    if [ -z $will_sleep ]; then
+        will_sleep=300
+    fi
     s=0
     for r in $(git rev-list --reverse ${start}..${cb}); do
         sleep $s
-        s=300
+        s=$will_sleep
         git push --force-with-lease --force-if-includes origin ${r}:refs/heads/${cb}
     done
 }
