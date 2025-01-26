@@ -29,6 +29,8 @@ brew install gnupg
 brew install pinentry-mac
 brew install --cask iglance
 brew install fzf
+brew install ripgrep
+brew install fd
 
 # Install common components
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
