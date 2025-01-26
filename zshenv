@@ -101,7 +101,7 @@ export GH_COPILOT_TOKEN="" # silence some log noise
 # fi
 
 # copilot
-export COPILOT_AGENT_VERBOSE='true'
+# export COPILOT_AGENT_VERBOSE='true'
 
 # rust
 if [ -f "$HOME/.cargo/env" ]; then
