@@ -48,6 +48,7 @@ alias cd.='cd ~/.dotfiles'
 # ViM
 alias v='nvim'
 alias vi='nvim'
+alias ve='nvim ~/.dotfiles/config/nvim/init.vim'
 
 # Vagrant
 alias vg='vagrant'
