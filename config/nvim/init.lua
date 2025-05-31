@@ -38,10 +38,14 @@ lazy.setup({
   {'hrsh7th/nvim-cmp'},                  -- Autocomplete engine
   {'hrsh7th/cmp-nvim-lsp'},              -- Completion source for LSP
   {'L3MON4D3/LuaSnip'},                  -- Snippet engine
-  {'github/copilot.vim'},
+  {'ibhagwan/fzf-lua'},
+  -- {'github/copilot.vim'},
+  {dir = '~/code/copilot-vim'},
+  -- {'ggml-org/llama.vim'},
   {'tpope/vim-surround'},
 })
 
+vim.g.mapleader = ' '
 vim.cmd.colorscheme('habamax')
 vim.opt.relativenumber = true
 vim.opt.spell = true
