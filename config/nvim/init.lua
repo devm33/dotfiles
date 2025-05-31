@@ -43,6 +43,7 @@ lazy.setup({
   {dir = '~/code/copilot-vim'},
   -- {'ggml-org/llama.vim'},
   {'tpope/vim-surround'},
+  {'lewis6991/gitsigns.nvim'},
 })
 
 vim.g.mapleader = ' '
