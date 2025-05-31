@@ -11,7 +11,7 @@ sudo xcodebuild -license || exit
 # OSX Specific install
 
 # Install homebrew
-NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || exit
+NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/main/install.sh)" || exit
 
 # Manually add installed homebrew to path for installations below
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -33,4 +33,4 @@ brew install ripgrep
 brew install fd
 
 # Install common components
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit

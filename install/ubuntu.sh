@@ -10,4 +10,4 @@ sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ri
 sudo npm i -g npm
 
 # Install common components
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit
