@@ -1,9 +1,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
-
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -217,40 +214,7 @@ require("lazy").setup({
             -- this setting is independent of vim.o.timeoutlen
             delay = 0,
             icons = {
-                -- set icon mappings to true if you have a Nerd Font
-                mappings = vim.g.have_nerd_font,
-                -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
-                -- default which-key.nvim defined Nerd Font icons, otherwise define a string table
-                keys = vim.g.have_nerd_font and {} or {
-                    Up = "<Up> ",
-                    Down = "<Down> ",
-                    Left = "<Left> ",
-                    Right = "<Right> ",
-                    C = "<C-…> ",
-                    M = "<M-…> ",
-                    D = "<D-…> ",
-                    S = "<S-…> ",
-                    CR = "<CR> ",
-                    Esc = "<Esc> ",
-                    ScrollWheelDown = "<ScrollWheelDown> ",
-                    ScrollWheelUp = "<ScrollWheelUp> ",
-                    NL = "<NL> ",
-                    BS = "<BS> ",
-                    Space = "<Space> ",
-                    Tab = "<Tab> ",
-                    F1 = "<F1>",
-                    F2 = "<F2>",
-                    F3 = "<F3>",
-                    F4 = "<F4>",
-                    F5 = "<F5>",
-                    F6 = "<F6>",
-                    F7 = "<F7>",
-                    F8 = "<F8>",
-                    F9 = "<F9>",
-                    F10 = "<F10>",
-                    F11 = "<F11>",
-                    F12 = "<F12>",
-                },
+                mappings = true,
             },
 
             -- Document existing key chains
@@ -288,9 +252,7 @@ require("lazy").setup({
                 end,
             },
             { "nvim-telescope/telescope-ui-select.nvim" },
-
-            -- Useful for getting pretty icons, but requires a Nerd Font.
-            { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
+            { "nvim-tree/nvim-web-devicons" },
         },
         config = function()
             -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -554,14 +516,14 @@ require("lazy").setup({
                 severity_sort = true,
                 float = { border = "rounded", source = "if_many" },
                 underline = { severity = vim.diagnostic.severity.ERROR },
-                signs = vim.g.have_nerd_font and {
+                signs = {
                     text = {
                         [vim.diagnostic.severity.ERROR] = "󰅚 ",
                         [vim.diagnostic.severity.WARN] = "󰀪 ",
                         [vim.diagnostic.severity.INFO] = "󰋽 ",
                         [vim.diagnostic.severity.HINT] = "󰌶 ",
                     },
-                } or {},
+                },
                 virtual_text = {
                     source = "if_many",
                     spacing = 2,
@@ -851,7 +813,7 @@ require("lazy").setup({
             --  and try some other statusline plugin
             local statusline = require("mini.statusline")
             -- set use_icons to true if you have a Nerd Font
-            statusline.setup({ use_icons = vim.g.have_nerd_font })
+            statusline.setup({ use_icons = true })
 
             -- You can configure sections in the statusline by overriding their
             -- default behavior. For example, here we set the section for
@@ -929,24 +891,4 @@ require("lazy").setup({
     -- Or use telescope!
     -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
     -- you can continue same window with `<space>sr` which resumes last telescope search
-}, {
-    ui = {
-        -- If you are using a Nerd Font: set icons to an empty table which will use the
-        -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
-        icons = vim.g.have_nerd_font and {} or {
-            cmd = "⌘",
-            config = "🛠",
-            event = "📅",
-            ft = "📂",
-            init = "⚙",
-            keys = "🗝",
-            plugin = "🔌",
-            runtime = "💻",
-            require = "🌙",
-            source = "📄",
-            start = "🚀",
-            task = "📌",
-            lazy = "💤 ",
-        },
-    },
 })
