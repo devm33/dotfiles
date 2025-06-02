@@ -1,13 +1,20 @@
+-- Leaders
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+-- Numbers
 vim.o.number = true
 vim.o.relativenumber = true
 
--- Enable mouse mode, can be useful for resizing splits for example!
+-- Mouse
 vim.o.mouse = "a"
 
--- Don't show the mode, since it's already in the status line
-vim.o.showmode = false
+-- File IO
+vim.o.swapfile = false
+vim.o.autowriteall = true
+
+-- Undo
+vim.o.undofile = true
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -21,7 +28,6 @@ end)
 vim.o.breakindent = true
 
 -- Save undo history
-vim.o.undofile = true
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.ignorecase = true
