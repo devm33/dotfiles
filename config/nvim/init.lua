@@ -16,6 +16,9 @@ vim.o.autowriteall = true
 -- Undo
 vim.o.undofile = true
 
+-- Copilot
+vim.b.copilot_enabled = true
+
 -- Clipboard
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -841,4 +844,5 @@ require("lazy").setup({
     -- Or use telescope!
     -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
     -- you can continue same window with `<space>sr` which resumes last telescope search
+    { dir = "~/code/copilot-vim" },
 })
