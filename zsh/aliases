@@ -409,3 +409,12 @@ togif() {
 
     ffmpeg -i $1 -pix_fmt rgb8 -r 10 $output_file && gifsicle -O3 $output_file -o $output_file
 }
+
+# GitHub Copilot CLI
+ghcs() {
+    gh copilot suggest -t shell "$*"
+}
+
+ghce() {
+    gh copilot explain "$*"
+}
