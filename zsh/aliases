@@ -171,6 +171,7 @@ alias gwc='git whatchanged -p'
 alias gcX='git clean -dfX'
 alias gbv='git branch -vv'
 alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
+alias gdn='git diff --name-only $(git_main_branch)'
 
 git_commit_all_message() {
     git add -A
