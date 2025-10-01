@@ -419,3 +419,5 @@ ghcs() {
 ghce() {
     gh copilot explain "$*"
 }
+
+alias cpd='copilot-dev'
