@@ -421,3 +421,5 @@ ghce() {
 }
 
 alias cpd='copilot-dev'
+alias cpd2='/Users/devm33/code/2swe/runtime/dist-cli/index.js'
+alias cpd3='/Users/devm33/code/3swe/runtime/dist-cli/index.js'
