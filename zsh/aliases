@@ -420,4 +420,5 @@ ghce() {
     gh copilot explain "$*"
 }
 
-alias cpdup='npm i -g @github/copilot@prerelease'
+alias clilog='less ~/.copilot/logs/"$(ls -t ~/.copilot/logs/ | head -1)"'
+alias clises='less ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"'
