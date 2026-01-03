@@ -430,3 +430,4 @@ ask_copilot() {
     copilot -s -p "$*"
 }
 alias ask=ask_copilot
+alias ci=code-insiders
