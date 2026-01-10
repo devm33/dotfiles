@@ -20,6 +20,9 @@ export PATH="$HOME/.bin:$PATH"
 if [ -d "$HOME/code/bin" ]; then
     export PATH="$HOME/code/bin:$PATH"
 fi
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
 
 # gems on path
 export GEM_HOME="$HOME/.gem"
