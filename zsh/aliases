@@ -194,7 +194,7 @@ git_push_one_at_a_time() {
     fi
     will_sleep=$2
     if [ -z $will_sleep ]; then
-        will_sleep=300
+        will_sleep=10
     fi
     s=0
     for r in $(git rev-list --reverse ${start}..${cb}); do
