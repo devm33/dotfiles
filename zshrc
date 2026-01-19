@@ -70,9 +70,9 @@ export NVM_DIR="$HOME/.nvm"
 #eval "$(rbenv init - zsh)"
 
 # ngrok
-if command -v ngrok &>/dev/null; then
-    eval "$(ngrok completion)"
-fi
+# if command -v ngrok &>/dev/null; then
+#     eval "$(ngrok completion)"
+# fi
 
 # vscode
 export VSCODE_VERBOSE_LOGGING="true"
