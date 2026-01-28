@@ -44,6 +44,7 @@ chpwd() {
 # navigation shortcuts
 alias cdc='cd ~/code'
 alias cd.='cd ~/.dotfiles'
+alias cd.cp='cd ~/.copilot'
 
 # ViM
 alias v='nvim'
@@ -424,6 +425,7 @@ ghce() {
 
 alias clilog='less ~/.copilot/logs/"$(ls -t ~/.copilot/logs/ | head -1)"'
 alias clisesless='less ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
+alias clicd='cd ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"'
 alias clisesopen='code-insiders ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
 alias clises='chropen ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
 alias yolo='copilot --allow-all'
