@@ -118,4 +118,4 @@ export LESS="-FRX"
 # export SSLKEYLOGFILE='/private/tmp/ssl-key.log'
 
 # local node_modules (only works from project root)
-export PATH="./node_modules/.bin:$PATH"
+# export PATH="./node_modules/.bin:$PATH"
