@@ -182,12 +182,15 @@ wt() {
   fi
 
   local wt_path="$HOME/code/wt/$1"
+  local wt_branch="devm33/$1"
 
-  # Create the git worktree, creating the branch if it doesn't exist
-  if git show-ref --verify --quiet "refs/heads/devm33/$1"; then
-    git worktree add "$wt_path" "devm33/$1"
-  else
-    git worktree add -b "devm33/$1" "$wt_path"
+  # Create the git worktree if it doesn't already exist
+  if [[ ! -d "$wt_path" ]]; then
+    if git show-ref --verify --quiet "refs/heads/$wt_branch"; then
+      git worktree add "$wt_path" "$wt_branch"
+    else
+      git worktree add -b "$wt_branch" "$wt_path"
+    fi
   fi
 
   # Install dependencies in the new worktree
@@ -222,6 +225,17 @@ wt() {
 
   # Focus back on the first pane
   tmux select-pane -t "${win}.0"
+}
+# Remove worktrees for gone branches, then delete the branches
+gwgD() {
+  for b in $(LANG=C git branch --no-color -vv | grep ": gone\]" | sed 's/^[+* ]*//' | awk '{print $1}'); do
+    wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$b" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+    if [ -n "$wt" ]; then
+      echo "Removing worktree: $wt (branch: $b)"
+      git worktree remove --force "$wt"
+    fi
+    git branch -D "$b"
+  done
 }
 
 
