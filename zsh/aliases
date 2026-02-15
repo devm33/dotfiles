@@ -175,8 +175,53 @@ alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
 alias gdn='git diff --name-only $(git_main_branch)...@'
 alias gdm='git diff $(git_main_branch)..HEAD'
 alias gs='git status'
-gwa() {
-  git worktree add -b devm33/$1 ~/code/wt/$1
+wt() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: wt <branch-name>"
+    return 1
+  fi
+
+  local wt_path="$HOME/code/wt/$1"
+
+  # Create the git worktree, creating the branch if it doesn't exist
+  if git show-ref --verify --quiet "refs/heads/devm33/$1"; then
+    git worktree add "$wt_path" "devm33/$1"
+  else
+    git worktree add -b "devm33/$1" "$wt_path"
+  fi
+
+  # Install dependencies in the new worktree
+  if [ -f "$wt_path/package.json" ]; then
+    (cd "$wt_path" && npm install)
+  fi
+
+  # Create a new tmux window at the worktree path
+  local win
+  win=$(tmux new-window -c "$wt_path" -P -F '#{window_id}')
+
+  # In the initial pane: background npm install, then run yolo
+  tmux send-keys -t "$win" "yolo" Enter
+
+  # Split vertically (left | right)
+  tmux split-window -h -t "$win" -c "$wt_path"
+
+  # Split the right pane horizontally (right-top / right-bottom)
+  tmux split-window -v -t "$win" -c "$wt_path"
+
+  # Split the right-bottom pane vertically (right-bottom-left | right-bottom-right)
+  tmux split-window -h -t "$win" -c "$wt_path"
+
+  # Target panes by index within the window:
+  #   0 = left           (yolo is already running here)
+  #   1 = right-top
+  #   2 = right-bottom-left
+  #   3 = right-bottom-right
+
+  tmux send-keys -t "${win}.2" "npm run build:cli:watch" Enter
+  tmux send-keys -t "${win}.3" "npm run lint:types:watch" Enter
+
+  # Focus back on the first pane
+  tmux select-pane -t "${win}.0"
 }
 
 
