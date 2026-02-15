@@ -175,6 +175,10 @@ alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
 alias gdn='git diff --name-only $(git_main_branch)...@'
 alias gdm='git diff $(git_main_branch)..HEAD'
 alias gs='git status'
+gwa() {
+  git worktree add -b devm33/$1 ~/code/wt/$1
+}
+
 
 git_commit_all_message() {
     git add -A
