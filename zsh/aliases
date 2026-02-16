@@ -187,9 +187,9 @@ wt() {
   # Create the git worktree if it doesn't already exist
   if [[ ! -d "$wt_path" ]]; then
     if git show-ref --verify --quiet "refs/heads/$wt_branch"; then
-      git worktree add "$wt_path" "$wt_branch"
+      git worktree add "$wt_path" "$wt_branch" || return 1
     else
-      git worktree add -b "$wt_branch" "$wt_path"
+      git worktree add -b "$wt_branch" "$wt_path" || return 1
     fi
   fi
 
