@@ -236,6 +236,17 @@ wt() {
   # Focus back on the first pane
   tmux select-pane -t "${win}.0"
 }
+# Delete branch and its associated worktree (if any)
+gbDW() {
+  for b in "$@"; do
+    wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$b" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+    if [ -n "$wt" ]; then
+      echo "Removing worktree: $wt (branch: $b)"
+      git worktree remove --force "$wt"
+    fi
+    git branch -D "$b"
+  done
+}
 # Remove worktrees for gone branches, then delete the branches
 gwgD() {
   for b in $(LANG=C git branch --no-color -vv | grep ": gone\]" | sed 's/^[+* ]*//' | awk '{print $1}'); do
