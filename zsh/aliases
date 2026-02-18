@@ -182,7 +182,17 @@ wt() {
   fi
 
   local wt_path="$HOME/code/wt/$1"
-  local wt_branch="devm33/$1"
+
+  # Fetch latest branches
+  git pull || return 1
+
+  # Determine branch name: skip devm33/ prefix if already present or if it's an existing branch
+  local wt_branch
+  if [[ "$1" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$1" || git show-ref --verify --quiet "refs/remotes/origin/$1"; then
+    wt_branch="$1"
+  else
+    wt_branch="devm33/$1"
+  fi
 
   # Create the git worktree if it doesn't already exist
   if [[ ! -d "$wt_path" ]]; then
