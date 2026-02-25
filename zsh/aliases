@@ -258,7 +258,33 @@ gwgD() {
     git branch -D "$b"
   done
 }
+# Delete a single worktree by name and force delete its branch
+wtD() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: wtD <branch-name>"
+    return 1
+  fi
 
+  local wt_path="$HOME/code/wt/$1"
+
+  # Determine branch name using the same logic as wt
+  local wt_branch
+  if [[ "$1" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$1" || git show-ref --verify --quiet "refs/remotes/origin/$1"; then
+    wt_branch="$1"
+  else
+    wt_branch="devm33/$1"
+  fi
+
+  # Remove the worktree if it exists
+  local wt
+  wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$wt_branch" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+  if [ -n "$wt" ]; then
+    echo "Removing worktree: $wt (branch: $wt_branch)"
+    git worktree remove --force "$wt"
+  fi
+
+  git branch -D "$wt_branch"
+}
 
 git_commit_all_message() {
     git add -A
