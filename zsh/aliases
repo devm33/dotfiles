@@ -258,6 +258,7 @@ gwgD() {
     git branch -D "$b"
   done
 }
+alias wgwD='gwgD'
 # Delete a single worktree by name and force delete its branch
 wtD() {
   if [[ -z "$1" ]]; then
