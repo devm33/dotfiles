@@ -194,8 +194,12 @@ wt() {
     wt_branch="devm33/$1"
   fi
 
-  # Create the git worktree if it doesn't already exist
-  if [[ ! -d "$wt_path" ]]; then
+  # Reuse existing worktree if one exists for this branch, otherwise create one
+  local existing_wt
+  existing_wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$wt_branch" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+  if [[ -n "$existing_wt" ]]; then
+    wt_path="$existing_wt"
+  elif [[ ! -d "$wt_path" ]]; then
     if git show-ref --verify --quiet "refs/heads/$wt_branch" || git show-ref --verify --quiet "refs/remotes/origin/$wt_branch"; then
       git worktree add "$wt_path" "$wt_branch" || return 1
     else
