@@ -50,6 +50,7 @@ alias cd.cp='cd ~/.copilot'
 alias v='nvim'
 alias vi='nvim'
 alias ve='nvim ~/.dotfiles/config/nvim/init.lua'
+alias vcp='nvim ~/.copilot/config.json'
 
 # Vagrant
 alias vg='vagrant'
