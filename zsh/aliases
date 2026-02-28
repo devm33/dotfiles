@@ -234,7 +234,7 @@ wt() {
   #   2 = right-bottom-left
   #   3 = right-bottom-right
 
-  tmux send-keys -t "${win}.2" "npm run build:cli:watch" Enter
+  tmux send-keys -t "${win}.2" "npm run build:watch" Enter
   tmux send-keys -t "${win}.3" "npm run lint:types:watch" Enter
 
   # Focus back on the first pane
