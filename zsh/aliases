@@ -51,6 +51,7 @@ alias v='nvim'
 alias vi='nvim'
 alias ve='nvim ~/.dotfiles/config/nvim/init.lua'
 alias vcp='nvim ~/.copilot/config.json'
+alias vm='nvim $(git diff --name-only --diff-filter=d)'
 
 # Vagrant
 alias vg='vagrant'
