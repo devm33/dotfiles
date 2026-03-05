@@ -227,17 +227,12 @@ wt() {
   # Split the right pane horizontally (right-top / right-bottom)
   tmux split-window -v -t "$win" -c "$wt_path"
 
-  # Split the right-bottom pane vertically (right-bottom-left | right-bottom-right)
-  tmux split-window -h -t "$win" -c "$wt_path"
-
   # Target panes by index within the window:
   #   0 = left           (yolo is already running here)
   #   1 = right-top
-  #   2 = right-bottom-left
-  #   3 = right-bottom-right
+  #   2 = right-bottom
 
-  tmux send-keys -t "${win}.2" "npm run build:watch" Enter
-  tmux send-keys -t "${win}.3" "npm run lint:types:watch" Enter
+  tmux send-keys -t "${win}.2" "npm run watch" Enter
 
   # Focus back on the first pane
   tmux select-pane -t "${win}.0"
