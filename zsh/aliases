@@ -255,6 +255,7 @@ gwgD() {
     if [ -n "$wt" ]; then
       echo "Removing worktree: $wt (branch: $b)"
       git worktree remove --force "$wt"
+      rm -rf "$wt"
     fi
     git branch -D "$b"
   done
