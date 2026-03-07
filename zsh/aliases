@@ -87,6 +87,7 @@ alias nt='npm test'
 alias nm='npx mocha'
 alias nmw='npx mocha --watch --extension ts'
 alias nb='npm run build'
+alias nw='npm run watch'
 
 # Bundler
 alias bx='bundle exec'
