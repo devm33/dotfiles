@@ -554,3 +554,58 @@ alias ask=ask_copilot
 alias ci=code-insiders
 alias prw='gh pr view --web'
 alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
+
+pr() {
+  local json
+  json=$(gh pr view --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
+
+  local url review mergeable base head_oid
+  url=$(echo "$json" | jq -r '.url')
+  review=$(echo "$json" | jq -r '.reviewDecision')
+  mergeable=$(echo "$json" | jq -r '.mergeable')
+  base=$(echo "$json" | jq -r '.baseRefName')
+  head_oid=$(echo "$json" | jq -r '.headRefOid')
+
+  # Checks summary
+  local total passed failed pending
+  total=$(echo "$json" | jq '.statusCheckRollup | length')
+  passed=$(echo "$json" | jq '[.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length')
+  failed=$(echo "$json" | jq '[.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "ERROR")] | length')
+  pending=$(( total - passed - failed ))
+
+  # Commits behind base
+  local behind
+  behind=$(git rev-list --count "$head_oid..origin/$base" 2>/dev/null || echo "?")
+
+  # Output
+  echo "\033[1m$url\033[0m"
+
+  if (( failed > 0 )); then
+    echo "checks:   \033[31m✗ $failed failing\033[0m ($passed/$total passed)"
+  elif (( pending > 0 )); then
+    echo "checks:   \033[33m● $pending pending\033[0m ($passed/$total passed)"
+  elif (( total > 0 )); then
+    echo "checks:   \033[32m✓ all $total passed\033[0m"
+  else
+    echo "checks:   no checks"
+  fi
+
+  case "$review" in
+    APPROVED)          echo "review:   \033[32m✓ approved\033[0m" ;;
+    CHANGES_REQUESTED) echo "review:   \033[31m✗ changes requested\033[0m" ;;
+    REVIEW_REQUIRED)   echo "review:   \033[33m● review required\033[0m" ;;
+    *)                 echo "review:   \033[33m● pending\033[0m" ;;
+  esac
+
+  case "$mergeable" in
+    MERGEABLE)   echo "merge:    \033[32m✓ no conflicts\033[0m" ;;
+    CONFLICTING) echo "merge:    \033[31m✗ has conflicts\033[0m" ;;
+    *)           echo "merge:    \033[33m● unknown\033[0m" ;;
+  esac
+
+  if [[ "$behind" == "0" ]]; then
+    echo "behind:   \033[32m✓ up to date with $base\033[0m"
+  else
+    echo "behind:   \033[33m$behind commits behind $base\033[0m"
+  fi
+}
