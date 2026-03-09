@@ -558,8 +558,9 @@ alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 _pr_info() {
   local json="$1"
   local local_repo="$2"
-  local url review mergeable base head_oid
+  local url title review mergeable base head_oid
   url=$(jq -r '.url' <<< "$json")
+  title=$(jq -r '.title' <<< "$json")
   review=$(jq -r '.reviewDecision' <<< "$json")
   mergeable=$(jq -r '.mergeable' <<< "$json")
   base=$(jq -r '.baseRefName' <<< "$json")
@@ -583,7 +584,8 @@ _pr_info() {
   fi
 
   # Output
-  echo "\033[1m$url\033[0m"
+  echo "\033[1m$title\033[0m"
+  echo "$url"
 
   if (( failed > 0 )); then
     echo "checks:   \033[31m✗ $failed failing\033[0m ($passed/$total passed)"
@@ -617,7 +619,7 @@ _pr_info() {
 
 pr() {
   local json
-  json=$(gh pr view --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
+  json=$(gh pr view --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
   _pr_info "$json" local
 }
 
@@ -632,7 +634,7 @@ prall() {
   while IFS=' ' read -r repo num; do
     (( first )) || echo
     first=0
-    json=$(gh pr view "$num" -R "$repo" --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
+    json=$(gh pr view "$num" -R "$repo" --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
     _pr_info "$json"
   done <<< "$urls"
 }
