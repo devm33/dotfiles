@@ -625,7 +625,9 @@ pr() {
 
 prall() {
   local urls
-  urls=$(gh search prs --author @me --state open --json repository,number -q '.[] | .repository.nameWithOwner + " " + (.number | tostring)') || return 1
+  local since
+  since=$(date -v-50d +%Y-%m-%d)
+  urls=$(gh search prs --author @me --state open --created ">=$since" --json repository,number -q '.[] | .repository.nameWithOwner + " " + (.number | tostring)') || return 1
   if [[ -z "$urls" ]]; then
     echo "No open PRs found."
     return 0
