@@ -555,27 +555,32 @@ alias ci=code-insiders
 alias prw='gh pr view --web'
 alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 
-pr() {
-  local json
-  json=$(gh pr view --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
-
+_pr_info() {
+  local json="$1"
+  local local_repo="$2"
   local url review mergeable base head_oid
-  url=$(echo "$json" | jq -r '.url')
-  review=$(echo "$json" | jq -r '.reviewDecision')
-  mergeable=$(echo "$json" | jq -r '.mergeable')
-  base=$(echo "$json" | jq -r '.baseRefName')
-  head_oid=$(echo "$json" | jq -r '.headRefOid')
+  url=$(jq -r '.url' <<< "$json")
+  review=$(jq -r '.reviewDecision' <<< "$json")
+  mergeable=$(jq -r '.mergeable' <<< "$json")
+  base=$(jq -r '.baseRefName' <<< "$json")
+  head_oid=$(jq -r '.headRefOid' <<< "$json")
 
   # Checks summary
   local total passed failed pending
-  total=$(echo "$json" | jq '.statusCheckRollup | length')
-  passed=$(echo "$json" | jq '[.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length')
-  failed=$(echo "$json" | jq '[.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "ERROR")] | length')
+  total=$(jq '.statusCheckRollup | length' <<< "$json")
+  passed=$(jq '[.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length' <<< "$json")
+  failed=$(jq '[.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "ERROR")] | length' <<< "$json")
   pending=$(( total - passed - failed ))
 
   # Commits behind base
-  local behind
-  behind=$(git rev-list --count "$head_oid..origin/$base" 2>/dev/null || echo "?")
+  local behind="?"
+  if [[ -n "$local_repo" ]]; then
+    behind=$(git rev-list --count "$head_oid..origin/$base" 2>/dev/null || echo "?")
+  else
+    local repo_nwo
+    repo_nwo=$(sed -E 's|https://github.com/([^/]+/[^/]+)/pull/.*|\1|' <<< "$url")
+    behind=$(gh api "repos/$repo_nwo/compare/$base...$head_oid" --jq '.behind_by' 2>/dev/null || echo "?")
+  fi
 
   # Output
   echo "\033[1m$url\033[0m"
@@ -608,4 +613,26 @@ pr() {
   else
     echo "behind:   \033[33m$behind commits behind $base\033[0m"
   fi
+}
+
+pr() {
+  local json
+  json=$(gh pr view --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
+  _pr_info "$json" local
+}
+
+prall() {
+  local urls
+  urls=$(gh search prs --author @me --state open --json repository,number -q '.[] | .repository.nameWithOwner + " " + (.number | tostring)') || return 1
+  if [[ -z "$urls" ]]; then
+    echo "No open PRs found."
+    return 0
+  fi
+  local first=1 json
+  while IFS=' ' read -r repo num; do
+    (( first )) || echo
+    first=0
+    json=$(gh pr view "$num" -R "$repo" --json url,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
+    _pr_info "$json"
+  done <<< "$urls"
 }
