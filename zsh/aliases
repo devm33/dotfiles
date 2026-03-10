@@ -224,7 +224,8 @@ wt() {
 
   # In the initial pane: run yolo with optional args
   if [[ -n "$prompt_args" ]]; then
-    tmux send-keys -t "$win" "yolo -i \"$prompt_args\"" Enter
+    local escaped_args="${prompt_args//\'/\'\\\'\'}"
+    tmux send-keys -t "$win" "yolo -i '${escaped_args}'" Enter
   else
     tmux send-keys -t "$win" "yolo" Enter
   fi
