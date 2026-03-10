@@ -571,6 +571,15 @@ _pr_info() {
   title=$(jq -r '.title' <<< "$json")
   review=$(jq -r '.reviewDecision' <<< "$json")
   mergeable=$(jq -r '.mergeable' <<< "$json")
+  # GitHub returns UNKNOWN while computing merge status; retry a few times
+  if [[ "$mergeable" == "UNKNOWN" ]]; then
+    local i
+    for i in 1 2 3; do
+      sleep 1
+      mergeable=$(gh pr view "$url" --json mergeable --jq '.mergeable' 2>/dev/null) || break
+      [[ "$mergeable" != "UNKNOWN" ]] && break
+    done
+  fi
   base=$(jq -r '.baseRefName' <<< "$json")
   head_oid=$(jq -r '.headRefOid' <<< "$json")
 
