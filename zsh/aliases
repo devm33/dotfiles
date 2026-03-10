@@ -220,7 +220,7 @@ wt() {
 
   # Create a new tmux window at the worktree path
   local win
-  win=$(tmux new-window -c "$wt_path" -P -F '#{window_id}')
+  win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
 
   # In the initial pane: run yolo with optional args
   if [[ -n "$prompt_args" ]]; then
