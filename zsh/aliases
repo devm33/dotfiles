@@ -309,7 +309,10 @@ wtrm() {
     echo "Error: current directory is not a git worktree"
     return 1
   fi
-  git worktree remove --force "$PWD" && tmux kill-window
+  local wt_dir="$PWD"
+  git worktree remove --force "$wt_dir" 2>/dev/null
+  rm -rf "$wt_dir"
+  tmux kill-window
 }
 
 git_commit_all_message() {
