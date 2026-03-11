@@ -301,6 +301,16 @@ _wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[* ]*/
 compdef _wt_branches wt
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
+# Remove the worktree rooted at cwd and close the tmux window
+wtrm() {
+  local wt_root
+  wt_root=$(git worktree list --porcelain | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
+  if [[ -z "$wt_root" ]]; then
+    echo "Error: current directory is not a git worktree"
+    return 1
+  fi
+  git worktree remove --force "$PWD" && tmux kill-window
+}
 
 git_commit_all_message() {
     git add -A
