@@ -657,3 +657,5 @@ prall() {
     _pr_info "$json"
   done <<< "$urls"
 }
+
+alias datetime='date +%Y%m%dT%H%M%S'
