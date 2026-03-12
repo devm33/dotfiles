@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Copilot CLI hook to show activity indicator in tmux window status.
+# Usage: tmux-copilot-hook start | stop
+# Called from .github/hooks/hooks.json userPromptSubmitted / sessionEnd hooks.
+# Paired with alert-bell hook in tmux.conf that clears on copilot's done bell.
+
+[ -n "${TMUX:-}" ] || exit 0
+
+case "${1:-}" in
+    start) tmux set-option -w @copilot_busy 1 ;;
+    stop)  tmux set-option -wqu @copilot_busy 2>/dev/null || true ;;
+esac
