@@ -263,6 +263,15 @@ gwgD() {
     wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$b" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
     if [ -n "$wt" ]; then
       echo "Removing worktree: $wt (branch: $b)"
+      # Close any tmux window with panes in this worktree
+      if [ -n "$TMUX" ]; then
+        local win_id
+        win_id=$(tmux list-panes -s -F '#{window_id} #{pane_current_path}' | awk -v wt="$wt" '$2 == wt || index($2, wt"/") == 1 {print $1; exit}')
+        if [ -n "$win_id" ]; then
+          echo "Closing tmux window: $win_id"
+          tmux kill-window -t "$win_id"
+        fi
+      fi
       git worktree remove --force "$wt"
       rm -rf "$wt"
     fi
