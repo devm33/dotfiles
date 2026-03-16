@@ -10,6 +10,7 @@ alias mmv='noglob zmv -W'
 # edit tmux conf
 alias vt='$EDITOR ~/.dotfiles/tmux.conf'
 alias ta='tmux attach || tmux'
+alias tmrm='tmux kill-window'
 
 # ls
 alias lh='ls -lsh'
