@@ -310,18 +310,41 @@ _wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[* ]*/
 compdef _wt_branches wt
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
-# Remove the worktree rooted at cwd and close the tmux window
+compdef _wt_worktrees wtrm
+# Remove a worktree and close its tmux window.
+# Usage: wtrm [branch-name]  (defaults to worktree at $PWD)
 wtrm() {
-  local wt_root
-  wt_root=$(git worktree list --porcelain | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
-  if [[ -z "$wt_root" ]]; then
-    echo "Error: current directory is not a git worktree"
-    return 1
+  local wt_dir branch
+
+  if [[ -n "$1" ]]; then
+    # Look up worktree path by branch name, trying both bare and devm33/-prefixed
+    for ref in "refs/heads/$1" "refs/heads/devm33/$1"; do
+      wt_dir=$(git worktree list --porcelain | awk -v branch="$ref" '/^worktree /{wt=substr($0,10)} $0 == "branch " branch {print wt; exit}')
+      [[ -n "$wt_dir" ]] && break
+    done
+    if [[ -z "$wt_dir" ]]; then
+      echo "Error: no worktree found for branch '$1'"
+      return 1
+    fi
+  else
+    # Fall back to current directory
+    wt_dir="$PWD"
+    branch=$(git worktree list --porcelain | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
+    if [[ -z "$branch" ]]; then
+      echo "Error: current directory is not a git worktree"
+      return 1
+    fi
   fi
-  local wt_dir="$PWD"
+
+  # Find and kill the tmux window whose pane started in the worktree directory
+  local pane_id
+  pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
+  if [[ -n "$pane_id" ]]; then
+    tmux kill-window -t "$pane_id"
+  fi
+
   git worktree remove --force "$wt_dir" 2>/dev/null
   rm -rf "$wt_dir"
-  tmux kill-window
 }
 
 git_commit_all_message() {
