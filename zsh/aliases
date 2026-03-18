@@ -337,15 +337,17 @@ wtrm() {
     fi
   fi
 
-  # Find and kill the tmux window whose pane started in the worktree directory
+  # Find the tmux window whose pane started in the worktree directory
   local pane_id
   pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
-  if [[ -n "$pane_id" ]]; then
-    tmux kill-window -t "$pane_id"
-  fi
 
   git worktree remove --force "$wt_dir" 2>/dev/null
   rm -rf "$wt_dir"
+
+  # Kill tmux window last — if it's our own window, earlier commands still ran
+  if [[ -n "$pane_id" ]]; then
+    tmux kill-window -t "$pane_id"
+  fi
 }
 
 git_commit_all_message() {
