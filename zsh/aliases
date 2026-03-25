@@ -215,7 +215,9 @@ wt() {
   fi
 
   # Install dependencies in the new worktree
-  if [ -f "$wt_path/package.json" ]; then
+  if [ -f "$wt_path/bun.lock" ]; then
+    (cd "$wt_path" && bun install)
+  elif [ -f "$wt_path/package.json" ]; then
     (cd "$wt_path" && npm install)
   fi
 
