@@ -244,7 +244,13 @@ wt() {
   #   1 = right-top
   #   2 = right-bottom
 
-  tmux send-keys -t "${win}.2" "npm run watch" Enter
+  if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null); then
+    if [ -f "$wt_path/bun.lock" ]; then
+      tmux send-keys -t "${win}.2" "bun run watch" Enter
+    else
+      tmux send-keys -t "${win}.2" "npm run watch" Enter
+    fi
+  fi
 
   # Focus back on the first pane
   tmux select-pane -t "${win}.0"
