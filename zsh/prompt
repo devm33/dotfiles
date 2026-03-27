@@ -105,7 +105,7 @@ cmd_failed() {
 }
 
 _1LEFT="$_USERNAME $_PATH"
-_1RIGHT='$(cmd_failed $retval)[%*] '
+_1RIGHT='$(cmd_failed $retval)$(bureau_git_prompt) [%*] '
 
 bureau_precmd () {
   retval="$?"
@@ -115,8 +115,7 @@ bureau_precmd () {
 }
 
 setopt prompt_subst
-PROMPT='> $_LIBERTY '
-RPROMPT='$(bureau_git_prompt)'
+PROMPT='$_LIBERTY '
 
 autoload -U add-zsh-hook
 add-zsh-hook precmd bureau_precmd
