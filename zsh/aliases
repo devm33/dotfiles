@@ -188,7 +188,11 @@ wt() {
   local branch_name="$1"
   shift
   local prompt_args="$*"
-  local wt_path="$HOME/code/wt/$branch_name"
+  local repo_root
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  local wt_dir="${repo_root}.worktrees"
+  mkdir -p "$wt_dir"
+  local wt_path="${wt_dir}/${branch_name}"
 
   # Fetch latest branches
   git pull || return 1
@@ -214,13 +218,6 @@ wt() {
     fi
   fi
 
-  # Install dependencies in the new worktree
-  if [ -f "$wt_path/bun.lock" ]; then
-    (cd "$wt_path" && bun install)
-  elif [ -f "$wt_path/package.json" ]; then
-    (cd "$wt_path" && npm install)
-  fi
-
   # Create a new tmux window at the worktree path
   local win
   win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
@@ -244,11 +241,26 @@ wt() {
   #   1 = right-top
   #   2 = right-bottom
 
-  if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null); then
-    if [ -f "$wt_path/bun.lock" ]; then
-      tmux send-keys -t "${win}.2" "bun run watch" Enter
+  # Install deps (non-blocking, in pane 2) and optionally run watch
+  local install_cmd=""
+  if [ -f "$wt_path/bun.lock" ]; then
+    install_cmd="bun install"
+  elif [ -f "$wt_path/package.json" ]; then
+    install_cmd="npm install"
+  fi
+  if [[ -n "$install_cmd" ]]; then
+    local has_watch=false
+    if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null); then
+      has_watch=true
+    fi
+    if $has_watch; then
+      if [ -f "$wt_path/bun.lock" ]; then
+        tmux send-keys -t "${win}.2" "$install_cmd && bun run watch" Enter
+      else
+        tmux send-keys -t "${win}.2" "$install_cmd && npm run watch" Enter
+      fi
     else
-      tmux send-keys -t "${win}.2" "npm run watch" Enter
+      tmux send-keys -t "${win}.2" "$install_cmd" Enter
     fi
   fi
 
@@ -295,7 +307,8 @@ wtD() {
     return 1
   fi
 
-  local wt_path="$HOME/code/wt/$1"
+  local repo_root
+  repo_root=$(git rev-parse --show-toplevel) || return 1
 
   # Determine branch name using the same logic as wt
   local wt_branch
@@ -320,6 +333,23 @@ compdef _wt_branches wt
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm
+# Create a worktree with a random word-pair name
+wta() {
+  local adjectives=(
+    bright cool fast green happy lucky quick red sharp warm
+    blue calm dark fresh golden hidden iron keen noble swift
+  )
+  local nouns=(
+    bear cobra dolphin dynamo eagle falcon hawk lion panther tiger
+    cedar coral flame glacier mesa orbit pixel spark wolf zenith
+  )
+  local adj=${adjectives[$((RANDOM % ${#adjectives[@]} + 1))]}
+  local noun=${nouns[$((RANDOM % ${#nouns[@]} + 1))]}
+  local name="${adj}-${noun}"
+  echo "Worktree name: $name"
+  wt "$name" "$@"
+}
+compdef _wt_branches wta
 # Remove a worktree and close its tmux window.
 # Usage: wtrm [branch-name]  (defaults to worktree at $PWD)
 wtrm() {
