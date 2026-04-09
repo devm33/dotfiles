@@ -642,7 +642,7 @@ alias clisesopen='code-insiders ~/.copilot/session-state/"$(ls -t ~/.copilot/ses
 alias clises='chropen ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
 alias yolo='copilot --allow-all'
 ask_copilot() {
-    copilot -s -p "$*"
+    copilot --model=gpt-5.4-mini -s -p "Respond succinctly to the following user question: $*"
 }
 alias ask=ask_copilot
 alias ci=code-insiders
