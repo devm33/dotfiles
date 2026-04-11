@@ -5,9 +5,9 @@ DISABLE_AUTO_UPDATE="true"
 COMPLETION_WAITING_DOTS="true"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 if [[ "$(uname -s)" == Darwin ]]; then
-    plugins=(git vagrant npm node pip django bundler docker)
+    plugins=(git npm node docker)
 else
-    plugins=(git vagrant debian npm node pip django bundler docker)
+    plugins=(git vagrant debian npm node pip bundler docker)
 fi
 source $ZSH/oh-my-zsh.sh
 
@@ -17,9 +17,6 @@ source $HOME/.zsh/prompt
 # Use bash completion scripts
 autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
-
-# Configure color term
-export TERM="xterm-256color"
 
 # Save a ton of history
 HISTSIZE=20000
@@ -61,7 +58,25 @@ fi
 # Go for it, it's the 60's! (disable ctrl-s freeze)
 stty -ixon
 
-# added by travis gem
-[ -f /Users/devrajm/.travis/travis.sh ] && source /Users/devrajm/.travis/travis.sh
+# fzf
+[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+[ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use  # This loads nvm without auto-using
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# rbenv
+#eval "$(rbenv init - zsh)"
+
+# ngrok
+# if command -v ngrok &>/dev/null; then
+#     eval "$(ngrok completion)"
+# fi
+
 
 export PATH="/home/devraj/.local/bin:$PATH"
+
+# vscode
+export VSCODE_VERBOSE_LOGGING="true"
+

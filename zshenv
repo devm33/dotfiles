@@ -3,10 +3,14 @@
 
 export PATH="/usr/local/bin:/usr/sbin:$PATH"
 
-# for mac I sometimes store homebrew packages here
-if [ -d "$HOME/homebrew/bin" ]; then
-    export PATH="$HOME/homebrew/bin:$PATH"
-    export LD_LIBRARY_PATH=$HOME/homebrew/lib:$LD_LIBRARY_PATH
+# for mac homebrew should be installed here
+if [ -d "/opt/homebrew" ]; then
+    export HOMEBREW_PREFIX="/opt/homebrew";
+    export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
+    export HOMEBREW_REPOSITORY="/opt/homebrew";
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
+    export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:";
+    export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
 fi
 
 # prepend my bin to path so it's checked first because I'm important
@@ -15,6 +19,9 @@ export PATH="$HOME/.bin:$PATH"
 
 if [ -d "$HOME/code/bin" ]; then
     export PATH="$HOME/code/bin:$PATH"
+fi
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # gems on path
@@ -27,14 +34,17 @@ if [ -d "$HOME/.gem/bin" ]; then
     export PATH="$PATH:$HOME/.gem/bin"
 fi
 
-# pip3 install location on mac
-[ -d $HOME/Library/Python/3.6/bin ] && export PATH="$PATH:$HOME/Library/Python/3.6/bin"
+# homebrew python3 symlinks
+[ -d /opt/homebrew/opt/python@3.11/libexec/bin ] && export PATH="$PATH:/opt/homebrew/opt/python@3.11/libexec/bin"
+
+# pip packages
+[ -d $HOME/Library/Python/3.11/bin ] && export PATH="$PATH:$HOME/Library/Python/3.11/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-export EDITOR='vim'
+export EDITOR='nvim'
 
 # golang needs this
 export GOPATH="$HOME/code/gocode"
@@ -43,6 +53,12 @@ if [ -d "$HOME/Code/gocode" ]; then
 fi
 export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
+
+# golang goproxy
+export GOPROXY='https://goproxy.githubapp.com/mod,https://proxy.golang.org/,direct'
+export GOPRIVATE=''
+export GONOPROXY=''
+export GONOSUMDB='github.com/github/*'
 
 # scala needs these
 if [ -d '/usr/local/share/scala' ]; then
@@ -70,3 +86,36 @@ if [ -d /usr/local/opt/dart/libexec ]; then
   export PATH="$PATH:/usr/local/opt/dart/libexec"
 fi
 
+# blaze tab completion
+if [ -d /google/data ]; then
+   fpath=(/google/src/files/head/depot/google3/devtools/blaze/scripts/zsh_completion $fpath)
+fi
+
+# depot_tools
+export PATH="$PATH:$HOME/code/depot_tools"
+
+# git cache
+export GIT_CACHE_PATH="${HOME}/.git_cache"
+
+# github token
+export GH_COPILOT_TOKEN="" # silence some log noise
+# if [ -f ~/.github_token ]; then
+#   export GITHUB_TOKEN=`cat ~/.github_token`
+# fi
+
+# copilot
+# export COPILOT_AGENT_VERBOSE='true'
+
+# rust
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
+
+# less
+export LESS="-FRX"
+
+# ssl
+# export SSLKEYLOGFILE='/private/tmp/ssl-key.log'
+
+# local node_modules (only works from project root)
+# export PATH="./node_modules/.bin:$PATH"

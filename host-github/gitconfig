@@ -1,12 +1,14 @@
 [user]
     name = Devraj Mehta
-    email = devm33@gmail.com
-    signingkey = A2BFB1A5C52E3AB6
+    email = devm33@github.com
+	signingkey = /Users/devm33/.ssh/id_ed25519.pub
 [core]
     text = auto
     excludesfile = ~/.gitignore
     whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol,tab-in-indent
     autocrlf = input
+[merge]
+    conflictstyle = zdiff3
 [color]
     ui = always
     status = always
@@ -28,8 +30,10 @@
     untracked = cyan
 [push]
     default = current
+	autoSetupRemote = true
 [branch]
     autosetupmerge = true
+	sort = -committerdate
 [merge]
     tool = vimdiff
 [fetch]
@@ -42,5 +46,19 @@
     insteadof = d:
 [url "git@github.com:github/"]
     insteadof = gh:
-[url "git@github.com:"]
-    insteadof = g:
+[commit]
+    gpgsign = true
+	verbose = true
+[pull]
+	rebase = true
+[init]
+	defaultBranch = main
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[rerere]
+	enabled = true
+[gpg]
+	format = ssh

@@ -15,20 +15,20 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
     -   For Ubuntu-like environments:
 
     ```bash
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/ubuntu.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/ubuntu.sh)"
     ```
 
     -   For OSX:
 
     ```bash
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/osx.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/osx.sh)"
     ```
 
     -   For generic posix environment, where post-install of dependencies is
         done manually:
 
     ```bash
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)"
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)"
     ```
 
     -  For a readonly install (no github authorized keys on the box) set this

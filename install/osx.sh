@@ -8,24 +8,29 @@
 # ensure dev tools setup
 sudo xcodebuild -license || exit
 
-# Install common components
+# OSX Specific install
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
+# Install homebrew
+NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/main/install.sh)" || exit
 
-# OSX Specific post install
+# Manually add installed homebrew to path for installations below
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Install homebrew to home dir
-cd ~
-mkdir homebrew
-curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
-
-# Temporarily add homebrew to path for install (permant add in zshenv)
-export PATH=$HOME/homebrew/bin:$PATH
-
+# Install homebrew packages
 brew install node
 brew install cmake
 brew install ffmpeg
 brew install vim
+brew install neovim
 brew install tmux
 brew install ag
-brew install reattach-to-user-namespace
+brew install imagemagick
+brew install gnupg
+brew install pinentry-mac
+brew install --cask iglance
+brew install fzf
+brew install ripgrep
+brew install fd
+
+# Install common components
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit

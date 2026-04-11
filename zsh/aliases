@@ -1,15 +1,16 @@
 # Reload/edit zsh configuration
 alias rz='source ~/.zshrc'
-alias ze='vim ~/.dotfiles/zshrc'
-alias za='vim ~/.dotfiles/zsh/aliases'
+alias ze='$EDITOR ~/.dotfiles/zshrc'
+alias za='$EDITOR ~/.dotfiles/zsh/aliases'
 
 # zsh awesomeness
 autoload -U zmv
 alias mmv='noglob zmv -W'
 
 # edit tmux conf
-alias vt='vim ~/.dotfiles/tmux.conf'
+alias vt='$EDITOR ~/.dotfiles/tmux.conf'
 alias ta='tmux attach || tmux'
+alias tmrm='tmux kill-window'
 
 # ls
 alias lh='ls -lsh'
@@ -29,16 +30,29 @@ alias aci='apt-cache show'
 
 # Show contents of directory after cd-ing into it
 chpwd() {
-  if [ -d .git ]; then
-      git diff --quiet || echo 'git changes pending'
-      echo '--'
-  fi
   ls
+  if [[ "$PWD" == *"electron/src"* ]]; then
+    return
+  fi
+  if [[ "$PWD" == *"chromium/src"* ]]; then
+    return
+  fi
+  if [ -d .git ]; then
+      git diff --quiet || echo "--\ngit changes pending"
+  fi
 }
 
+# navigation shortcuts
+alias cdc='cd ~/code'
+alias cd.='cd ~/.dotfiles'
+alias cd.cp='cd ~/.copilot'
+
 # ViM
-alias v='vim'
-alias vi='vim'
+alias v='nvim'
+alias vi='nvim'
+alias ve='nvim ~/.dotfiles/config/nvim/init.lua'
+alias vcp='nvim ~/.copilot/config.json'
+alias vm='nvim $(git diff --name-only --diff-filter=d)'
 
 # Vagrant
 alias vg='vagrant'
@@ -67,6 +81,14 @@ alias b='grunt_and_gulp'
 
 # Npm
 alias npmdev='npm install --save-dev '
+alias nr='npm run'
+alias nri='npm run --ignore-scripts'
+alias ns='npm start'
+alias nt='npm test'
+alias nm='npx mocha'
+alias nmw='npx mocha --watch --extension ts'
+alias nb='npm run build'
+alias nw='npm run watch'
 
 # Bundler
 alias bx='bundle exec'
@@ -133,14 +155,238 @@ alias mdw=markdown_watch
 compdef '_files -g "*.md *.txt"' markdown_preview
 compdef '_files -g "*.md *.txt"' markdown_watch
 
+# Hg aliases
+alias hu='hg st | ifne hg amend && hg uploadchain'
+alias hl='hg xl'
+alias hs='hg st'
+alias hs4='hg st --rev p4base'
+alias hn='hg next'
+alias hp='hg prev'
+alias hd='hg diff'
+alias ha='hg am'
+
 # Git functions and aliases
+alias glom='git log --oneline --decorate main..@'
 alias gA='git add -A'
 alias gpr='git remote prune origin'
 alias gra='git remote add'
-alias gmm='git merge master'
-alias gwc='git whatchanged -p'
+alias gmm='git merge $(git_main_branch)'
+alias gfm='git fetch origin $(git_main_branch):$(git_main_branch)'
+alias gwc=glgp
 alias gcX='git clean -dfX'
+alias gbv='git branch -vv'
 alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
+alias gdn='git diff --name-only $(git_main_branch)...@'
+alias gdm='git diff $(git_main_branch)..HEAD'
+alias gs='git status'
+wt() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: wt <branch-name> [yolo args...]"
+    return 1
+  fi
+
+  local branch_name="$1"
+  shift
+  local prompt_args="$*"
+  local repo_root
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  local wt_dir="${repo_root}.worktrees"
+  mkdir -p "$wt_dir"
+  local wt_path="${wt_dir}/${branch_name}"
+
+  # Fetch latest branches
+  git pull || return 1
+
+  # Determine branch name: skip devm33/ prefix if already present or if it's an existing branch
+  local wt_branch
+  if [[ "$branch_name" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$branch_name" || git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
+    wt_branch="$branch_name"
+  else
+    wt_branch="devm33/$branch_name"
+  fi
+
+  # Reuse existing worktree if one exists for this branch, otherwise create one
+  local existing_wt
+  existing_wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$wt_branch" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+  if [[ -n "$existing_wt" ]]; then
+    wt_path="$existing_wt"
+  elif [[ ! -d "$wt_path" ]]; then
+    if git show-ref --verify --quiet "refs/heads/$wt_branch" || git show-ref --verify --quiet "refs/remotes/origin/$wt_branch"; then
+      git worktree add "$wt_path" "$wt_branch" || return 1
+    else
+      git worktree add -b "$wt_branch" "$wt_path" || return 1
+    fi
+  fi
+
+  # Create a new tmux window at the worktree path
+  local win
+  win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
+
+  # In the initial pane: run yolo with optional args
+  if [[ -n "$prompt_args" ]]; then
+    local escaped_args="${prompt_args//\'/\'\\\'\'}"
+    tmux send-keys -t "$win" "yolo -i '${escaped_args}'" Enter
+  else
+    tmux send-keys -t "$win" "yolo" Enter
+  fi
+
+  # Split vertically (left | right)
+  tmux split-window -h -t "$win" -c "$wt_path"
+
+  # Split the right pane horizontally (right-top / right-bottom)
+  tmux split-window -v -t "$win" -c "$wt_path"
+
+  # Target panes by index within the window:
+  #   0 = left           (yolo is already running here)
+  #   1 = right-top
+  #   2 = right-bottom
+
+  # Install deps (non-blocking, in pane 2) and optionally run watch
+  local install_cmd=""
+  if [ -f "$wt_path/bun.lock" ]; then
+    install_cmd="bun install"
+  elif [ -f "$wt_path/package.json" ]; then
+    install_cmd="npm install"
+  fi
+  if [[ -n "$install_cmd" ]]; then
+    local has_watch=false
+    if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null); then
+      has_watch=true
+    fi
+    if $has_watch; then
+      if [ -f "$wt_path/bun.lock" ]; then
+        tmux send-keys -t "${win}.2" "$install_cmd && bun run watch" Enter
+      else
+        tmux send-keys -t "${win}.2" "$install_cmd && npm run watch" Enter
+      fi
+    else
+      tmux send-keys -t "${win}.2" "$install_cmd" Enter
+    fi
+  fi
+
+  # Focus back on the first pane
+  tmux select-pane -t "${win}.0"
+}
+# Delete branch and its associated worktree (if any)
+gbDW() {
+  for b in "$@"; do
+    wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$b" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+    if [ -n "$wt" ]; then
+      echo "Removing worktree: $wt (branch: $b)"
+      git worktree remove --force "$wt"
+    fi
+    git branch -D "$b"
+  done
+}
+# Remove worktrees for gone branches, then delete the branches
+gwgD() {
+  for b in $(LANG=C git branch --no-color -vv | grep ": gone\]" | sed 's/^[+* ]*//' | awk '{print $1}'); do
+    wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$b" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+    if [ -n "$wt" ]; then
+      echo "Removing worktree: $wt (branch: $b)"
+      # Close any tmux window with panes in this worktree
+      if [ -n "$TMUX" ]; then
+        local win_id
+        win_id=$(tmux list-panes -s -F '#{window_id} #{pane_current_path}' | awk -v wt="$wt" '$2 == wt || index($2, wt"/") == 1 {print $1; exit}')
+        if [ -n "$win_id" ]; then
+          echo "Closing tmux window: $win_id"
+          tmux kill-window -t "$win_id"
+        fi
+      fi
+      git worktree remove --force "$wt"
+      rm -rf "$wt"
+    fi
+    git branch -D "$b"
+  done
+}
+alias wgwD='gwgD'
+# Delete a single worktree by name and force delete its branch
+wtD() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: wtD <branch-name>"
+    return 1
+  fi
+
+  local repo_root
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+
+  # Determine branch name using the same logic as wt
+  local wt_branch
+  if [[ "$1" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$1" || git show-ref --verify --quiet "refs/remotes/origin/$1"; then
+    wt_branch="$1"
+  else
+    wt_branch="devm33/$1"
+  fi
+
+  # Remove the worktree if it exists
+  local wt
+  wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$wt_branch" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
+  if [ -n "$wt" ]; then
+    echo "Removing worktree: $wt (branch: $wt_branch)"
+    git worktree remove --force "$wt"
+  fi
+
+  git branch -D "$wt_branch"
+}
+_wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[* ]*//' | sed 's|remotes/origin/||' | sort -u) }
+compdef _wt_branches wt
+_wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
+compdef _wt_worktrees wtD
+compdef _wt_worktrees wtrm
+# Create a worktree with a random word-pair name
+wta() {
+  local adjectives=(
+    bright cool fast green happy lucky quick red sharp warm
+    blue calm dark fresh golden hidden iron keen noble swift
+  )
+  local nouns=(
+    bear cobra dolphin dynamo eagle falcon hawk lion panther tiger
+    cedar coral flame glacier mesa orbit pixel spark wolf zenith
+  )
+  local adj=${adjectives[$((RANDOM % ${#adjectives[@]} + 1))]}
+  local noun=${nouns[$((RANDOM % ${#nouns[@]} + 1))]}
+  local name="${adj}-${noun}"
+  echo "Worktree name: $name"
+  wt "$name" "$@"
+}
+compdef _wt_branches wta
+# Remove a worktree and close its tmux window.
+# Usage: wtrm [branch-name]  (defaults to worktree at $PWD)
+wtrm() {
+  local wt_dir branch
+
+  if [[ -n "$1" ]]; then
+    # Look up worktree path by branch name, trying both bare and devm33/-prefixed
+    for ref in "refs/heads/$1" "refs/heads/devm33/$1"; do
+      wt_dir=$(git worktree list --porcelain | awk -v branch="$ref" '/^worktree /{wt=substr($0,10)} $0 == "branch " branch {print wt; exit}')
+      [[ -n "$wt_dir" ]] && break
+    done
+    if [[ -z "$wt_dir" ]]; then
+      echo "Error: no worktree found for branch '$1'"
+      return 1
+    fi
+  else
+    # Fall back to current directory
+    wt_dir="$PWD"
+    branch=$(git worktree list --porcelain | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
+    if [[ -z "$branch" ]]; then
+      echo "Error: current directory is not a git worktree"
+      return 1
+    fi
+  fi
+
+  # Find the tmux window whose pane started in the worktree directory
+  local pane_id
+  pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
+
+  git worktree remove --force "$wt_dir" 2>/dev/null
+  rm -rf "$wt_dir"
+
+  # Kill tmux window last — if it's our own window, earlier commands still ran
+  if [[ -n "$pane_id" ]]; then
+    tmux kill-window -t "$pane_id"
+  fi
+}
 
 git_commit_all_message() {
     git add -A
@@ -148,6 +394,29 @@ git_commit_all_message() {
 }
 alias gcam=git_commit_all_message
 
+git_commit_message() {
+    git commit -m "$*"
+}
+alias GC=git_commit_message
+
+git_push_one_at_a_time() {
+    cb=$(git_current_branch)
+    start=$1
+    if [ -z $start ]; then
+        start=$(git_main_branch)
+    fi
+    will_sleep=$2
+    if [ -z $will_sleep ]; then
+        will_sleep=10
+    fi
+    s=0
+    for r in $(git rev-list --reverse ${start}..${cb}); do
+        sleep $s
+        s=$will_sleep
+        git push --force-with-lease --force-if-includes origin ${r}:refs/heads/${cb}
+    done
+}
+alias gp1b1=git_push_one_at_a_time
 
 # Overwrite of alias in omz plugin due to error
 alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*master\s*$)" | command xargs -n 1 git branch -d'
@@ -331,7 +600,7 @@ dotall () {
 alias dotcall='dotall 1'
 
 rama () {
-    if ping -c 1 192.168.0.33 &> /dev/null
+    if ping -t 1 -c 1 192.168.0.33 &> /dev/null
     then
         ssh ramalocal
     else
@@ -340,12 +609,139 @@ rama () {
 }
 
 yumi () {
-    if ping -c 1 192.168.1.3 &> /dev/null
+    if ping -t 1 -c 1 192.168.86.3 &> /dev/null
     then
-        ssh yumil
+        ssh openyumil
     else
-        ssh yumi
+        ssh openyumi
     fi
 }
 
 alias ytdl='youtube-dl -x --audio-format mp3 '
+
+togif() {
+    # Based on https://gist.github.com/SheldonWangRJT/8d3f44a35c8d1386a396b9b49b43c385
+    output_file="$1.gif"
+
+    ffmpeg -i $1 -pix_fmt rgb8 -r 10 $output_file && gifsicle -O3 $output_file -o $output_file
+}
+
+# GitHub Copilot CLI
+ghcs() {
+    gh copilot suggest -t shell "$*"
+}
+
+ghce() {
+    gh copilot explain "$*"
+}
+
+alias clilog='less ~/.copilot/logs/"$(ls -t ~/.copilot/logs/ | head -1)"'
+alias clisesless='less ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
+alias clicd='cd ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"'
+alias clisesopen='code-insiders ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
+alias clises='chropen ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
+alias yolo='copilot --allow-all'
+ask_copilot() {
+    copilot --model=gpt-5.4-mini -s -p "Respond succinctly to the following user question: $*"
+}
+alias ask=ask_copilot
+alias ci=code-insiders
+alias prw='gh pr view --web'
+alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
+
+_pr_info() {
+  local json="$1"
+  local local_repo="$2"
+  local url title review mergeable base head_oid
+  url=$(jq -r '.url' <<< "$json")
+  title=$(jq -r '.title' <<< "$json")
+  review=$(jq -r '.reviewDecision' <<< "$json")
+  mergeable=$(jq -r '.mergeable' <<< "$json")
+  # GitHub returns UNKNOWN while computing merge status; retry a few times
+  if [[ "$mergeable" == "UNKNOWN" ]]; then
+    local i
+    for i in 1 2 3; do
+      sleep 1
+      mergeable=$(gh pr view "$url" --json mergeable --jq '.mergeable' 2>/dev/null) || break
+      [[ "$mergeable" != "UNKNOWN" ]] && break
+    done
+  fi
+  base=$(jq -r '.baseRefName' <<< "$json")
+  head_oid=$(jq -r '.headRefOid' <<< "$json")
+
+  # Checks summary
+  local total passed failed pending
+  total=$(jq '.statusCheckRollup | length' <<< "$json")
+  passed=$(jq '[.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length' <<< "$json")
+  failed=$(jq '[.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "ERROR")] | length' <<< "$json")
+  pending=$(( total - passed - failed ))
+
+  # Commits behind base
+  local behind="?"
+  if [[ -n "$local_repo" ]]; then
+    behind=$(git rev-list --count "$head_oid..origin/$base" 2>/dev/null || echo "?")
+  else
+    local repo_nwo
+    repo_nwo=$(sed -E 's|https://github.com/([^/]+/[^/]+)/pull/.*|\1|' <<< "$url")
+    behind=$(gh api "repos/$repo_nwo/compare/$base...$head_oid" --jq '.behind_by' 2>/dev/null || echo "?")
+  fi
+
+  # Output
+  echo "\033[1m$title\033[0m"
+  echo "$url"
+
+  if (( failed > 0 )); then
+    echo "checks:   \033[31m✗ $failed failing\033[0m ($passed/$total passed)"
+  elif (( pending > 0 )); then
+    echo "checks:   \033[33m● $pending pending\033[0m ($passed/$total passed)"
+  elif (( total > 0 )); then
+    echo "checks:   \033[32m✓ all $total passed\033[0m"
+  else
+    echo "checks:   no checks"
+  fi
+
+  case "$review" in
+    APPROVED)          echo "review:   \033[32m✓ approved\033[0m" ;;
+    CHANGES_REQUESTED) echo "review:   \033[31m✗ changes requested\033[0m" ;;
+    REVIEW_REQUIRED)   echo "review:   \033[33m● review required\033[0m" ;;
+    *)                 echo "review:   \033[33m● pending\033[0m" ;;
+  esac
+
+  case "$mergeable" in
+    MERGEABLE)   echo "merge:    \033[32m✓ no conflicts\033[0m" ;;
+    CONFLICTING) echo "merge:    \033[31m✗ has conflicts\033[0m" ;;
+    *)           echo "merge:    \033[33m● unknown\033[0m" ;;
+  esac
+
+  if [[ "$behind" == "0" ]]; then
+    echo "behind:   \033[32m✓ up to date with $base\033[0m"
+  else
+    echo "behind:   \033[33m$behind commits behind $base\033[0m"
+  fi
+}
+
+pr() {
+  local json
+  json=$(gh pr view --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
+  _pr_info "$json" local
+}
+
+prall() {
+  local urls
+  local since
+  since=$(date -v-50d +%Y-%m-%d)
+  urls=$(gh search prs --author @me --state open --created ">=$since" --json repository,number -q '.[] | .repository.nameWithOwner + " " + (.number | tostring)') || return 1
+  if [[ -z "$urls" ]]; then
+    echo "No open PRs found."
+    return 0
+  fi
+  local first=1 json
+  while IFS=' ' read -r repo num; do
+    (( first )) || echo
+    first=0
+    json=$(gh pr view "$num" -R "$repo" --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
+    _pr_info "$json"
+  done <<< "$urls"
+}
+
+alias datetime='date +%Y%m%dT%H%M%S'

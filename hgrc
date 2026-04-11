@@ -1,0 +1,15 @@
+[ui]
+merge = :merge3
+
+[pager]
+pager = less -FRX
+
+[google]
+presubmit.default-rev=.
+mail.default-rev=.
+
+[experimental]
+uncommit.keep = false
+
+[google-change-tags]
+default.bug={get_parent_cl_tag("bug")}

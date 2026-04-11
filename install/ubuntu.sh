@@ -5,11 +5,9 @@
 
 # before running ensure that there is a valid ssh key authorized for github
 
+# Ubuntu/Debian Specific install
+sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ripgrep
+sudo npm i -g npm
+
 # Install common components
-
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/master/install/common.sh)" || exit
-
-# Ubuntu Specific post install
-
-sudo apt-get install --yes cmake tmux silversearcher-ag
-
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit

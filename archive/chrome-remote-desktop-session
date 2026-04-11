@@ -1,0 +1,1 @@
+exec /etc/X11/Xsession /usr/bin/xfce4-session

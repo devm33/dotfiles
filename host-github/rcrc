@@ -1,0 +1,3 @@
+DOTFILES_DIRS="$HOME/.dotfiles $HOME/code/dotfiles-work"
+EXCLUDES="README.md git install archive"
+HOSTNAME="github"
