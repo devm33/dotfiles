@@ -12,15 +12,18 @@ docker rm vpn
 docker run \
   --name=vpn \
   --cap-add=NET_ADMIN \
-  --device=/dev/net/tun -d \
   --dns 8.8.8.8 --dns 8.8.4.4 \
   -v $STORAGE:/data \
   -v /etc/localtime:/etc/localtime:ro \
+  -e "CREATE_TUN_DEVICE=true" \
   -e "OPENVPN_PROVIDER=PIA" \
-  -e "OPENVPN_CONFIG=US East" \
+  -e "OPENVPN_CONFIG=us_new_york" \
   -e "OPENVPN_USERNAME=$PIA_USER" \
   -e "OPENVPN_PASSWORD=$PIA_PASS" \
   -e "OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60" \
+  -e "LOCAL_NETWORK=192.168.86.0/24" \
+  --log-driver json-file \
+  --log-opt max-size=10m \
   --restart=always \
   -p 9091:9091 \
   haugene/transmission-openvpn
