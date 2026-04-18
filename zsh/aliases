@@ -334,7 +334,7 @@ _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch re
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm
 # Create a worktree with a random word-pair name
-wta() {
+wtp() {
   local adjectives=(
     bright cool fast green happy lucky quick red sharp warm
     blue calm dark fresh golden hidden iron keen noble swift
@@ -349,7 +349,7 @@ wta() {
   echo "Worktree name: $name"
   wt "$name" "$@"
 }
-compdef _wt_branches wta
+compdef _wt_branches wtp
 # Remove a worktree and close its tmux window.
 # Usage: wtrm [branch-name]  (defaults to worktree at $PWD)
 wtrm() {
