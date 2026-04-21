@@ -64,8 +64,9 @@ while true; do
         if [ -n "$remote_sha" ] && [ "$local_sha" != "$remote_sha" ]; then
           base=$(git merge-base HEAD "$upstream" 2>/dev/null || echo "")
           if [ "$base" = "$local_sha" ]; then
-            if git -c advice.detachedHead=false merge --ff-only --quiet "$upstream"; then
-              log "fast-forwarded $branch to ${remote_sha:0:8}"
+            log "fast-forwarding $branch to ${remote_sha:0:8}"
+            if git -c advice.detachedHead=false merge --ff-only --stat "$upstream"; then
+              :
             else
               log "fast-forward failed for $branch"
             fi
