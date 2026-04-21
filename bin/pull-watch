@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Keep a git repo up to date with its remote by periodically fetching
+# and fast-forwarding the current branch when the remote has advanced.
+#
+# Usage: pull-watch [-i interval_seconds] [-r remote] [path]
+#   path defaults to the current directory
+#   interval defaults to 60 seconds
+#   remote defaults to the upstream's remote (or "origin")
+
+set -u
+
+interval=60
+remote=""
+
+while getopts ":i:r:h" opt; do
+  case "$opt" in
+    i) interval="$OPTARG" ;;
+    r) remote="$OPTARG" ;;
+    h)
+      sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    \?) echo "pull-watch: invalid option -$OPTARG" >&2; exit 2 ;;
+    :)  echo "pull-watch: option -$OPTARG requires an argument" >&2; exit 2 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+repo="${1:-.}"
+
+cd "$repo" || exit 1
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "pull-watch: $repo is not a git repository" >&2
+  exit 1
+fi
+
+log() {
+  printf '[pull-watch %s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+}
+
+trap 'log "stopping"; exit 0' INT TERM
+
+log "watching $(pwd) (interval=${interval}s)"
+
+while true; do
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || echo "")
+  if [ -z "$branch" ]; then
+    log "detached HEAD; skipping"
+  else
+    if [ -n "$remote" ]; then
+      upstream="$remote/$branch"
+    else
+      upstream=$(git rev-parse --abbrev-ref --symbolic-full-name "@{upstream}" 2>/dev/null || echo "")
+    fi
+
+    if [ -z "$upstream" ]; then
+      log "no upstream for $branch; skipping"
+    else
+      remote_name="${upstream%%/*}"
+      if git fetch --quiet "$remote_name" 2>/dev/null; then
+        local_sha=$(git rev-parse HEAD)
+        remote_sha=$(git rev-parse "$upstream" 2>/dev/null || echo "")
+        if [ -n "$remote_sha" ] && [ "$local_sha" != "$remote_sha" ]; then
+          base=$(git merge-base HEAD "$upstream" 2>/dev/null || echo "")
+          if [ "$base" = "$local_sha" ]; then
+            if git -c advice.detachedHead=false merge --ff-only --quiet "$upstream"; then
+              log "fast-forwarded $branch to ${remote_sha:0:8}"
+            else
+              log "fast-forward failed for $branch"
+            fi
+          else
+            log "$branch has diverged from $upstream; skipping"
+          fi
+        fi
+      else
+        log "fetch from $remote_name failed"
+      fi
+    fi
+  fi
+  sleep "$interval"
+done
