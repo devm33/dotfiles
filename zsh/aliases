@@ -654,13 +654,15 @@ alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 _pr_info() {
   local json="$1"
   local local_repo="$2"
-  local url title review mergeable base head_oid
+  local url title review mergeable base head_oid state
   url=$(jq -r '.url' <<< "$json")
   title=$(jq -r '.title' <<< "$json")
   review=$(jq -r '.reviewDecision' <<< "$json")
   mergeable=$(jq -r '.mergeable' <<< "$json")
+  state=$(jq -r '.state' <<< "$json")
   # GitHub returns UNKNOWN while computing merge status; retry a few times
-  if [[ "$mergeable" == "UNKNOWN" ]]; then
+  # (only meaningful for open PRs)
+  if [[ "$state" == "OPEN" && "$mergeable" == "UNKNOWN" ]]; then
     local i
     for i in 1 2 3; do
       sleep 1
@@ -691,6 +693,14 @@ _pr_info() {
   # Output
   echo "\033[1m$title\033[0m"
   echo "$url"
+
+  if [[ "$state" == "MERGED" ]]; then
+    echo "state:    \033[35m✓ merged\033[0m"
+    return 0
+  elif [[ "$state" == "CLOSED" ]]; then
+    echo "state:    \033[31m✗ closed\033[0m"
+    return 0
+  fi
 
   if (( failed > 0 )); then
     echo "checks:   \033[31m✗ $failed failing\033[0m ($passed/$total passed)"
@@ -724,7 +734,7 @@ _pr_info() {
 
 pr() {
   local json
-  json=$(gh pr view --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
+  json=$(gh pr view --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid) || return 1
   _pr_info "$json" local
 }
 
@@ -741,7 +751,7 @@ prall() {
   while IFS=' ' read -r repo num; do
     (( first )) || echo
     first=0
-    json=$(gh pr view "$num" -R "$repo" --json url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
+    json=$(gh pr view "$num" -R "$repo" --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid 2>/dev/null) || continue
     _pr_info "$json"
   done <<< "$urls"
 }
