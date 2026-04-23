@@ -647,6 +647,10 @@ ask_copilot() {
     copilot --model=gpt-5.4-mini -s -p "Respond succinctly to the following user question: $*"
 }
 alias ask=ask_copilot
+ask_copilot_i() {
+    copilot --model=gpt-5.4-mini -i "Respond succinctly to the following user question: $*"
+}
+alias aski=ask_copilot_i
 alias ci=code-insiders
 alias prw='gh pr view --web'
 alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
