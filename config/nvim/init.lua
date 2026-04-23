@@ -18,6 +18,8 @@ vim.o.undofile = true
 
 -- Copilot
 vim.b.copilot_enabled = true
+-- Option+Right sends <M-f> on macOS; map it to accept word suggestion
+vim.keymap.set("i", "<M-f>", 'copilot#AcceptWord()', { expr = true, replace_keycodes = false, desc = "Copilot accept word" })
 
 -- Clipboard
 -- Sync clipboard between OS and Neovim.
