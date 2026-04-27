@@ -761,3 +761,5 @@ prall() {
 }
 
 alias datetime='date +%Y%m%dT%H%M%S'
+
+alias proxy='HTTP_PROXY=http://localhost:9090'
