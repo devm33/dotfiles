@@ -250,7 +250,7 @@ wt() {
   fi
   if [[ -n "$install_cmd" ]]; then
     local has_watch=false
-    if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null); then
+    if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null) > /dev/null; then
       has_watch=true
     fi
     if $has_watch; then
