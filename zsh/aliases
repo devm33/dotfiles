@@ -1,3 +1,8 @@
+# Stub compdef if completion system isn't loaded (e.g. non-interactive shells)
+if ! typeset -f compdef > /dev/null; then
+    compdef() { :; }
+fi
+
 # Reload/edit zsh configuration
 alias rz='source ~/.zshrc'
 alias ze='$EDITOR ~/.dotfiles/zshrc'

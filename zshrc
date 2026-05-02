@@ -23,10 +23,7 @@ HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history
 SAVEHIST=20000
 
-# include aliases file
-if [ -f $HOME/.zsh/aliases ]; then
-    source $HOME/.zsh/aliases;
-fi
+# aliases sourced in .zshenv for availability in non-interactive shells
 
 # include work stuff
 if [ -f $HOME/.zsh/work ]; then

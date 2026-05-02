@@ -119,3 +119,8 @@ export LESS="-FRX"
 
 # local node_modules (only works from project root)
 # export PATH="./node_modules/.bin:$PATH"
+
+# include aliases file
+if [ -f $HOME/.zsh/aliases ]; then
+    source $HOME/.zsh/aliases;
+fi
