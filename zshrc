@@ -11,6 +11,14 @@ else
 fi
 source $ZSH/oh-my-zsh.sh
 
+# override oh-my-zsh git plugin aliases that conflict with our functions
+unalias gcam gcpc gpr grh grhh 2>/dev/null
+alias gcam=git_commit_all_message
+alias gcpc=git_copy_commit
+alias gpr='git remote prune origin'
+alias grh=git_reset_head
+alias grhh=git_reset_head_hard
+
 # prompt config
 source $HOME/.zsh/prompt
 
