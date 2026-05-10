@@ -183,6 +183,7 @@ alias gbv='git branch -vv'
 alias pullall='for d in ./*/ ; do (cd "$d" && git pull); done'
 alias gdn='git diff --name-only $(git_main_branch)...@'
 alias gdm='git diff $(git_main_branch)..HEAD'
+alias gab='git rev-list --left-right --count $(git_main_branch)...HEAD | awk "{print \"behind: \" \$1 \"\nahead:  \" \$2}"'
 alias gs='git status'
 wt() {
   if [[ -z "$1" ]]; then
