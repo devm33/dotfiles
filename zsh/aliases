@@ -365,6 +365,7 @@ wtrm() {
 
   if [[ -n "$1" ]]; then
     # Look up worktree path by branch name, trying both bare and devm33/-prefixed
+    echo "Looking up worktree for branch '$1' ..."
     for ref in "refs/heads/$1" "refs/heads/devm33/$1"; do
       wt_dir=$(echo "$wt_list" | awk -v branch="$ref" '/^worktree /{wt=substr($0,10)} $0 == "branch " branch {print wt; exit}')
       [[ -n "$wt_dir" ]] && break
@@ -387,11 +388,14 @@ wtrm() {
   local pane_id
   pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
 
+  echo "Removing worktree at $wt_dir ..."
   git worktree remove --force "$wt_dir" 2>/dev/null
   rm -rf "$wt_dir"
+  echo "Worktree removed."
 
   # Kill tmux window last — if it's our own window, earlier commands still ran
   if [[ -n "$pane_id" ]]; then
+    echo "Closing tmux window $pane_id ..."
     tmux kill-window -t "$pane_id"
   fi
 }
