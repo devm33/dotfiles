@@ -200,9 +200,6 @@ wt() {
   mkdir -p "$wt_dir"
   local wt_path="${wt_dir}/${branch_name}"
 
-  # Fetch latest branches
-  git pull || return 1
-
   # Determine branch name: skip devm33/ prefix if already present or if it's an existing branch
   local wt_branch
   if [[ "$branch_name" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$branch_name" || git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
