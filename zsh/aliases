@@ -221,6 +221,14 @@ wt() {
     fi
   fi
 
+  # If a tmux window is already open at this worktree path, switch to it
+  local existing_win
+  existing_win=$(tmux list-panes -a -F '#{pane_current_path} #{window_id}' 2>/dev/null | awk -v dir="$wt_path" '$1 == dir {print $2; exit}')
+  if [[ -n "$existing_win" ]]; then
+    tmux select-window -t "$existing_win"
+    return 0
+  fi
+
   # Create a new tmux window at the worktree path
   local win
   win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
