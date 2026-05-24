@@ -669,6 +669,7 @@ alias aski=ask_copilot_i
 alias ci=code-insiders
 alias prw='gh pr view --web'
 alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
+alias prap='gh pr review --approve'
 
 _pr_info() {
   local json="$1"
