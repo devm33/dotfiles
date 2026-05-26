@@ -70,6 +70,10 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- tmux sends Escape as CSI-u (\e[27u) with extended-keys always + csi-u format,
+-- but nvim can't negotiate kitty protocol through tmux, so map it explicitly.
+vim.keymap.set({ "i", "n", "v", "c", "t" }, "\x1b[27u", "<Esc>", { noremap = true })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
