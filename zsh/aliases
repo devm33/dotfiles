@@ -339,7 +339,7 @@ wtD() {
 
   git branch -D "$wt_branch"
 }
-_wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[* ]*//' | sed 's|remotes/origin/||' | sort -u) }
+_wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[+* ]*//' | grep -v 'HEAD' | sed 's|remotes/origin/||' | sort -u) }
 compdef _wt_branches wt
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
