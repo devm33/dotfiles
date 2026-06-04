@@ -785,3 +785,17 @@ prall() {
 alias datetime='date +%Y%m%dT%H%M%S'
 
 alias proxy='HTTP_PROXY=http://localhost:9090'
+
+command_not_found_handler() {
+    if [[ $# -gt 1 ]]; then
+        if ! type yolo >/dev/null 2>&1; then
+            echo "zsh: command not found: $1" >&2
+            return 127
+        fi
+        local prompt="$*"
+        eval "yolo -i ${(q)prompt}"
+        return $?
+    fi
+    echo "zsh: command not found: $1" >&2
+    return 127
+}
