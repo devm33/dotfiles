@@ -26,6 +26,13 @@ source $HOME/.zsh/prompt
 autoload -U bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
+# aliases were sourced from .zshenv (before compinit), so their compdef calls
+# hit the no-op stub. Re-source now that the real compdef is available so
+# completions like `wt` get registered.
+if [ -f $HOME/.zsh/aliases ]; then
+    source $HOME/.zsh/aliases
+fi
+
 # Save a ton of history
 HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history
