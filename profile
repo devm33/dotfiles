@@ -20,3 +20,7 @@ fi
 
 export IBUS_ENABLE_SYNC_MODE=1
 . "$HOME/.cargo/env"
+
+export RUSTC_WRAPPER=sccache
+export CARGO_INCREMENTAL=0
+export SCCACHE_CACHE_SIZE=20G
