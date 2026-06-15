@@ -96,6 +96,7 @@ alias nb='npm run build'
 alias nw='npm run watch'
 alias pst='pnpm start --'
 alias p='pnpm'
+alias pw='pnpm run watch'
 
 # Bundler
 alias bx='bundle exec'
