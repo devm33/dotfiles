@@ -254,7 +254,9 @@ wt() {
 
   # Install deps (non-blocking, in pane 2) and optionally run watch
   local install_cmd=""
-  if [ -f "$wt_path/bun.lock" ]; then
+  if [ -f "$wt_path/pnpm-lock.yaml" ]; then
+    install_cmd="pnpm install"
+  elif [ -f "$wt_path/bun.lock" ]; then
     install_cmd="bun install"
   elif [ -f "$wt_path/package.json" ]; then
     install_cmd="npm install"
@@ -265,7 +267,9 @@ wt() {
       has_watch=true
     fi
     if $has_watch; then
-      if [ -f "$wt_path/bun.lock" ]; then
+      if [ -f "$wt_path/pnpm-lock.yaml" ]; then
+        tmux send-keys -t "${win}.2" "$install_cmd && pnpm run watch" Enter
+      elif [ -f "$wt_path/bun.lock" ]; then
         tmux send-keys -t "${win}.2" "$install_cmd && bun run watch" Enter
       else
         tmux send-keys -t "${win}.2" "$install_cmd && npm run watch" Enter
