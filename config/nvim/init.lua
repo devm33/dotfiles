@@ -190,6 +190,22 @@ require("lazy").setup({
                 topdelete = { text = "‾" },
                 changedelete = { text = "~" },
             },
+            current_line_blame = true,
+            current_line_blame_opts = {
+                delay = 300,
+                virt_text_pos = "eol",
+            },
+            on_attach = function(bufnr)
+                local gs = require("gitsigns")
+                local function map(l, r, desc)
+                    vim.keymap.set("n", l, r, { buffer = bufnr, desc = desc })
+                end
+                map("<leader>hb", function()
+                    gs.blame_line({ full = true })
+                end, "Git blame line")
+                map("<leader>hB", gs.blame, "Git blame buffer")
+                map("<leader>tb", gs.toggle_current_line_blame, "Toggle line blame")
+            end,
         },
     },
 
