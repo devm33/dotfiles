@@ -197,8 +197,11 @@ wt() {
   local branch_name="$1"
   shift
   local prompt_args="$*"
-  local repo_root
-  repo_root=$(git rev-parse --show-toplevel) || return 1
+  # Use the main worktree root (parent of the common git dir) so worktrees are
+  # always created under repo.worktrees/, even when run from another worktree.
+  local git_common_dir
+  git_common_dir=$(git rev-parse --path-format=absolute --git-common-dir) || return 1
+  local repo_root="${git_common_dir%/.git}"
   local wt_dir="${repo_root}.worktrees"
   mkdir -p "$wt_dir"
   local wt_path="${wt_dir}/${branch_name}"
