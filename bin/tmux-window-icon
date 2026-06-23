@@ -1,0 +1,242 @@
+#!/usr/bin/env zsh
+# Print the Nerd Font glyph for a tmux tab: the current branch's PR status when
+# the branch has a pull request, otherwise the icon for the running command.
+#
+# Meant for tmux window-status-format, taking the pane path and current command.
+# The surrounding format supplies the spacing and resets fg afterwards so a PR
+# status color does not bleed into the window name, e.g.:
+#   "... #I #(tmux-window-icon #{pane_current_path} #{pane_current_command}) #[fg=cyan]#{b:...} ..."
+#
+# tmux re-expands every window's status line on each redraw (status-interval),
+# so this stays cheap: it reads a short-lived cache and refreshes the status in
+# a detached background process via `gh`, never blocking the status bar or
+# hammering the GitHub API. Non-git / non-GitHub / no-PR tabs print nothing.
+#
+# Ported from caarlos0/dotfiles bin/tmux-window-icon (fish -> zsh).
+
+emulate -L zsh
+setopt no_nomatch
+
+ttl=30
+cache_dir="$HOME/.cache/tmux-window-icon"
+
+# PR-status glyphs + colors (Catppuccin Mocha).
+# Nerd Font: f058 check-circle, f057 times-circle, f111 circle, e0a0 branch, f071 warning.
+glyph_pass=$'\uf058'
+glyph_fail=$'\uf057'
+glyph_pending=$'\uf111'
+glyph_merged=$'\ue0a0'
+glyph_conflicts=$'\uf071'
+color_pass='#a6e3a1'
+color_fail='#f38ba8'
+color_pending='#f9e2af'
+color_merged='#cba6f7'
+color_conflicts='#fab387'
+
+# Return a styled glyph for one of the known states, or nothing. The case never
+# echoes its input, so it can only ever produce a known PR-status glyph.
+emit() {
+  case "$1" in
+    pass)      printf '#[fg=%s]%s' "$color_pass" "$glyph_pass" ;;
+    fail)      printf '#[fg=%s]%s' "$color_fail" "$glyph_fail" ;;
+    pending)   printf '#[fg=%s]%s' "$color_pending" "$glyph_pending" ;;
+    merged)    printf '#[fg=%s]%s' "$color_merged" "$glyph_merged" ;;
+    conflicts) printf '#[fg=%s]%s' "$color_conflicts" "$glyph_conflicts" ;;
+  esac
+}
+
+# Seconds since the mtime of $1, or nothing if it does not exist.
+age() {
+  local m
+  m=$(stat -f %m "$1" 2>/dev/null) || return
+  [[ -n "$m" ]] && printf '%s' $(( $(date +%s) - m ))
+}
+
+# Nerd Font icon for a command name (merged from caarlos0 bin/icons), or nothing.
+command_icon() {
+  case "$1" in
+    ack|fd|find|fzf|grep|rg) print -- '\uf422' ;;
+    atop|htop|top) print -- '\uf200' ;;
+    bash|fish|zsh|sh|ash) print -- '\ue795' ;;
+    bat|cat) print -- '\uf1b0' ;;
+    clx) print -- '\ue642' ;;
+    copilot) print -- '\uf113' ;;
+    cp|duplicate) print -- '\uf0c5' ;;
+    diff) print -- '\uf4d2' ;;
+    mv) print -- '\U000f0252' ;;
+    curl|http|pint|lynx|wget|w3m) print -- '\uf484' ;;
+    docker|docker-compose|podman) print -- '\uf308' ;;
+    lf|ls|nnn|ranger|lsd) print -- '\uf413' ;;
+    elixir|mix) print -- '\ue62d' ;;
+    prowl) print -- '\U000f03d2' ;;
+    gh|gh-dash) print -- '\ue708' ;;
+    git|lazygit|tig) print -- '\ue725' ;;
+    glow) print -- '\uf48a' ;;
+    go|goreleaser) print -- '\ue627' ;;
+    java|mvn) print -- '\ue256' ;;
+    less|more) print -- '\uf036' ;;
+    lua) print -- '\ue620' ;;
+    man) print -- '\uf02d' ;;
+    nano|pico) print -- '\uf15c' ;;
+    node) print -- '\ued0d' ;;
+    npm|pnpm) print -- '\ued0e' ;;
+    nix*) print -- '\U000f1105' ;;
+    vim|vi) print -- '\ue62b' ;;
+    nvim) print -- '\uf36f' ;;
+    python|pip) print -- '\ue73c' ;;
+    rm) print -- '\uea81' ;;
+    rsync) print -- '\uf46a' ;;
+    rust|cargo|rustup) print -- '\ue7a8' ;;
+    ruby|irb) print -- '\ue791' ;;
+    scp|ssh) print -- '\U000f08c0' ;;
+    sleep) print -- '\uf252' ;;
+    sudo) print -- '\uf12a' ;;
+    tail) print -- '\uf4ed' ;;
+    task|make) print -- '\ue673' ;;
+    tmux) print -- '\uebc8' ;;
+    youtube-dl) print -- '\uf16a' ;;
+    age|bw|gpg|op|pass|pinentry) print -- '\uf023' ;;
+    ansible) print -- '\ue7a8' ;;
+    bun) print -- '\ue76f' ;;
+    composer) print -- '\ue783' ;;
+    deno) print -- '\U000f07d3' ;;
+    dig|nslookup|ping|traceroute|mtr|nc|netcat|nmap|tcpdump) print -- '\U000f06f3' ;;
+    du|df|ncdu|dust) print -- '\uf7c9' ;;
+    eslint) print -- '\ue655' ;;
+    ffmpeg|mpv|yt-dlp) print -- '\uf03d' ;;
+    helm) print -- '\u2388' ;;
+    imagemagick|magick|convert) print -- '\uf03e' ;;
+    jq|yq) print -- '\U000f0626' ;;
+    mongo|mongosh) print -- '\ue7a4' ;;
+    mysql|mariadb) print -- '\ue704' ;;
+    openssl) print -- '\uf21b' ;;
+    psql) print -- '\ue76e' ;;
+    redis-cli) print -- '\ue76d' ;;
+    screen) print -- '\uf489' ;;
+    sqlite|sqlite3) print -- '\ue7c4' ;;
+    swift) print -- '\ue755' ;;
+    tar|zip|unzip|gzip|gunzip) print -- '\uf410' ;;
+    terraform|tofu|tflint) print -- '\ue7b1' ;;
+    time) print -- '\uf017' ;;
+    tsc) print -- '\ue628' ;;
+    watch) print -- '\uf254' ;;
+    xcodebuild) print -- '\ue711' ;;
+    yarn) print -- '\ue71e' ;;
+    zig) print -- '\uf0e7' ;;
+  esac
+}
+
+# --- background worker: tmux-window-icon --refresh <top> <rev> <statefile> <lockdir>
+if [[ "$1" == --refresh ]]; then
+  top=$2; rev=$3; statefile=$4; lockdir=$5
+
+  # Only ever write inside the cache dir, so a misaligned call can't litter repos.
+  case "$statefile" in
+    "$cache_dir"/*) ;;
+    *) rm -rf "$lockdir"; exit 0 ;;
+  esac
+
+  cd "$top" 2>/dev/null || { rm -rf "$lockdir"; exit 0 }
+
+  state=none
+  # No branch arg: `gh pr view <branch>` matches only the base repo and misses
+  # cross-repo (fork) PRs; bare gh uses the current branch (we cd'd into $top).
+  # Precedence: merged > conflicts > failing/pending/passing checks.
+  local -a pr buckets
+  pr=("${(@f)$(gh pr view --json state,mergeable -q '.state, .mergeable' 2>/dev/null)}")
+  case "${pr[1]}" in
+    MERGED) state=merged ;;
+    OPEN|CLOSED)
+      if [[ "${pr[2]}" == CONFLICTING ]]; then
+        state=conflicts
+      else
+        buckets=("${(@f)$(gh pr checks --json bucket -q '.[].bucket' 2>/dev/null)}")
+        if (( ${#buckets} > 0 )); then
+          if (( ${buckets[(I)fail]} )) || (( ${buckets[(I)cancel]} )); then
+            state=fail
+          elif (( ${buckets[(I)pending]} )); then
+            state=pending
+          elif (( ${buckets[(I)pass]} )); then
+            state=pass
+          fi
+        fi
+      fi
+      ;;
+  esac
+
+  tmp="$statefile.tmp.$$"
+  printf '%s\n%s' "$rev" "$state" > "$tmp"
+  mv -f "$tmp" "$statefile"
+  rm -rf "$lockdir"
+  exit 0
+fi
+
+# --- fast path (called by tmux with a pane path and the current command) ---
+# Last arg is the command (for the icon fallback); the rest is the path.
+cmd=""
+dir=""
+if (( $# >= 2 )); then
+  cmd=${@[$#]}
+  dir="${(j: :)@[1,-2]}"
+else
+  dir="$*"
+fi
+
+# PR status, only when the pane's directory is inside a git repo.
+out=""
+local -a info cached
+if [[ -n "$dir" ]]; then
+  info=("${(@f)$(git -C "$dir" rev-parse HEAD --show-toplevel --abbrev-ref HEAD 2>/dev/null)}")
+fi
+if (( ${#info} >= 3 )); then
+  head=${info[1]}
+  top=${info[2]}
+  branch=${info[3]}
+
+  # Revision signature: HEAD plus the push target, so commits, branch switches
+  # and `git push` all invalidate the cache (the upstream ref moves on push).
+  up=$(git -C "$dir" rev-parse --verify --quiet '@{upstream}' 2>/dev/null)
+  rev="$head-$up"
+
+  mkdir -p "$cache_dir" 2>/dev/null
+  # filename-safe cache key from repo path + branch
+  key="${top}#${branch}"
+  key="${key//[^A-Za-z0-9._-]/_}"
+  statefile="$cache_dir/$key.state"
+  lockdir="$cache_dir/$key.lock"
+
+  # cache file is rev then state
+  [[ -f "$statefile" ]] && cached=("${(@f)$(cat "$statefile")}")
+  (( ${#cached} >= 2 )) && out=$(emit "${cached[2]}")
+
+  # refresh when the cache is missing, stale (TTL), or for a different revision
+  need_refresh=1
+  st=$(age "$statefile")
+  if (( ${#cached} >= 2 )) && [[ "${cached[1]}" == "$rev" ]] && [[ -n "$st" ]] && (( st < ttl )); then
+    need_refresh=0
+  fi
+
+  if (( need_refresh )); then
+    locked=0
+    if mkdir "$lockdir" 2>/dev/null; then
+      locked=1
+    else
+      lt=$(age "$lockdir")
+      if [[ -n "$lt" ]] && (( lt > 120 )); then
+        rm -rf "$lockdir" && mkdir "$lockdir" 2>/dev/null && locked=1
+      fi
+    fi
+    if (( locked )); then
+      # Redirect ALL std streams: tmux runs #() over a socketpair, so an
+      # inherited stdin would keep the socket open and tmux would show
+      # "<'...' not ready>" until the slow gh call finishes. Detach fully (&!).
+      "$0" --refresh "$top" "$rev" "$statefile" "$lockdir" </dev/null >/dev/null 2>&1 &!
+    fi
+  fi
+fi
+
+# Show the PR status glyph if we have one; otherwise the icon for the command,
+# falling back to a generic terminal glyph (Nerd Font f489) when nothing matches.
+[[ -z "$out" && -n "$cmd" ]] && out=$(command_icon "$cmd")
+[[ -z "$out" ]] && out=$'\uf489'
+printf '%s' "$out"
