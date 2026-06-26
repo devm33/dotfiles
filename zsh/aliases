@@ -693,12 +693,14 @@ alias prap='gh pr review --approve'
 _pr_info() {
   local json="$1"
   local local_repo="$2"
-  local url title review mergeable base head_oid state
+  local url title review mergeable base head_oid state is_draft auto_merge
   url=$(jq -r '.url' <<< "$json")
   title=$(jq -r '.title' <<< "$json")
   review=$(jq -r '.reviewDecision' <<< "$json")
   mergeable=$(jq -r '.mergeable' <<< "$json")
   state=$(jq -r '.state' <<< "$json")
+  is_draft=$(jq -r '.isDraft' <<< "$json")
+  auto_merge=$(jq -r 'if .autoMergeRequest == null then "false" else "true" end' <<< "$json")
   # GitHub returns UNKNOWN while computing merge status; retry a few times
   # (only meaningful for open PRs)
   if [[ "$state" == "OPEN" && "$mergeable" == "UNKNOWN" ]]; then
@@ -760,6 +762,12 @@ _pr_info() {
     return 0
   fi
 
+  if [[ "$is_draft" == "true" ]]; then
+    echo "state:    \033[90m● draft\033[0m"
+  else
+    echo "state:    \033[32m✓ ready\033[0m"
+  fi
+
   if (( failed > 0 )); then
     echo "checks:   \033[31m✗ $failed failing\033[0m ($passed/$total passed)"
   elif (( pending > 0 )); then
@@ -792,6 +800,12 @@ _pr_info() {
     *)           echo "merge:    \033[33m● unknown\033[0m" ;;
   esac
 
+  if [[ "$auto_merge" == "true" ]]; then
+    echo "automerge:\033[32m ✓ enabled\033[0m"
+  else
+    echo "automerge:\033[90m ✗ disabled\033[0m"
+  fi
+
   if [[ "$behind" == "0" ]]; then
     echo "vs $base:  \033[32m↑$ahead ↓$behind\033[0m (up to date)"
   else
@@ -801,7 +815,7 @@ _pr_info() {
 
 pr() {
   local json
-  json=$(gh pr view --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid,labels,author,latestReviews) || return 1
+  json=$(gh pr view --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid,labels,author,latestReviews,isDraft,autoMergeRequest) || return 1
   _pr_info "$json" local
 }
 
@@ -818,7 +832,7 @@ prall() {
   while IFS=' ' read -r repo num; do
     (( first )) || echo
     first=0
-    json=$(gh pr view "$num" -R "$repo" --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid,labels,author,latestReviews 2>/dev/null) || continue
+    json=$(gh pr view "$num" -R "$repo" --json state,url,title,reviewDecision,mergeable,statusCheckRollup,baseRefName,headRefOid,labels,author,latestReviews,isDraft,autoMergeRequest 2>/dev/null) || continue
     _pr_info "$json"
   done <<< "$urls"
 }
