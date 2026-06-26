@@ -31,6 +31,26 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)"
     ```
 
+### GitHub Codespaces
+
+This repo doubles as a [Codespaces dotfiles repository][codespaces-dotfiles]. To
+use it, enable "Automatically install dotfiles" in your [Codespaces settings][cs-settings]
+and select this repo.
+
+On codespace creation GitHub clones the repo to a temporary location and runs
+`install.sh`, which:
+
+-   symlinks the clone to `~/.dotfiles` (where rcm and the configs expect it),
+-   installs dependencies (`rcm`, `oh-my-zsh`, zsh, and a few CLI tools),
+-   links `host-codespace/rcrc` to `~/.rcrc` and runs `rcup`, and
+-   sets zsh as the default shell.
+
+The `codespace` host intentionally omits a `gitconfig` so Codespaces keeps
+managing git identity and commit signing.
+
+[codespaces-dotfiles]: https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account#dotfiles
+[cs-settings]: https://github.com/settings/codespaces
+
     -  For a readonly install (no github authorized keys on the box) set this
        flag before running the install script:
 
