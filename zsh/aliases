@@ -691,6 +691,7 @@ alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 alias prap='gh pr review --approve'
 alias prr='gh pr ready'
 alias pra='gh pr merge --auto'
+alias prc='gh pr view --comments'
 
 _pr_info() {
   local json="$1"
