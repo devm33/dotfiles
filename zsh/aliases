@@ -689,6 +689,8 @@ alias ci=code-insiders
 alias prw='gh pr view --web'
 alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 alias prap='gh pr review --approve'
+alias prr='gh pr ready'
+alias pra='gh pr merge --auto'
 
 _pr_info() {
   local json="$1"
