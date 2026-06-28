@@ -17,7 +17,7 @@ fi
 cd "${1:-$PWD}" || exit 1
 
 # COPILOT_ALLOW_ALL skips the interactive "trust this folder" prompt.
-COPILOT_ALLOW_ALL=true copilot --yolo -i /code-review
+COPILOT_ALLOW_ALL=true copilot --yolo -i /review
 
 # Keep the pane alive so exiting copilot doesn't drop the ssh connection.
 exec zsh -l
