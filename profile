@@ -21,6 +21,10 @@ fi
 export IBUS_ENABLE_SYNC_MODE=1
 . "$HOME/.cargo/env"
 
-export RUSTC_WRAPPER=sccache
 export CARGO_INCREMENTAL=0
-export SCCACHE_CACHE_SIZE=20G
+# Only use sccache when it's actually installed; otherwise cargo fails because
+# RUSTC_WRAPPER points at a missing binary (e.g. in codespaces).
+if command -v sccache >/dev/null 2>&1; then
+  export RUSTC_WRAPPER=sccache
+  export SCCACHE_CACHE_SIZE=20G
+fi
