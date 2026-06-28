@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+
+# Launcher for the `ccr` codespace code-review workflow.
+#
+# Runs the Copilot CLI `/code-review` prompt in the given directory inside a
+# codespace. It is meant to be started by tmux (which uses a non-login `sh`),
+# so it first re-execs itself as a *login* shell to pick up the environment
+# Codespaces injects only for login shells (notably GITHUB_TOKEN, which copilot
+# needs to authenticate). After copilot exits it drops into an interactive
+# login shell instead of tearing down the tmux session / ssh connection.
+
+# Re-exec once as a login shell if we don't have the codespace auth token yet.
+if [[ -z "$GITHUB_TOKEN" && -z "$CCR_RELOGIN" ]]; then
+  exec env CCR_RELOGIN=1 zsh -l "$0" "$@"
+fi
+
+cd "${1:-$PWD}" || exit 1
+
+# COPILOT_ALLOW_ALL skips the interactive "trust this folder" prompt.
+COPILOT_ALLOW_ALL=true copilot --yolo -i /code-review
+
+# Keep the pane alive so exiting copilot doesn't drop the ssh connection.
+exec zsh -l
