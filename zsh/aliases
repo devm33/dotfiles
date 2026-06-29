@@ -189,6 +189,15 @@ alias gdm='git diff $(git_main_branch)..HEAD'
 alias gab='git rev-list --left-right --count $(git_main_branch)...HEAD | awk "{print \"behind: \" \$1 \"\nahead:  \" \$2}"'
 alias gs='git status'
 wt() {
+  _wt_impl "" "$@"
+}
+# Like wt, but launches the copilot (yolo) command with --cloud.
+wtc() {
+  _wt_impl "--cloud" "$@"
+}
+_wt_impl() {
+  local cloud_flag="$1"
+  shift
   if [[ -z "$1" ]]; then
     echo "Usage: wt <branch-name> [yolo args...]"
     return 1
@@ -240,15 +249,24 @@ wt() {
   win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
 
   # In the initial pane: run yolo with optional args
+  local cloud_arg=""
+  [[ -n "$cloud_flag" ]] && cloud_arg=" ${cloud_flag}"
   if [[ -n "$prompt_args" ]]; then
     local escaped_args="${prompt_args//\'/\'\\\'\'}"
-    tmux send-keys -t "$win" "yolo --autopilot -i '${escaped_args}'" Enter
+    tmux send-keys -t "$win" "yolo${cloud_arg} --autopilot -i '${escaped_args}'" Enter
   else
-    tmux send-keys -t "$win" "yolo" Enter
+    tmux send-keys -t "$win" "yolo${cloud_arg}" Enter
   fi
 
   # Split vertically (left | right)
   tmux split-window -h -t "$win" -c "$wt_path"
+
+  # Cloud mode runs the agent remotely, so skip the local install/build pane.
+  if [[ -n "$cloud_flag" ]]; then
+    # Focus back on the first pane
+    tmux select-pane -t "${win}.0"
+    return 0
+  fi
 
   # Split the right pane horizontally (right-top / right-bottom)
   tmux split-window -v -t "$win" -c "$wt_path"
@@ -287,6 +305,36 @@ wt() {
 
   # Focus back on the first pane
   tmux select-pane -t "${win}.0"
+}
+# Resolve a cr/crc argument to a branch name. Accepts a branch name (passed
+# through unchanged), or a pull request number / URL, which is resolved to the
+# PR's head branch and fetched locally so a worktree can be created from it.
+_cr_resolve_branch() {
+  local arg="$1"
+  if [[ "$arg" == *"/pull/"* || "$arg" =~ ^[0-9]+$ ]]; then
+    local json num head
+    json=$(gh pr view "$arg" --json number,headRefName) || return 1
+    num=$(jq -r '.number' <<< "$json")
+    head=$(jq -r '.headRefName' <<< "$json")
+    echo "Resolved PR $num to branch $head" >&2
+    git fetch origin "pull/$num/head:$head" 2>/dev/null
+    printf '%s' "$head"
+  else
+    printf '%s' "$arg"
+  fi
+}
+# Open a worktree and run /code-review in it. Accepts a branch name, or a pull
+# request number / URL.
+cr() {
+  local branch
+  branch=$(_cr_resolve_branch "$1") || return 1
+  wt "$branch" /code-review
+}
+# Like cr, but launches the copilot (yolo) command with --cloud.
+crc() {
+  local branch
+  branch=$(_cr_resolve_branch "$1") || return 1
+  wtc "$branch" /code-review
 }
 # Delete branch and its associated worktree (if any)
 gbDW() {
@@ -351,6 +399,9 @@ wtD() {
 }
 _wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[+* ]*//' | grep -v 'HEAD' | sed 's|remotes/origin/||' | sort -u) }
 compdef _wt_branches wt
+compdef _wt_branches wtc
+compdef _wt_branches cr
+compdef _wt_branches crc
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm

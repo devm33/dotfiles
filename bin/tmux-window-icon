@@ -142,7 +142,9 @@ if [[ "$1" == --refresh ]]; then
   # No branch arg: `gh pr view <branch>` matches only the base repo and misses
   # cross-repo (fork) PRs; bare gh uses the current branch (we cd'd into $top).
   # Precedence: merged > conflicts > failing/pending/passing checks.
-  local -a pr buckets
+  # Only a failing/cancelled *required* check turns the tab red; non-required
+  # check failures are ignored so they don't mask an otherwise mergeable PR.
+  local -a pr buckets reqfails
   pr=("${(@f)$(gh pr view --json state,mergeable -q '.state, .mergeable' 2>/dev/null)}")
   case "${pr[1]}" in
     MERGED) state=merged ;;
@@ -151,8 +153,9 @@ if [[ "$1" == --refresh ]]; then
         state=conflicts
       else
         buckets=("${(@f)$(gh pr checks --json bucket -q '.[].bucket' 2>/dev/null)}")
+        reqfails=("${(@f)$(gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
         if (( ${#buckets} > 0 )); then
-          if (( ${buckets[(I)fail]} )) || (( ${buckets[(I)cancel]} )); then
+          if (( ${#reqfails} > 0 )); then
             state=fail
           elif (( ${buckets[(I)pending]} )); then
             state=pending
