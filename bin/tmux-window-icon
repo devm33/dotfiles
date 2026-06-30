@@ -152,8 +152,13 @@ if [[ "$1" == --refresh ]]; then
       if [[ "${pr[2]}" == CONFLICTING ]]; then
         state=conflicts
       else
+        # Drop empty fields: "${(@f)$(cmd)}" yields a single empty element
+        # (not an empty array) when the command prints nothing, which would
+        # otherwise count as a phantom failure / check.
         buckets=("${(@f)$(gh pr checks --json bucket -q '.[].bucket' 2>/dev/null)}")
+        buckets=(${buckets:#})
         reqfails=("${(@f)$(gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
+        reqfails=(${reqfails:#})
         if (( ${#buckets} > 0 )); then
           if (( ${#reqfails} > 0 )); then
             state=fail
