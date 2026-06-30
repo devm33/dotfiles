@@ -45,10 +45,54 @@ if command -v apt-get >/dev/null 2>&1; then
     log "Installing packages with apt-get"
     maybe_sudo apt-get update -y || true
     maybe_sudo apt-get install -y --no-install-recommends \
-        zsh tmux fzf ripgrep silversearcher-ag neovim \
+        zsh tmux fzf ripgrep silversearcher-ag \
         build-essential curl ca-certificates \
         libevent-dev libncurses-dev bison pkg-config || true
 fi
+
+# 2b. Install a recent Neovim. Codespaces' apt neovim is too old (< 0.8) for
+#     lazy.nvim, so grab the official prebuilt binary and drop it in
+#     /usr/local (ahead of apt's /usr/bin on PATH). Best effort and idempotent:
+#     skip if already on the target version, fall back to a pinned version if
+#     the GitHub API is unreachable.
+NVIM_FALLBACK='v0.11.2'
+install_nvim() {
+    local want arch asset tmp
+    want="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest 2>/dev/null \
+        | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
+    [ -n "$want" ] || want="$NVIM_FALLBACK"
+
+    if command -v nvim >/dev/null 2>&1 && [ "$(nvim --version | sed -n '1s/^NVIM //p')" = "$want" ]; then
+        log "Neovim $want already installed"
+        return 0
+    fi
+
+    case "$(uname -m)" in
+        x86_64|amd64) arch='x86_64' ;;
+        aarch64|arm64) arch='arm64' ;;
+        *) log "Unsupported arch $(uname -m) for prebuilt Neovim; keeping system nvim"; return 1 ;;
+    esac
+    asset="nvim-linux-$arch.tar.gz"
+
+    log "Installing Neovim $want ($asset)"
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        # Newer releases ship nvim-linux-<arch>.tar.gz; older ones only
+        # nvim-linux64.tar.gz. Try the arch-specific name first, then fall back.
+        if ! curl -fsSLO "https://github.com/neovim/neovim/releases/download/$want/$asset"; then
+            asset='nvim-linux64.tar.gz'
+            curl -fsSLO "https://github.com/neovim/neovim/releases/download/$want/$asset"
+        fi
+        tar -xf "$asset"
+        local dir="${asset%.tar.gz}"
+        maybe_sudo cp -a "$dir/bin/." /usr/local/bin/
+        maybe_sudo cp -a "$dir/lib/." /usr/local/lib/ 2>/dev/null || true
+        maybe_sudo cp -a "$dir/share/." /usr/local/share/
+    )
+    rm -rf "$tmp"
+}
+install_nvim || log "Neovim install failed; keeping system nvim"
 
 # 3. Build the latest stable tmux from source. Codespaces ship an old tmux
 #    (Debian's 3.3a) whose format parser mis-renders the status line (commas in
