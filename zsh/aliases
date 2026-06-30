@@ -358,6 +358,18 @@ cs() {
 }
 # SSH into a codespace (prompts to pick one when no -c <name> is given).
 alias cssh='gh codespace ssh'
+
+# Fallback `yolo` for machines without zsh/work (e.g. codespaces). Prefer a
+# locally built CLI in the codespace workspace when present, otherwise use the
+# installed copilot binary. zsh/work overrides this with its own yolo when
+# available.
+yolo() {
+  local cli
+  for cli in /workspaces/*/dist-cli/index.js(N); do
+    [[ -f "$cli" ]] && { node "$cli" --yolo "$@"; return; }
+  done
+  copilot --yolo "$@"
+}
 # Open a worktree and run /code-review in it. Accepts a branch name, or a pull
 # request number / URL.
 cr() {
