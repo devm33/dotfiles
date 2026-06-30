@@ -172,24 +172,4 @@ if command -v zsh >/dev/null 2>&1; then
     fi
 fi
 
-# 8. Trust all folders for the Copilot CLI so it doesn't prompt in the
-#    codespace. Merge "trustedFolders": ["/"] into ~/.copilot/config.json,
-#    preserving any other settings and creating the file if it's absent.
-log "Trusting / for the Copilot CLI"
-copilot_config="$HOME/.copilot/config.json"
-mkdir -p "$(dirname "$copilot_config")"
-if command -v jq >/dev/null 2>&1; then
-    tmp="$(mktemp)"
-    if [ -s "$copilot_config" ]; then
-        jq '.trustedFolders = ["/"]' "$copilot_config" > "$tmp"
-    else
-        jq -n '{trustedFolders: ["/"]}' > "$tmp"
-    fi
-    mv "$tmp" "$copilot_config"
-elif [ ! -s "$copilot_config" ]; then
-    printf '%s\n' '{"trustedFolders": ["/"]}' > "$copilot_config"
-else
-    log "jq not found; leaving existing $copilot_config unchanged"
-fi
-
 log "Dotfiles install complete"
