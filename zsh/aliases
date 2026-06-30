@@ -823,12 +823,41 @@ _pr_info() {
   local labels
   labels=$(jq -r '[.labels[].name] | join(", ")' <<< "$json")
 
-  # Checks summary
+  # Checks summary (all checks)
   local total passed failed pending
   total=$(jq '.statusCheckRollup | length' <<< "$json")
   passed=$(jq '[.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length' <<< "$json")
   failed=$(jq '[.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "ERROR")] | length' <<< "$json")
   pending=$(( total - passed - failed ))
+
+  # Required checks summary (statusCheckRollup has no isRequired flag, so query
+  # it separately via GraphQL)
+  local req_total="" req_passed=0 req_failed=0 req_pending=0
+  local owner repo num
+  if [[ "$url" =~ github.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
+    owner="${match[1]}"; repo="${match[2]}"; num="${match[3]}"
+    local req_counts
+    req_counts=$(gh api graphql -F owner="$owner" -F repo="$repo" -F pr="$num" -f query='
+      query($owner:String!,$repo:String!,$pr:Int!){
+        repository(owner:$owner,name:$repo){
+          pullRequest(number:$pr){
+            commits(last:1){nodes{commit{statusCheckRollup{contexts(first:100){nodes{
+              __typename
+              ... on CheckRun { conclusion isRequired(pullRequestNumber:$pr) }
+              ... on StatusContext { state isRequired(pullRequestNumber:$pr) }
+            }}}}}}
+          }
+        }
+      }' --jq '
+      [.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[]
+        | select(.isRequired == true) | (.conclusion // .state)] as $r
+      | "\($r | length) \([$r[] | select(. == "SUCCESS")] | length) \([$r[] | select(. == "FAILURE" or . == "ERROR")] | length)"
+    ' 2>/dev/null)
+    if [[ -n "$req_counts" ]]; then
+      read -r req_total req_passed req_failed <<< "$req_counts"
+      req_pending=$(( req_total - req_passed - req_failed ))
+    fi
+  fi
 
   # Commits ahead/behind base
   local behind="?" ahead="?"
@@ -877,6 +906,18 @@ _pr_info() {
     echo "checks:   \033[32m✓ all $total passed\033[0m"
   else
     echo "checks:   no checks"
+  fi
+
+  if [[ -n "$req_total" ]]; then
+    if (( req_total == 0 )); then
+      echo "required: \033[90mnone\033[0m"
+    elif (( req_failed > 0 )); then
+      echo "required: \033[31m✗ $req_failed failing\033[0m ($req_passed/$req_total passed)"
+    elif (( req_pending > 0 )); then
+      echo "required: \033[33m● $req_pending pending\033[0m ($req_passed/$req_total passed)"
+    else
+      echo "required: \033[32m✓ all $req_total passed\033[0m"
+    fi
   fi
 
   # Reviewers who approved
