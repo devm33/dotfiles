@@ -1,0 +1,45 @@
+{
+  "beep": true,
+  "beepOnSchedule": false,
+  "renderMarkdown": true,
+  "theme": "auto",
+  "showReasoning": true,
+  "experimental": true,
+  "logLevel": "all",
+  "mouse": true,
+  "footer": {
+    "showModelEffort": false,
+    "showDirectory": true,
+    "showBranch": true,
+    "showContextWindow": true,
+    "showQuota": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    },
+    "github-slack-mcp": {
+      "source": {
+        "source": "github",
+        "repo": "github/copilot-slack-mcp"
+      }
+    }
+  },
+  "voice": {
+    "enabled": true,
+    "selectedModel": "nemotron-speech-streaming-en-0.6b-generic-cpu:2"
+  },
+  "streamerMode": false,
+  "model": "claude-opus-4.8",
+  "colorMode": "github",
+  "scrollbar": true,
+  "disabledMcpServers": [
+    "slack",
+    "computer-use"
+  ],
+  "inlineImages": false,
+  "notifications": true
+}
