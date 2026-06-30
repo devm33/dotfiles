@@ -198,8 +198,15 @@ wtc() {
 _wt_impl() {
   local cloud_flag="$1"
   shift
+  # Optional -r/--resume: launch `yolo --resume` (interactive session picker)
+  # in the worktree instead of starting a fresh session.
+  local resume=""
+  if [[ "$1" == "-r" || "$1" == "--resume" ]]; then
+    resume="1"
+    shift
+  fi
   if [[ -z "$1" ]]; then
-    echo "Usage: wt <branch-name> [yolo args...]"
+    echo "Usage: wt [-r] <branch-name> [yolo args...]"
     return 1
   fi
 
@@ -251,7 +258,9 @@ _wt_impl() {
   # In the initial pane: run yolo with optional args
   local cloud_arg=""
   [[ -n "$cloud_flag" ]] && cloud_arg=" ${cloud_flag}"
-  if [[ -n "$prompt_args" ]]; then
+  if [[ -n "$resume" ]]; then
+    tmux send-keys -t "$win" "yolo${cloud_arg} --resume" Enter
+  elif [[ -n "$prompt_args" ]]; then
     local escaped_args="${prompt_args//\'/\'\\\'\'}"
     tmux send-keys -t "$win" "yolo${cloud_arg} --autopilot -i '${escaped_args}'" Enter
   else
@@ -453,6 +462,41 @@ compdef _wt_branches wt
 compdef _wt_branches wtc
 compdef _wt_branches cr
 compdef _wt_branches crc
+# Reopen the tmux windows from the last saved snapshot (bin/tmux-window-snapshot,
+# kept current by tmux hooks). Worktree windows (under *.worktrees/*) relaunch
+# `yolo --resume` so you can pick the session that was running there; other
+# windows reopen as a plain shell. Windows already open are skipped.
+wtr() {
+  if [[ -z "$TMUX" ]]; then
+    echo "wtr: must be run inside tmux"
+    return 1
+  fi
+  local file="$HOME/.cache/wt/last-windows"
+  if [[ ! -s "$file" ]]; then
+    echo "wtr: no saved windows ($file)"
+    return 1
+  fi
+
+  # Paths already open, to avoid creating duplicate windows.
+  local -A open
+  local p
+  while IFS= read -r p; do
+    [[ -n "$p" ]] && open[$p]=1
+  done < <(tmux list-panes -a -F '#{pane_current_path}')
+
+  local path win count=0
+  while IFS= read -r path; do
+    [[ -z "$path" || ! -d "$path" ]] && continue
+    [[ -n "${open[$path]}" ]] && continue
+    win=$(tmux new-window -d -c "$path" -P -F '#{window_id}')
+    if [[ "$path" == *.worktrees/* ]]; then
+      tmux send-keys -t "$win" "yolo --resume" Enter
+    fi
+    open[$path]=1
+    (( count++ ))
+  done < "$file"
+  echo "wtr: opened $count window(s)"
+}
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm

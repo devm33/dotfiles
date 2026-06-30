@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Persist the set of currently-open tmux windows (their working directories) so
+# `wtr` can reopen them after the tmux server (or the machine) is restarted.
+#
+# Invoked from tmux hooks (see tmux.conf) whenever the set of windows changes,
+# so the snapshot always reflects the windows you last had open. Worktree
+# windows are reopened in `yolo --resume` mode by `wtr`; everything else reopens
+# as a plain shell.
+
+[ -n "${TMUX:-}" ] || exit 0
+
+state_dir="$HOME/.cache/wt"
+mkdir -p "$state_dir" 2>/dev/null || exit 0
+file="$state_dir/last-windows"
+tmp="$file.tmp.$$"
+
+# One working directory per window (active pane), in window order, de-duplicated
+# while preserving order. Blank lines are dropped.
+tmux list-windows -a -F '#{pane_current_path}' 2>/dev/null \
+  | awk 'NF && !seen[$0]++' > "$tmp" && mv -f "$tmp" "$file"
