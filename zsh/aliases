@@ -333,10 +333,14 @@ cs() {
   repo=$(gh repo view --json nameWithOwner -q .nameWithOwner) || return 1
 
   echo "Creating codespace for $repo on branch $branch..." >&2
-  # Pick the first available machine type so create doesn't try to prompt
-  # (it can't, since its output is captured -> "no terminal").
-  local machine
-  machine=$(gh api "/repos/$repo/codespaces/machines" --jq '.machines[0].name' 2>/dev/null)
+  # Pick a machine type so create doesn't try to prompt (it can't, since its
+  # output is captured -> "no terminal"). Honor $CS_MACHINE if set, otherwise
+  # default to the largest available (most cpus, then most storage).
+  local machine="${CS_MACHINE:-}"
+  if [[ -z "$machine" ]]; then
+    machine=$(gh api "/repos/$repo/codespaces/machines" \
+      --jq '.machines | sort_by(.cpus, .storage_in_bytes) | last | .name' 2>/dev/null)
+  fi
   local -a machine_flag
   [[ -n "$machine" ]] && machine_flag=(-m "$machine")
   local name
