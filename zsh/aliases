@@ -323,6 +323,39 @@ _cr_resolve_branch() {
     printf '%s' "$arg"
   fi
 }
+# Create a codespace for the current repo on the given branch (defaults to
+# main) and print its name to stdout. Progress goes to stderr so the name can
+# be captured with `name=$(cs [branch])`. When run interactively it also ssh's
+# into the new codespace.
+cs() {
+  local branch="${1:-main}"
+  local repo
+  repo=$(gh repo view --json nameWithOwner -q .nameWithOwner) || return 1
+
+  echo "Creating codespace for $repo on branch $branch..." >&2
+  # Pick the first available machine type so create doesn't try to prompt
+  # (it can't, since its output is captured -> "no terminal").
+  local machine
+  machine=$(gh api "/repos/$repo/codespaces/machines" --jq '.machines[0].name' 2>/dev/null)
+  local -a machine_flag
+  [[ -n "$machine" ]] && machine_flag=(-m "$machine")
+  local name
+  name=$(gh codespace create -R "$repo" -b "$branch" --default-permissions "${machine_flag[@]}") || return 1
+  echo "$name"
+
+  # Codespaces apply dotfiles (which install tmux, zsh, etc.) asynchronously
+  # after the container is ready, so connecting immediately races that setup.
+  # Wait for install.sh to log completion before returning / connecting.
+  echo "Waiting for dotfiles install to finish..." >&2
+  gh codespace ssh -c "$name" -- 'for i in $(seq 1 150); do grep -q "Dotfiles install complete" /workspaces/.codespaces/.persistedshare/creation.log 2>/dev/null && exit 0; sleep 2; done' 2>/dev/null
+
+  # When run interactively (stdout is a terminal) connect to the codespace. When
+  # the output is captured (e.g. by ccr) just return the name.
+  if [[ -t 1 ]]; then
+    echo "Connecting to $name..." >&2
+    gh codespace ssh -c "$name"
+  fi
+}
 # Open a worktree and run /code-review in it. Accepts a branch name, or a pull
 # request number / URL.
 cr() {
