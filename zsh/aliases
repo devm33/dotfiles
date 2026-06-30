@@ -356,6 +356,8 @@ cs() {
     gh codespace ssh -c "$name"
   fi
 }
+# SSH into a codespace (prompts to pick one when no -c <name> is given).
+alias cssh='gh codespace ssh'
 # Open a worktree and run /code-review in it. Accepts a branch name, or a pull
 # request number / URL.
 cr() {
