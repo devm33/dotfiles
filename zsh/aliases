@@ -188,150 +188,6 @@ alias gdn='git diff --name-only $(git_main_branch)...@'
 alias gdm='git diff $(git_main_branch)..HEAD'
 alias gab='git rev-list --left-right --count $(git_main_branch)...HEAD | awk "{print \"behind: \" \$1 \"\nahead:  \" \$2}"'
 alias gs='git status'
-wt() {
-  _wt_impl "" "$@"
-}
-# Like wt, but launches the copilot (yolo) command with --cloud.
-wtc() {
-  _wt_impl "--cloud" "$@"
-}
-_wt_impl() {
-  local cloud_flag="$1"
-  shift
-  # Optional -r/--resume: launch `yolo --resume` (interactive session picker)
-  # in the worktree instead of starting a fresh session.
-  local resume=""
-  if [[ "$1" == "-r" || "$1" == "--resume" ]]; then
-    resume="1"
-    shift
-  fi
-  if [[ -z "$1" ]]; then
-    echo "Usage: wt [-r] <branch-name> [yolo args...]"
-    return 1
-  fi
-
-  local branch_name="$1"
-  shift
-  local prompt_args="$*"
-  # Use the main worktree root (parent of the common git dir) so worktrees are
-  # always created under repo.worktrees/, even when run from another worktree.
-  local git_common_dir
-  git_common_dir=$(git rev-parse --path-format=absolute --git-common-dir) || return 1
-  local repo_root="${git_common_dir%/.git}"
-  local wt_dir="${repo_root}.worktrees"
-  mkdir -p "$wt_dir"
-  local wt_path="${wt_dir}/${branch_name}"
-
-  # Determine branch name: skip devm33/ prefix if already present or if it's an existing branch
-  local wt_branch
-  if [[ "$branch_name" == devm33/* ]] || git show-ref --verify --quiet "refs/heads/$branch_name" || git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
-    wt_branch="$branch_name"
-  else
-    wt_branch="devm33/$branch_name"
-  fi
-
-  # Reuse existing worktree if one exists for this branch, otherwise create one
-  local existing_wt
-  existing_wt=$(git worktree list --porcelain | awk -v branch="refs/heads/$wt_branch" '/^worktree /{wt=$0} $0 == "branch " branch {sub(/^worktree /, "", wt); print wt}')
-  if [[ -n "$existing_wt" ]]; then
-    wt_path="$existing_wt"
-  elif [[ ! -d "$wt_path" ]]; then
-    if git show-ref --verify --quiet "refs/heads/$wt_branch" || git show-ref --verify --quiet "refs/remotes/origin/$wt_branch"; then
-      git worktree add "$wt_path" "$wt_branch" || return 1
-    else
-      git worktree add -b "$wt_branch" "$wt_path" || return 1
-    fi
-  fi
-
-  # If a tmux window is already open at this worktree path, switch to it
-  local existing_win
-  existing_win=$(tmux list-panes -a -F '#{pane_current_path} #{window_id}' 2>/dev/null | awk -v dir="$wt_path" '$1 == dir {print $2; exit}')
-  if [[ -n "$existing_win" ]]; then
-    tmux select-window -t "$existing_win"
-    return 0
-  fi
-
-  # Create a new tmux window at the worktree path
-  local win
-  win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
-
-  # In the initial pane: run yolo with optional args
-  local cloud_arg=""
-  [[ -n "$cloud_flag" ]] && cloud_arg=" ${cloud_flag}"
-  if [[ -n "$resume" ]]; then
-    tmux send-keys -t "$win" "yolo${cloud_arg} --resume" Enter
-  elif [[ -n "$prompt_args" ]]; then
-    local escaped_args="${prompt_args//\'/\'\\\'\'}"
-    tmux send-keys -t "$win" "yolo${cloud_arg} --autopilot -i '${escaped_args}'" Enter
-  else
-    tmux send-keys -t "$win" "yolo${cloud_arg}" Enter
-  fi
-
-  # Split vertically (left | right)
-  tmux split-window -h -t "$win" -c "$wt_path"
-
-  # Cloud mode runs the agent remotely, so skip the local install/build pane.
-  if [[ -n "$cloud_flag" ]]; then
-    # Focus back on the first pane
-    tmux select-pane -t "${win}.0"
-    return 0
-  fi
-
-  # Split the right pane horizontally (right-top / right-bottom)
-  tmux split-window -v -t "$win" -c "$wt_path"
-
-  # Target panes by index within the window:
-  #   0 = left           (yolo is already running here)
-  #   1 = right-top
-  #   2 = right-bottom
-
-  # Install deps (non-blocking, in pane 2) and optionally run watch
-  local install_cmd=""
-  if [ -f "$wt_path/pnpm-lock.yaml" ]; then
-    install_cmd="pnpm install"
-  elif [ -f "$wt_path/bun.lock" ]; then
-    install_cmd="bun install"
-  elif [ -f "$wt_path/package.json" ]; then
-    install_cmd="npm install"
-  fi
-  if [[ -n "$install_cmd" ]]; then
-    local has_watch=false
-    if (cd "$wt_path" && node -e "process.exit(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts?.watch?0:1)" 2>/dev/null) > /dev/null; then
-      has_watch=true
-    fi
-    if $has_watch; then
-      if [ -f "$wt_path/pnpm-lock.yaml" ]; then
-        tmux send-keys -t "${win}.2" "$install_cmd && pnpm run watch" Enter
-      elif [ -f "$wt_path/bun.lock" ]; then
-        tmux send-keys -t "${win}.2" "$install_cmd && bun run watch" Enter
-      else
-        tmux send-keys -t "${win}.2" "$install_cmd && npm run watch" Enter
-      fi
-    else
-      tmux send-keys -t "${win}.2" "$install_cmd" Enter
-    fi
-  fi
-
-  # Focus back on the first pane
-  tmux select-pane -t "${win}.0"
-}
-# Resolve a cr/crc argument to a branch name. Accepts a branch name (passed
-# through unchanged), or a pull request number / URL, which is resolved to the
-# PR's head branch and fetched locally so a worktree can be created from it.
-_cr_resolve_branch() {
-  local arg="$1"
-  if [[ "$arg" == *"/pull/"* || "$arg" =~ ^[0-9]+$ ]]; then
-    local json num head
-    json=$(gh pr view "$arg" --json number,headRefName) || return 1
-    num=$(jq -r '.number' <<< "$json")
-    head=$(jq -r '.headRefName' <<< "$json")
-    echo "Resolved PR $num to branch $head" >&2
-    git fetch origin "pull/$num/head:$head" 2>/dev/null
-    printf '%s' "$head"
-  else
-    printf '%s' "$arg"
-  fi
-}
 # Create a codespace for the current repo on the given branch (defaults to
 # main) and print its name to stdout. Progress goes to stderr so the name can
 # be captured with `name=$(cs [branch])`. When run interactively it also ssh's
@@ -382,19 +238,6 @@ yolo() {
     [[ -f "$cli" ]] && { node "$cli" --yolo "$@"; return; }
   done
   copilot --yolo "$@"
-}
-# Open a worktree and run /code-review in it. Accepts a branch name, or a pull
-# request number / URL.
-cr() {
-  local branch
-  branch=$(_cr_resolve_branch "$1") || return 1
-  wt "$branch" /code-review
-}
-# Like cr, but launches the copilot (yolo) command with --cloud.
-crc() {
-  local branch
-  branch=$(_cr_resolve_branch "$1") || return 1
-  wtc "$branch" /code-review
 }
 # Delete branch and its associated worktree (if any)
 gbDW() {
@@ -457,11 +300,6 @@ wtD() {
 
   git branch -D "$wt_branch"
 }
-_wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[+* ]*//' | grep -v 'HEAD' | sed 's|remotes/origin/||' | sort -u) }
-compdef _wt_branches wt
-compdef _wt_branches wtc
-compdef _wt_branches cr
-compdef _wt_branches crc
 # Reopen the tmux windows from the last saved snapshot (bin/tmux-window-snapshot,
 # kept current by tmux hooks). Worktree windows (under *.worktrees/*) relaunch
 # `yolo --resume` so you can pick the session that was running there; other
@@ -497,9 +335,10 @@ wtr() {
   done < "$file"
   echo "wtr: opened $count window(s)"
 }
-_wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
-compdef _wt_worktrees wtD
-compdef _wt_worktrees wtrm
+# Cloud variant of wt: launch the copilot (yolo) command with --cloud. See bin/wt.
+wtc() { wt --cloud "$@"; }
+# Cloud variant of cr: run /code-review with the cloud agent. See bin/cr.
+crc() { cr --cloud "$@"; }
 # Create a worktree with a random word-pair name
 wtp() {
   local adjectives=(
@@ -515,60 +354,6 @@ wtp() {
   local name="${adj}-${noun}"
   echo "Worktree name: $name"
   wt "$name" "$@"
-}
-compdef _wt_branches wtp
-# Remove a worktree and close its tmux window.
-# Usage: wtrm [branch-name]  (defaults to worktree at $PWD)
-wtrm() {
-  local wt_dir branch
-  local wt_list
-  wt_list=$(git worktree list --porcelain)
-
-  if [[ -n "$1" ]]; then
-    # Look up worktree path by branch name, trying both bare and devm33/-prefixed
-    echo "Looking up worktree for branch '$1' ..."
-    for ref in "refs/heads/$1" "refs/heads/devm33/$1"; do
-      wt_dir=$(echo "$wt_list" | awk -v branch="$ref" '/^worktree /{wt=substr($0,10)} $0 == "branch " branch {print wt; exit}')
-      [[ -n "$wt_dir" ]] && break
-    done
-    if [[ -z "$wt_dir" ]]; then
-      echo "Error: no worktree found for branch '$1'"
-      return 1
-    fi
-  else
-    # Fall back to current directory
-    wt_dir="$PWD"
-    branch=$(echo "$wt_list" | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
-    if [[ -z "$branch" ]]; then
-      echo "Error: current directory is not a git worktree"
-      return 1
-    fi
-  fi
-
-  # Find the tmux window whose pane started in the worktree directory
-  local pane_id
-  pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
-
-  # Close every other pane in that window first (keep the one running wtrm)
-  if [[ -n "$pane_id" ]]; then
-    local p
-    for p in $(tmux list-panes -t "$pane_id" -F '#{pane_id}'); do
-      [[ "$p" == "$TMUX_PANE" ]] && continue
-      tmux kill-pane -t "$p" 2>/dev/null
-    done
-  fi
-
-  # Remove the worktree in a detached background process so closing the
-  # window doesn't have to wait for it. nohup + &! keeps it alive after the
-  # window (and this shell) goes away.
-  echo "Removing worktree at $wt_dir in background ..."
-  nohup zsh -c "git worktree remove --force '$wt_dir' 2>/dev/null; rm -rf '$wt_dir'" >/dev/null 2>&1 &!
-
-  # Kill tmux window last — if it's our own window, earlier commands still ran
-  if [[ -n "$pane_id" ]]; then
-    echo "Closing tmux window $pane_id ..."
-    tmux kill-window -t "$pane_id"
-  fi
 }
 
 git_commit_all_message() {

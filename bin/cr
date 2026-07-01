@@ -1,0 +1,43 @@
+#!/usr/bin/env zsh
+# Open a worktree and run /code-review in it. Accepts a branch name, or a pull
+# request number / URL (resolved to the PR's head branch and fetched locally).
+#
+# Usage: cr [-c|--cloud] <branch | pr-number | pr-url>
+#   -c, --cloud   run the review with the cloud (remote) agent
+
+emulate -L zsh
+
+local cloud_flag=""
+while [[ "$1" == -* ]]; do
+  case "$1" in
+    -c|--cloud) cloud_flag="--cloud" ;;
+    --) shift; break ;;
+    *) echo "cr: unknown option '$1'" >&2; exit 1 ;;
+  esac
+  shift
+done
+
+if [[ -z "$1" ]]; then
+  echo "Usage: cr [-c|--cloud] <branch | pr-number | pr-url>"
+  exit 1
+fi
+
+# Resolve the argument to a branch name.
+local arg="$1" branch
+if [[ "$arg" == *"/pull/"* || "$arg" == <-> ]]; then
+  local json num head
+  json=$(gh pr view "$arg" --json number,headRefName) || exit 1
+  num=$(jq -r '.number' <<< "$json")
+  head=$(jq -r '.headRefName' <<< "$json")
+  echo "Resolved PR $num to branch $head" >&2
+  git fetch origin "pull/$num/head:$head" 2>/dev/null
+  branch="$head"
+else
+  branch="$arg"
+fi
+
+if [[ -n "$cloud_flag" ]]; then
+  exec wt --cloud "$branch" /code-review
+else
+  exec wt "$branch" /code-review
+fi

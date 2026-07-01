@@ -33,6 +33,13 @@ if [ -f $HOME/.zsh/aliases ]; then
     source $HOME/.zsh/aliases
 fi
 
+# Completions for the worktree / code-review commands. Sourced after compinit
+# so the real compdef is available (the commands live in bin/ scripts or as
+# functions in zsh/aliases).
+if [ -f $HOME/.zsh/completions ]; then
+    source $HOME/.zsh/completions
+fi
+
 # Save a ton of history
 HISTSIZE=20000
 HISTFILE=$HOME/.zsh_history

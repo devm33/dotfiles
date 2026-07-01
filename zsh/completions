@@ -1,0 +1,18 @@
+# zsh completions for the worktree / code-review commands.
+# Sourced from .zshrc after compinit (compdef must exist). The commands
+# themselves live either in bin/ scripts (wt, wtrm, cr) or as functions in
+# zsh/aliases (wtc, crc, wtp, wtD); compdef attaches to the command name
+# regardless of which.
+
+# Complete on local + remote branch names (deduped, HEAD/remotes prefix stripped).
+_wt_branches() { compadd $(git branch -a --no-column --no-color | sed 's/^[+* ]*//' | grep -v 'HEAD' | sed 's|remotes/origin/||' | sort -u) }
+compdef _wt_branches wt
+compdef _wt_branches wtc
+compdef _wt_branches cr
+compdef _wt_branches crc
+compdef _wt_branches wtp
+
+# Complete on the branch names that currently have a worktree.
+_wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
+compdef _wt_worktrees wtD
+compdef _wt_worktrees wtrm

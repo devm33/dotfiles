@@ -1,0 +1,58 @@
+#!/usr/bin/env zsh
+# Remove a worktree and close its tmux window.
+# Usage: wtrm [branch-name]   (defaults to the worktree at $PWD)
+
+emulate -L zsh
+
+source "${0:A:h}/lib/wt-common.zsh"
+
+local wt_dir branch
+local wt_list
+wt_list=$(git worktree list --porcelain)
+
+if [[ -n "$1" ]]; then
+  # Look up worktree path by branch name, trying both bare and devm33/-prefixed.
+  echo "Looking up worktree for branch '$1' ..."
+  local ref
+  for ref in "$1" "devm33/$1"; do
+    wt_dir=$(wt_path_for_branch "$ref" "$wt_list")
+    [[ -n "$wt_dir" ]] && break
+  done
+  if [[ -z "$wt_dir" ]]; then
+    echo "Error: no worktree found for branch '$1'"
+    exit 1
+  fi
+else
+  # Fall back to current directory.
+  wt_dir="$PWD"
+  branch=$(printf '%s' "$wt_list" | awk -v cwd="$PWD" '/^worktree /{wt=substr($0,10)} wt==cwd{found=1} found && /^branch /{print substr($0,8); exit}')
+  if [[ -z "$branch" ]]; then
+    echo "Error: current directory is not a git worktree"
+    exit 1
+  fi
+fi
+
+# Find the tmux window whose pane started in the worktree directory.
+local pane_id
+pane_id=$(tmux list-panes -a -F '#{pane_start_path} #{window_id}' | awk -v dir="$wt_dir" '$1 == dir {print $2; exit}')
+
+# Close every other pane in that window first (keep the one running wtrm).
+if [[ -n "$pane_id" ]]; then
+  local p
+  for p in $(tmux list-panes -t "$pane_id" -F '#{pane_id}'); do
+    [[ "$p" == "$TMUX_PANE" ]] && continue
+    tmux kill-pane -t "$p" 2>/dev/null
+  done
+fi
+
+# Remove the worktree in a detached background process so closing the window
+# doesn't have to wait for it. nohup + &! keeps it alive after the window (and
+# this shell) goes away.
+echo "Removing worktree at $wt_dir in background ..."
+nohup zsh -c "git worktree remove --force '$wt_dir' 2>/dev/null; rm -rf '$wt_dir'" >/dev/null 2>&1 &!
+
+# Kill tmux window last -- if it's our own window, earlier commands still ran.
+if [[ -n "$pane_id" ]]; then
+  echo "Closing tmux window $pane_id ..."
+  tmux kill-window -t "$pane_id"
+fi
