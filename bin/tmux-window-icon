@@ -23,7 +23,7 @@ setopt no_nomatch
 # cache is also invalidated on commit/push (the rev signature), so a long TTL
 # avoids hammering the GitHub API from every window on every redraw. Override
 # with TMUX_WINDOW_ICON_TTL.
-ttl=${TMUX_WINDOW_ICON_TTL:-300}
+ttl=${TMUX_WINDOW_ICON_TTL:-120}
 cache_dir="$HOME/.cache/tmux-window-icon"
 # Shared across all windows: when the collector last ran, and its run lock.
 stampfile="$cache_dir/.all.stamp"
