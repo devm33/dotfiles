@@ -148,6 +148,12 @@ if ! command -v rcup >/dev/null 2>&1; then
         ./configure
         make
         maybe_sudo make install
+        # Some base images set a default ACL on /usr/local that strips the
+        # traverse bit for "other", so root's `make install` can leave
+        # /usr/local/share/rcm without o+x. rcup runs as the non-root user and
+        # then can't read rcm.sh ("Permission denied", exit 127), aborting the
+        # whole install. Normalize perms so any user can read/traverse rcm.
+        maybe_sudo chmod -R a+rX /usr/local/share/rcm 2>/dev/null || true
     )
     rm -rf "$tmp"
 else
