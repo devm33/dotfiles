@@ -8,9 +8,11 @@
 #   "... #I #(tmux-window-icon #{pane_current_path} #{pane_current_command}) #[fg=cyan]#{b:...} ..."
 #
 # tmux re-expands every window's status line on each redraw (status-interval),
-# so this stays cheap: it reads a short-lived cache and refreshes the status in
-# a detached background process via `gh`, never blocking the status bar or
-# hammering the GitHub API. Non-git / non-GitHub / no-PR tabs print nothing.
+# so this stays cheap: it only reads a per-branch cache file and prints a glyph.
+# Refreshing is done out of band by a single batched collector (--refresh-all)
+# that fetches the PR status for *every* visible window in ONE GraphQL request,
+# instead of one API call per window. Non-git / non-GitHub / no-PR tabs print
+# nothing.
 #
 # Ported from caarlos0/dotfiles bin/tmux-window-icon (fish -> zsh).
 
@@ -23,6 +25,13 @@ setopt no_nomatch
 # with TMUX_WINDOW_ICON_TTL.
 ttl=${TMUX_WINDOW_ICON_TTL:-300}
 cache_dir="$HOME/.cache/tmux-window-icon"
+# Shared across all windows: when the collector last ran, and its run lock.
+stampfile="$cache_dir/.all.stamp"
+all_lock="$cache_dir/.all.lock"
+
+# Filename-safe per-branch cache key from repo toplevel + branch. Must match
+# between the fast path (reader) and the collector (writer).
+state_key() { local k="$1#$2"; print -r -- "${k//[^A-Za-z0-9._-]/_}" }
 
 # PR-status glyphs + colors (Catppuccin Mocha).
 # Nerd Font: f058 check-circle, f057 times-circle, f111 circle, e0a0 branch, f071 warning.
@@ -130,69 +139,109 @@ command_icon() {
   esac
 }
 
-# --- background worker: tmux-window-icon --refresh <top> <rev> <statefile> <lockdir>
-if [[ "$1" == --refresh ]]; then
-  top=$2; rev=$3; statefile=$4; lockdir=$5
+# --- batched collector: tmux-window-icon --refresh-all ---
+# Fetches PR status for every branch currently shown in a tmux window using a
+# single GraphQL request (one repository block per repo, one pullRequests alias
+# per branch), then writes each branch's state file. The only follow-up API
+# calls are for the rare PR whose checks are actually failing, to confirm the
+# failure is on a *required* check before turning the tab red.
+if [[ "$1" == --refresh-all ]]; then
+  mkdir -p "$cache_dir" 2>/dev/null
 
-  # Only ever write inside the cache dir, so a misaligned call can't litter repos.
-  case "$statefile" in
-    "$cache_dir"/*) ;;
-    *) rm -rf "$lockdir"; exit 0 ;;
-  esac
+  typeset -A seen repo_alias repo_query
+  typeset -A a_branch a_dir a_rev a_top a_ra
+  integer ri=0 bi=0
 
-  cd "$top" 2>/dev/null || { rm -rf "$lockdir"; exit 0 }
+  # Discover every (repo, branch) visible in any pane, resolving everything
+  # locally with git — no API calls just to enumerate.
+  for dir in ${(u)${(f)"$(tmux list-panes -a -F '#{pane_current_path}' 2>/dev/null)"}}; do
+    [[ -n "$dir" ]] || continue
+    local -a info
+    info=("${(@f)$(git -C "$dir" rev-parse HEAD --show-toplevel --abbrev-ref HEAD 2>/dev/null)}")
+    (( ${#info} >= 3 )) || continue
+    local head=${info[1]} top=${info[2]} branch=${info[3]}
+    [[ "$branch" == HEAD ]] && continue   # detached: no branch to look up
 
-  state=none
-  # No branch arg: `gh pr view <branch>` matches only the base repo and misses
-  # cross-repo (fork) PRs; bare gh uses the current branch (we cd'd into $top).
-  # Precedence: merged > conflicts > failing/pending/passing checks.
-  # Only a failing/cancelled *required* check turns the tab red; non-required
-  # check failures are ignored so they don't mask an otherwise mergeable PR.
-  local -a checks reqfails
-  # Single PR query: state, mergeability, and every check's status — deriving the
-  # pending/pass buckets locally from statusCheckRollup avoids a second
-  # `gh pr checks` round-trip. `--required` (for the red decision) has no JSON
-  # equivalent here, so it stays as the only other call.
-  prjson=$(gh pr view --json state,mergeable,statusCheckRollup 2>/dev/null)
-  prstate=$(print -r -- "$prjson" | jq -r '.state // empty' 2>/dev/null)
-  prmergeable=$(print -r -- "$prjson" | jq -r '.mergeable // empty' 2>/dev/null)
-  case "$prstate" in
-    MERGED) state=merged ;;
-    OPEN|CLOSED)
-      if [[ "$prmergeable" == CONFLICTING ]]; then
-        state=conflicts
-      else
-        # Classify each rollup entry as pending / done / fail locally. CheckRuns
-        # are pending until COMPLETED; legacy StatusContexts use a state enum.
-        # Drop empty fields: "${(@f)$(cmd)}" yields a single empty element (not
-        # an empty array) when there is no output, which would otherwise count
-        # as a phantom check.
-        checks=("${(@f)$(print -r -- "$prjson" | jq -r '.statusCheckRollup[]? | if .__typename == "CheckRun" then (if .status != "COMPLETED" then "pending" elif (.conclusion == "SUCCESS" or .conclusion == "NEUTRAL" or .conclusion == "SKIPPED") then "done" else "fail" end) else (if (.state == "PENDING" or .state == "EXPECTED") then "pending" elif .state == "SUCCESS" then "done" else "fail" end) end' 2>/dev/null)}")
-        checks=(${checks:#})
-        # Only pay for the `--required` round-trip when something actually
-        # failed; a fully green/pending rollup can never have a required failure.
-        reqfails=()
-        if (( ${checks[(I)fail]} )); then
-          reqfails=("${(@f)$(gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
-          reqfails=(${reqfails:#})
-        fi
-        if (( ${#checks} > 0 )); then
-          if (( ${#reqfails} > 0 )); then
-            state=fail
-          elif (( ${checks[(I)pending]} )); then
-            state=pending
+    local url nwo
+    url=$(git -C "$dir" remote get-url origin 2>/dev/null) || continue
+    nwo=${url#*github.com[:/]}; nwo=${nwo%.git}
+    [[ "$nwo" == */* ]] || continue       # not a github.com remote
+
+    local key=$(state_key "$top" "$branch")
+    [[ -n "${seen[$key]}" ]] && continue   # same worktree shown in several panes
+    seen[$key]=1
+
+    local up rev
+    up=$(git -C "$dir" rev-parse --verify --quiet '@{upstream}' 2>/dev/null)
+    rev="$head-$up"
+
+    [[ -z "${repo_alias[$nwo]}" ]] && { repo_alias[$nwo]="r$ri"; (( ri++ )) }
+    local ra=${repo_alias[$nwo]} ba="b$bi"; (( bi++ ))
+
+    # Escape the branch name for a GraphQL string literal.
+    local eb=${branch//\\/\\\\}; eb=${eb//\"/\\\"}
+    repo_query[$nwo]+="$ba: pullRequests(headRefName:\"$eb\", first:1, orderBy:{field:CREATED_AT,direction:DESC}){ nodes{ state mergeable commits(last:1){ nodes{ commit{ statusCheckRollup{ state } } } } } } "
+    a_branch[$ba]=$branch; a_dir[$ba]=$dir; a_rev[$ba]=$rev; a_top[$ba]=$top; a_ra[$ba]=$ra
+  done
+
+  if (( bi == 0 )); then
+    : > "$stampfile"; rm -rf "$all_lock"; exit 0
+  fi
+
+  # Assemble and run the one batched query.
+  local q="query{"
+  local nwo ra
+  for nwo ra in ${(kv)repo_alias}; do
+    q+="$ra: repository(owner:\"${nwo%/*}\",name:\"${nwo#*/}\"){ ${repo_query[$nwo]} } "
+  done
+  q+="}"
+  local result=$(gh api graphql -f query="$q" 2>/dev/null)
+
+  local ba
+  for ba in ${(k)a_branch}; do
+    local state=none
+    local node=$(print -r -- "$result" | jq -c ".data.${a_ra[$ba]}.${ba}.nodes[0] // empty" 2>/dev/null)
+    if [[ -n "$node" ]]; then
+      local s=$(print -r -- "$node" | jq -r '.state // empty')
+      local m=$(print -r -- "$node" | jq -r '.mergeable // empty')
+      local roll=$(print -r -- "$node" | jq -r '.commits.nodes[0].commit.statusCheckRollup.state // empty')
+      case "$s" in
+        MERGED) state=merged ;;
+        OPEN|CLOSED)
+          if [[ "$m" == CONFLICTING ]]; then
+            state=conflicts
           else
-            state=pass
+            case "$roll" in
+              SUCCESS)          state=pass ;;
+              PENDING|EXPECTED) state=pending ;;
+              FAILURE|ERROR)
+                # The rollup aggregates required and non-required checks. Confirm
+                # a *required* check is the one failing before going red; this is
+                # the only place we spend an extra (rare) API call.
+                local -a reqfails
+                reqfails=("${(@f)$(cd "${a_dir[$ba]}" 2>/dev/null && gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
+                reqfails=(${reqfails:#})
+                if (( ${#reqfails} > 0 )); then
+                  state=fail
+                else
+                  local -a buckets
+                  buckets=("${(@f)$(cd "${a_dir[$ba]}" 2>/dev/null && gh pr checks --json bucket -q '.[].bucket' 2>/dev/null)}")
+                  buckets=(${buckets:#})
+                  if (( ${buckets[(I)pending]} )); then state=pending; else state=pass; fi
+                fi
+                ;;
+            esac
           fi
-        fi
-      fi
-      ;;
-  esac
+          ;;
+      esac
+    fi
+    local sf="$cache_dir/$(state_key "${a_top[$ba]}" "${a_branch[$ba]}").state"
+    local tmp="$sf.tmp.$$"
+    printf '%s\n%s' "${a_rev[$ba]}" "$state" > "$tmp" && mv -f "$tmp" "$sf"
+  done
 
-  tmp="$statefile.tmp.$$"
-  printf '%s\n%s' "$rev" "$state" > "$tmp"
-  mv -f "$tmp" "$statefile"
-  rm -rf "$lockdir"
+  : > "$stampfile"
+  rm -rf "$all_lock"
   exit 0
 fi
 
@@ -224,38 +273,40 @@ if (( ${#info} >= 3 )); then
   rev="$head-$up"
 
   mkdir -p "$cache_dir" 2>/dev/null
-  # filename-safe cache key from repo path + branch
-  key="${top}#${branch}"
-  key="${key//[^A-Za-z0-9._-]/_}"
-  statefile="$cache_dir/$key.state"
-  lockdir="$cache_dir/$key.lock"
+  statefile="$cache_dir/$(state_key "$top" "$branch").state"
 
   # cache file is rev then state
   [[ -f "$statefile" ]] && cached=("${(@f)$(cat "$statefile")}")
   (( ${#cached} >= 2 )) && out=$(emit "${cached[2]}")
 
-  # refresh when the cache is missing, stale (TTL), or for a different revision
-  need_refresh=1
-  st=$(age "$statefile")
-  if (( ${#cached} >= 2 )) && [[ "${cached[1]}" == "$rev" ]] && [[ -n "$st" ]] && (( st < ttl )); then
-    need_refresh=0
+  # Decide whether the shared collector should run: when this branch has no
+  # cached state, when its revision changed (commit/push), or when the last
+  # batched refresh is older than the TTL.
+  need_refresh=0
+  if (( ${#cached} < 2 )) || [[ "${cached[1]}" != "$rev" ]]; then
+    need_refresh=1
+  else
+    st=$(age "$stampfile")
+    [[ -z "$st" ]] || (( st >= ttl )) && need_refresh=1
   fi
 
   if (( need_refresh )); then
+    # One collector for all windows: only the process that wins the shared lock
+    # spawns it; a stale lock (crashed run) is reclaimed after 120s.
     locked=0
-    if mkdir "$lockdir" 2>/dev/null; then
+    if mkdir "$all_lock" 2>/dev/null; then
       locked=1
     else
-      lt=$(age "$lockdir")
+      lt=$(age "$all_lock")
       if [[ -n "$lt" ]] && (( lt > 120 )); then
-        rm -rf "$lockdir" && mkdir "$lockdir" 2>/dev/null && locked=1
+        rm -rf "$all_lock" && mkdir "$all_lock" 2>/dev/null && locked=1
       fi
     fi
     if (( locked )); then
       # Redirect ALL std streams: tmux runs #() over a socketpair, so an
       # inherited stdin would keep the socket open and tmux would show
       # "<'...' not ready>" until the slow gh call finishes. Detach fully (&!).
-      "$0" --refresh "$top" "$rev" "$statefile" "$lockdir" </dev/null >/dev/null 2>&1 &!
+      "$0" --refresh-all </dev/null >/dev/null 2>&1 &!
     fi
   fi
 fi
