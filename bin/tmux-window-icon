@@ -17,7 +17,11 @@
 emulate -L zsh
 setopt no_nomatch
 
-ttl=30
+# Cache lifetime in seconds. PR status rarely changes minute-to-minute, and the
+# cache is also invalidated on commit/push (the rev signature), so a long TTL
+# avoids hammering the GitHub API from every window on every redraw. Override
+# with TMUX_WINDOW_ICON_TTL.
+ttl=${TMUX_WINDOW_ICON_TTL:-300}
 cache_dir="$HOME/.cache/tmux-window-icon"
 
 # PR-status glyphs + colors (Catppuccin Mocha).
@@ -144,27 +148,40 @@ if [[ "$1" == --refresh ]]; then
   # Precedence: merged > conflicts > failing/pending/passing checks.
   # Only a failing/cancelled *required* check turns the tab red; non-required
   # check failures are ignored so they don't mask an otherwise mergeable PR.
-  local -a pr buckets reqfails
-  pr=("${(@f)$(gh pr view --json state,mergeable -q '.state, .mergeable' 2>/dev/null)}")
-  case "${pr[1]}" in
+  local -a checks reqfails
+  # Single PR query: state, mergeability, and every check's status — deriving the
+  # pending/pass buckets locally from statusCheckRollup avoids a second
+  # `gh pr checks` round-trip. `--required` (for the red decision) has no JSON
+  # equivalent here, so it stays as the only other call.
+  prjson=$(gh pr view --json state,mergeable,statusCheckRollup 2>/dev/null)
+  prstate=$(print -r -- "$prjson" | jq -r '.state // empty' 2>/dev/null)
+  prmergeable=$(print -r -- "$prjson" | jq -r '.mergeable // empty' 2>/dev/null)
+  case "$prstate" in
     MERGED) state=merged ;;
     OPEN|CLOSED)
-      if [[ "${pr[2]}" == CONFLICTING ]]; then
+      if [[ "$prmergeable" == CONFLICTING ]]; then
         state=conflicts
       else
-        # Drop empty fields: "${(@f)$(cmd)}" yields a single empty element
-        # (not an empty array) when the command prints nothing, which would
-        # otherwise count as a phantom failure / check.
-        buckets=("${(@f)$(gh pr checks --json bucket -q '.[].bucket' 2>/dev/null)}")
-        buckets=(${buckets:#})
-        reqfails=("${(@f)$(gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
-        reqfails=(${reqfails:#})
-        if (( ${#buckets} > 0 )); then
+        # Classify each rollup entry as pending / done / fail locally. CheckRuns
+        # are pending until COMPLETED; legacy StatusContexts use a state enum.
+        # Drop empty fields: "${(@f)$(cmd)}" yields a single empty element (not
+        # an empty array) when there is no output, which would otherwise count
+        # as a phantom check.
+        checks=("${(@f)$(print -r -- "$prjson" | jq -r '.statusCheckRollup[]? | if .__typename == "CheckRun" then (if .status != "COMPLETED" then "pending" elif (.conclusion == "SUCCESS" or .conclusion == "NEUTRAL" or .conclusion == "SKIPPED") then "done" else "fail" end) else (if (.state == "PENDING" or .state == "EXPECTED") then "pending" elif .state == "SUCCESS" then "done" else "fail" end) end' 2>/dev/null)}")
+        checks=(${checks:#})
+        # Only pay for the `--required` round-trip when something actually
+        # failed; a fully green/pending rollup can never have a required failure.
+        reqfails=()
+        if (( ${checks[(I)fail]} )); then
+          reqfails=("${(@f)$(gh pr checks --required --json bucket -q '.[].bucket | select(. == "fail" or . == "cancel")' 2>/dev/null)}")
+          reqfails=(${reqfails:#})
+        fi
+        if (( ${#checks} > 0 )); then
           if (( ${#reqfails} > 0 )); then
             state=fail
-          elif (( ${buckets[(I)pending]} )); then
+          elif (( ${checks[(I)pending]} )); then
             state=pending
-          elif (( ${buckets[(I)pass]} )); then
+          else
             state=pass
           fi
         fi
