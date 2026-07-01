@@ -624,6 +624,7 @@ alias prr='gh pr ready'
 alias pra='gh pr merge --auto'
 alias prc='gh pr view --comments'
 alias prps='gh pr edit --add-label post-to-slack'
+alias prpu='gh pr edit --remove-label post-to-slack --remove-label already-posted-to-slack'
 
 _pr_info() {
   local json="$1"
