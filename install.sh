@@ -168,7 +168,60 @@ ln -sfn "$HOME/.dotfiles/host-codespace/rcrc" "$HOME/.rcrc"
 log "Running rcup"
 rcup -v -f
 
-# 7. Make zsh the default shell when possible (non-fatal).
+# 7. Trust the mitmproxy CA so intercepted TLS works from inside the codespace.
+#    mitmproxy generates a CA on first run at ~/.mitmproxy/mitmproxy-ca-cert.pem;
+#    install that into the system trust store. Most codespace base images don't
+#    ship mitmproxy, so fall back to installing it (pipx, then pip3). Best effort
+#    and idempotent: reuse an existing CA, and skip if the trusted copy is already
+#    current.
+MITM_CERT="$HOME/.mitmproxy/mitmproxy-ca-cert.pem"
+MITM_TRUST='/usr/local/share/ca-certificates/mitmproxy.crt'
+trust_mitmproxy_ca() {
+    local mitm
+    # Generate the CA once if it isn't there yet.
+    if [ ! -f "$MITM_CERT" ]; then
+        mitm="$(command -v mitmdump || true)"
+        if [ -z "$mitm" ]; then
+            log "Installing mitmproxy"
+            if command -v pipx >/dev/null 2>&1; then
+                pipx install mitmproxy || true
+            elif command -v pip3 >/dev/null 2>&1; then
+                maybe_sudo pip3 install --break-system-packages mitmproxy || true
+            fi
+            # pipx's bin dir may not be on PATH yet in this shell.
+            mitm="$(command -v mitmdump || true)"
+            [ -n "$mitm" ] || mitm="${PIPX_BIN_DIR:-/usr/local/py-utils/bin}/mitmdump"
+        fi
+        [ -x "$mitm" ] || { log "mitmproxy unavailable; skipping CA trust"; return 1; }
+
+        log "Generating mitmproxy CA"
+        # mitmdump writes the CA to ~/.mitmproxy on startup; run briefly (no proxy
+        # listener) just long enough to materialize the cert, then stop.
+        timeout 10 "$mitm" --no-server >/dev/null 2>&1 || true
+    fi
+
+    [ -f "$MITM_CERT" ] || { log "mitmproxy CA not found after generation; skipping"; return 1; }
+
+    # Default mitmproxy's listen port to 9090 via its persistent config. Leave an
+    # existing listen_port setting untouched so manual overrides survive re-runs.
+    local mitm_conf="$HOME/.mitmproxy/config.yaml"
+    if [ ! -f "$mitm_conf" ] || ! grep -q '^listen_port:' "$mitm_conf"; then
+        log "Setting mitmproxy listen_port to 9090"
+        echo 'listen_port: 9090' >> "$mitm_conf"
+    fi
+
+    if [ -f "$MITM_TRUST" ] && cmp -s "$MITM_CERT" "$MITM_TRUST"; then
+        log "mitmproxy CA already trusted"
+        return 0
+    fi
+
+    log "Installing mitmproxy CA into system trust store"
+    maybe_sudo cp "$MITM_CERT" "$MITM_TRUST"
+    maybe_sudo update-ca-certificates || true
+}
+trust_mitmproxy_ca || log "mitmproxy CA trust setup failed; continuing"
+
+# 8. Make zsh the default shell when possible (non-fatal).
 if command -v zsh >/dev/null 2>&1; then
     zsh_path="$(command -v zsh)"
     if [ "${SHELL:-}" != "$zsh_path" ]; then

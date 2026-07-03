@@ -19,6 +19,15 @@
 emulate -L zsh
 setopt no_nomatch
 
+# This helper runs non-interactively and repeatedly cd's inside $(...) command
+# substitutions to query per-repo state. Neutralize any chpwd hook inherited
+# from the user's shell (e.g. an auto-ls / git-status printer on cd): otherwise
+# that hook's output is captured by those substitutions and corrupts the result
+# -- e.g. a directory listing leaking into a PR-check query and falsely marking
+# a window's tab as failed (red).
+chpwd_functions=()
+unfunction chpwd 2>/dev/null
+
 # Cache lifetime in seconds. PR status rarely changes minute-to-minute, and the
 # cache is also invalidated on commit/push (the rev signature), so a long TTL
 # avoids hammering the GitHub API from every window on every redraw. Override
