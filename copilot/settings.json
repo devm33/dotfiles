@@ -8,11 +8,20 @@
   "logLevel": "all",
   "mouse": true,
   "footer": {
-    "showModelEffort": false,
+    "showModelEffort": true,
     "showDirectory": true,
     "showBranch": true,
     "showContextWindow": true,
-    "showQuota": true
+    "showQuota": true,
+    "showAiUsed": true,
+    "showAgent": true,
+    "showCodeChanges": false,
+    "showUsername": false,
+    "showSandbox": true,
+    "showYolo": false,
+    "showCiStatus": true,
+    "showPullRequest": true,
+    "showCustom": true
   },
   "colorMode": "github",
   "scrollbar": false,
