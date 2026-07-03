@@ -14,7 +14,7 @@ alias mmv='noglob zmv -W'
 
 # edit tmux conf
 alias vt='$EDITOR ~/.dotfiles/tmux.conf'
-alias ta='tmux attach || tmux'
+# Attach to tmux, rebuilding windows from the snapshot if the server died: bin/ta
 alias tmrm='tmux kill-window'
 
 # ls
@@ -228,6 +228,32 @@ cs() {
 # SSH into a codespace (prompts to pick one when no -c <name> is given).
 alias cssh='gh codespace ssh'
 
+# Durably SSH into a codespace. Improves on plain `cssh` for flaky networks:
+#   * Tight keepalives (~45s) so a dead connection is detected fast instead of
+#     hanging on the socket for minutes.
+#   * Attaches via `ta`, which rebuilds the tmux windows from the last saved
+#     snapshot if the server was killed (e.g. the codespace restarted).
+#   * Auto-reconnects on an unexpected drop; a clean tmux detach (prefix-d)
+#     exits 0 and stops the loop.
+#   * Resets local terminal state after each disconnect so an abrupt drop
+#     doesn't leave the shell in raw mode / alt-screen.
+# Usage: `csd` (prompts) or `csd -c <name>`. Extra args pass through to gh.
+csd() {
+  while true; do
+    gh codespace ssh "$@" -- \
+      -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+      -t 'zsh -c ta'
+    local rc=$?
+    # Restore local terminal after tmux/ssh may have left it in a bad state.
+    stty sane 2>/dev/null
+    printf '\033[?1049l\033[?25h'  # leave alt-screen, show cursor
+    # Clean detach/exit -> stop. Any other exit is treated as a drop.
+    [[ $rc -eq 0 ]] && break
+    printf 'Codespace connection dropped (rc=%s). Reconnecting... (Ctrl-C to stop)\n' "$rc" >&2
+    sleep 1
+  done
+}
+
 # Fallback `yolo` for machines without zsh/work (e.g. codespaces). Prefer a
 # locally built CLI in the codespace workspace when present, otherwise use the
 # installed copilot binary. zsh/work overrides this with its own yolo when
@@ -299,41 +325,6 @@ wtD() {
   fi
 
   git branch -D "$wt_branch"
-}
-# Reopen the tmux windows from the last saved snapshot (bin/tmux-window-snapshot,
-# kept current by tmux hooks). Worktree windows (under *.worktrees/*) relaunch
-# `yolo --resume` so you can pick the session that was running there; other
-# windows reopen as a plain shell. Windows already open are skipped.
-wtr() {
-  if [[ -z "$TMUX" ]]; then
-    echo "wtr: must be run inside tmux"
-    return 1
-  fi
-  local file="$HOME/.cache/wt/last-windows"
-  if [[ ! -s "$file" ]]; then
-    echo "wtr: no saved windows ($file)"
-    return 1
-  fi
-
-  # Paths already open, to avoid creating duplicate windows.
-  local -A open
-  local p
-  while IFS= read -r p; do
-    [[ -n "$p" ]] && open[$p]=1
-  done < <(tmux list-panes -a -F '#{pane_current_path}')
-
-  local path win count=0
-  while IFS= read -r path; do
-    [[ -z "$path" || ! -d "$path" ]] && continue
-    [[ -n "${open[$path]}" ]] && continue
-    win=$(tmux new-window -d -c "$path" -P -F '#{window_id}')
-    if [[ "$path" == *.worktrees/* ]]; then
-      tmux send-keys -t "$win" "yolo --resume" Enter
-    fi
-    open[$path]=1
-    (( count++ ))
-  done < "$file"
-  echo "wtr: opened $count window(s)"
 }
 # Cloud variant of wt: launch the copilot (yolo) command with --cloud. See bin/wt.
 wtc() { wt --cloud "$@"; }

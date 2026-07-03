@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+# Attach to the running tmux server. If the server was killed (e.g. the codespace
+# went offline), rebuild the windows from the last saved snapshot
+# (bin/tmux-window-snapshot) before attaching. Worktree windows relaunch
+# `yolo --resume`; everything else reopens as a plain shell.
+
+# Attach to an existing server if there is one.
+tmux attach 2>/dev/null && exit
+
+# No server: start one, then recreate each saved window as its own window.
+init=$(tmux new-session -d -P -F '#{window_id}')
+
+file="$HOME/.cache/wt/last-windows"
+count=0
+if [[ -s "$file" ]]; then
+  while IFS= read -r p; do
+    [[ -n "$p" && -d "$p" ]] || continue
+    win=$(tmux new-window -d -c "$p" -P -F '#{window_id}')
+    [[ "$p" == *.worktrees/* ]] && tmux send-keys -t "$win" "yolo --resume" Enter
+    (( count++ ))
+  done < "$file"
+fi
+
+# Drop the throwaway initial window if we recreated any real ones.
+(( count )) && tmux kill-window -t "$init"
+
+exec tmux attach

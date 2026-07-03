@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Persist the set of currently-open tmux windows (their working directories) so
-# `wtr` can reopen them after the tmux server (or the machine) is restarted.
+# `ta` can rebuild them after the tmux server (or the machine) is restarted.
 #
 # Invoked from tmux hooks (see tmux.conf) whenever the set of windows changes,
 # so the snapshot always reflects the windows you last had open. Worktree
-# windows are reopened in `yolo --resume` mode by `wtr`; everything else reopens
+# windows are reopened in `yolo --resume` mode by `ta`; everything else reopens
 # as a plain shell.
 
 [ -n "${TMUX:-}" ] || exit 0
