@@ -237,10 +237,36 @@ alias cssh='gh codespace ssh'
 #     exits 0 and stops the loop.
 #   * Resets local terminal state after each disconnect so an abrupt drop
 #     doesn't leave the shell in raw mode / alt-screen.
-# Usage: `csd` (prompts) or `csd -c <name>`. Extra args pass through to gh.
+# Usage: `csd` (prompts once) or `csd -c <name>`. Extra args pass through to gh.
 csd() {
+  # Resolve the codespace name once up front so reconnects don't re-prompt.
+  # If the caller already passed -c/--codespace, honor it and skip selection.
+  local -a args=("$@")
+  local has_name=
+  local a
+  for a in "$@"; do
+    [[ "$a" == "-c" || "$a" == "--codespace" ]] && { has_name=1; break; }
+  done
+  if [[ -z "$has_name" ]]; then
+    local name
+    local -a names
+    names=("${(@f)$(gh codespace list --json name -q '.[].name')}") || return 1
+    if [[ ${#names[@]} -eq 0 ]]; then
+      echo "No codespaces found." >&2
+      return 1
+    elif [[ ${#names[@]} -eq 1 ]]; then
+      name="${names[1]}"
+    elif command -v fzf >/dev/null 2>&1; then
+      name=$(printf '%s\n' "${names[@]}" | fzf --height=40% --reverse) || return 1
+    else
+      local PS3="Select a codespace: "
+      select name in "${names[@]}"; do [[ -n "$name" ]] && break; done
+    fi
+    [[ -z "$name" ]] && return 1
+    args=(-c "$name" "${args[@]}")
+  fi
   while true; do
-    gh codespace ssh "$@" -- \
+    gh codespace ssh "${args[@]}" -- \
       -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
       -t 'zsh -c ta'
     local rc=$?
