@@ -11,6 +11,13 @@ else
 fi
 source $ZSH/oh-my-zsh.sh
 
+# Make world-writable dirs (drwxrwxrwx, common in Codespaces) legible. oh-my-zsh
+# / dircolors highlight them with a background color -- ow (other-writable) on
+# yellow, tw (+sticky) on green -- which is unreadable on dark themes. Append
+# overrides after oh-my-zsh so they win, rendering them like normal dirs.
+export LS_COLORS="${LS_COLORS:+$LS_COLORS:}ow=1;36:tw=1;36"
+export LSCOLORS="GxfxcxdxbxegedabagGxGx" # BSD/macOS ls: render ow/tw like normal dirs
+
 # override oh-my-zsh git plugin aliases that conflict with our functions
 unalias gcam gcpc gpr grh grhh 2>/dev/null
 alias gcam=git_commit_all_message
