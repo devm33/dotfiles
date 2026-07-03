@@ -24,9 +24,14 @@ fi
 
 # Seed the session with the first dir (so there's no throwaway window to clean
 # up) and add the rest detached (-d) so focus never jumps to each new window.
-tmux new-session -d -c "${paths[1]}"
+# -e SHELL_LOGGED_IN=true stops the codespace's /etc/zsh/zprofile from cd'ing
+# every login shell back to the default workspace dir (which would clobber -c).
+tmux new-session -d -e SHELL_LOGGED_IN=true -c "${paths[1]}"
+# Set it server-wide too, so windows opened manually later (prefix-c) also skip
+# the zprofile cd and stay in their own dir.
+tmux set-environment -g SHELL_LOGGED_IN true
 for p in "${(@)paths[2,-1]}"; do
-  tmux new-window -d -c "$p"
+  tmux new-window -d -e SHELL_LOGGED_IN=true -c "$p"
 done
 
 # Relaunch `yolo --resume` in every worktree window.
