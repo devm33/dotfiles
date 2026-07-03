@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+# Fallback `yolo` for machines without zsh/work (e.g. codespaces). Prefer a
+# locally built CLI in the codespace workspace when present, otherwise use the
+# installed copilot binary. zsh/work overrides this with its own yolo function
+# when available (a shell function shadows this PATH executable in work shells).
+#
+# Lives in bin/ (not just as a zsh function) so it is resolvable from bash,
+# tmux send-keys, and non-interactive `zsh -c` contexts (e.g. `csd` / `ta`).
+emulate -L zsh
+setopt local_options null_glob
+
+local cli
+for cli in /workspaces/*/dist-cli/index.js; do
+  [[ -f "$cli" ]] && exec node "$cli" --yolo "$@"
+done
+exec copilot --yolo "$@"
