@@ -13,3 +13,11 @@ case "${1:-}" in
     start) tmux set-option -w -t "$TMUX_PANE" @copilot_busy 1 ;;
     stop)  tmux set-option -wqu -t "$TMUX_PANE" @copilot_busy 2>/dev/null || true ;;
 esac
+
+# Force an immediate status-line repaint. The window status shows a progress
+# spinner from the pane's OSC 9;4 state (#{pane_pb_state}), but tmux only
+# repaints a *background* window's status on the next status-interval tick or
+# when that window is selected -- so the spinner would otherwise lag or vanish
+# until you switch to the window. Refreshing here makes it appear/clear the
+# instant Copilot starts or stops working.
+tmux refresh-client -S 2>/dev/null || true
