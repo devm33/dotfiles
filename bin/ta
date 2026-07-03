@@ -4,6 +4,12 @@
 # (bin/tmux-window-snapshot) in their original working dirs before attaching.
 # Worktree windows relaunch `yolo --resume`; everything else is a plain shell.
 
+# During a codespace resume the environment (PATH, the tmux binary) may not be
+# ready yet. Fail fast so csd's reconnect loop just retries, instead of letting
+# each tmux call below trip command_not_found_handler (which spams "command not
+# found: tmux" and can even misfire yolo on the multi-word command).
+command -v tmux >/dev/null 2>&1 || exit 1
+
 # Attach to an existing server if there is one. -d detaches any other (possibly
 # stale/ghost) client so this terminal gets the full size immediately.
 tmux attach -d 2>/dev/null && exit
@@ -34,9 +40,11 @@ for p in "${(@)paths[2,-1]}"; do
   tmux new-window -d -e SHELL_LOGGED_IN=true -c "$p"
 done
 
-# Relaunch `yolo --resume` in every worktree window.
-tmux list-windows -a -F '#{window_id} #{pane_current_path}' | while read -r win path; do
-  [[ "$path" == *.worktrees/* ]] && tmux send-keys -t "$win" "yolo --resume" Enter
+# Relaunch `yolo --resume` in every worktree window. NB: don't name the loop var
+# `path` -- in zsh `$path` is the special array tied to `$PATH`, so reading a dir
+# into it would wipe PATH and make every subsequent `tmux` call fail.
+tmux list-windows -a -F '#{window_id} #{pane_current_path}' | while read -r win dir; do
+  [[ "$dir" == *.worktrees/* ]] && tmux send-keys -t "$win" "yolo --resume" Enter
 done
 
 exec tmux attach -d
