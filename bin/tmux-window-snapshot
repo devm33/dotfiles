@@ -15,6 +15,13 @@ file="$state_dir/last-windows"
 tmp="$file.tmp.$$"
 
 # One working directory per window (active pane), in window order, de-duplicated
-# while preserving order. Blank lines are dropped.
+# while preserving order. Blank lines are dropped. Only replace the saved file
+# when we actually captured something, so a transient empty result (e.g. during
+# teardown) can't wipe the snapshot `ta` needs to restore from.
 tmux list-windows -a -F '#{pane_current_path}' 2>/dev/null \
-  | awk 'NF && !seen[$0]++' > "$tmp" && mv -f "$tmp" "$file"
+  | awk 'NF && !seen[$0]++' > "$tmp"
+if [ -s "$tmp" ]; then
+  mv -f "$tmp" "$file"
+else
+  rm -f "$tmp"
+fi
