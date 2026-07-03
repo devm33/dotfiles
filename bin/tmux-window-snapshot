@@ -21,7 +21,16 @@ tmp="$file.tmp.$$"
 tmux list-windows -a -F '#{pane_current_path}' 2>/dev/null \
   | awk 'NF && !seen[$0]++' > "$tmp"
 if [ -s "$tmp" ]; then
-  mv -f "$tmp" "$file"
+  # Don't let a worktree-less snapshot clobber a saved one that has worktree
+  # windows. A bootstrap/transient default-only session (e.g. `ta` seeding its
+  # first window, or a `csd` reconnect race) would otherwise shrink the cache to
+  # a single default dir and destroy the multi-worktree layout `ta` restores.
+  # Healthy captures still update normally because they contain worktree paths.
+  if grep -q '\.worktrees/' "$file" 2>/dev/null && ! grep -q '\.worktrees/' "$tmp"; then
+    rm -f "$tmp"
+  else
+    mv -f "$tmp" "$file"
+  fi
 else
   rm -f "$tmp"
 fi
