@@ -253,8 +253,8 @@ csd() {
     # hidden first column (tab-separated) so we can recover it after selection.
     local rows
     rows=$(gh codespace list \
-      --json name,repository,gitStatus,state,displayName \
-      --jq '.[] | [.name, .repository, (.gitStatus.ref // "?"), .state, .displayName] | @tsv') || return 1
+      --json name,repository,gitStatus,state,displayName,lastUsedAt \
+      --jq 'sort_by(.lastUsedAt) | reverse | .[] | [.name, .repository, (.gitStatus.ref // "?"), .state, .displayName] | @tsv') || return 1
     if [[ -z "$rows" ]]; then
       echo "No codespaces found." >&2
       return 1
