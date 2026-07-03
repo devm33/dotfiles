@@ -10,9 +10,16 @@
 # found: tmux" and can even misfire yolo on the multi-word command).
 command -v tmux >/dev/null 2>&1 || exit 1
 
-# Attach to an existing server if there is one. -d detaches any other (possibly
-# stale/ghost) client so this terminal gets the full size immediately.
-tmux attach -d 2>/dev/null && exit
+# If a server with at least one session is already running, just attach to it --
+# never fall through to the restore path below. `tmux ls` succeeds only when the
+# server is up AND has sessions, so a *transient* attach failure (e.g. the pty
+# isn't ready yet on a flaky reconnect) exits non-zero and lets csd retry,
+# instead of rebuilding windows on top of the live session (which duplicates
+# them / re-runs yolo). -d detaches any stale/ghost client so this terminal gets
+# the full size immediately.
+if tmux ls >/dev/null 2>&1; then
+  exec tmux attach -d
+fi
 
 # Read the saved window dirs into memory *before* creating any tmux windows. The
 # snapshot hooks fire as we rebuild, so reading afterwards would restore whatever
