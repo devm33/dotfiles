@@ -249,18 +249,38 @@ csd() {
   done
   if [[ -z "$has_name" ]]; then
     local name
-    local -a names
-    names=("${(@f)$(gh codespace list --json name -q '.[].name')}") || return 1
-    if [[ ${#names[@]} -eq 0 ]]; then
+    # Pull richer metadata for the picker. The codespace name is kept as a
+    # hidden first column (tab-separated) so we can recover it after selection.
+    local rows
+    rows=$(gh codespace list \
+      --json name,repository,gitStatus,state,displayName \
+      --jq '.[] | [.name, .repository, (.gitStatus.ref // "?"), .state, .displayName] | @tsv') || return 1
+    if [[ -z "$rows" ]]; then
       echo "No codespaces found." >&2
       return 1
-    elif [[ ${#names[@]} -eq 1 ]]; then
-      name="${names[1]}"
+    fi
+    # Align columns (repo / branch / state / display name) for readability.
+    local table
+    table=$(printf '%s\n' "$rows" | awk -F'\t' '
+      { name[NR]=$1; repo[NR]=$2; ref[NR]=$3; state[NR]=$4; disp[NR]=$5
+        if (length($2)>wr) wr=length($2)
+        if (length($3)>wf) wf=length($3)
+        if (length($4)>ws) ws=length($4) }
+      END { for (i=1;i<=NR;i++)
+              printf "%s\t%-*s  %-*s  %-*s  %s\n", name[i], wr, repo[i], wf, ref[i], ws, state[i], disp[i] }')
+    if [[ $(printf '%s\n' "$table" | grep -c .) -eq 1 ]]; then
+      name=${table%%$'\t'*}
     elif command -v fzf >/dev/null 2>&1; then
-      name=$(printf '%s\n' "${names[@]}" | fzf --height=40% --reverse) || return 1
+      local sel
+      sel=$(printf '%s\n' "$table" | fzf --height=40% --reverse --with-nth=2.. --delimiter='\t') || return 1
+      name=${sel%%$'\t'*}
     else
-      local PS3="Select a codespace: "
-      select name in "${names[@]}"; do [[ -n "$name" ]] && break; done
+      local PS3="Select a codespace: " line
+      select line in "${(@f)$(printf '%s\n' "$table" | cut -f2-)}"; do
+        [[ -n "$line" ]] && break
+      done
+      [[ -z "$line" ]] && return 1
+      name=$(printf '%s\n' "$table" | awk -F'\t' -v d="$line" '$2==d{print $1; exit}')
     fi
     [[ -z "$name" ]] && return 1
     args=(-c "$name" "${args[@]}")
