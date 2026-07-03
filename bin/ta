@@ -4,8 +4,9 @@
 # (bin/tmux-window-snapshot) before attaching. Worktree windows relaunch
 # `yolo --resume`; everything else reopens as a plain shell.
 
-# Attach to an existing server if there is one.
-tmux attach 2>/dev/null && exit
+# Attach to an existing server if there is one. -d detaches any other (possibly
+# stale/ghost) client so this terminal gets the full size immediately.
+tmux attach -d 2>/dev/null && exit
 
 # No server: start one, then recreate each saved window as its own window.
 init=$(tmux new-session -d -P -F '#{window_id}')
@@ -24,4 +25,4 @@ fi
 # Drop the throwaway initial window if we recreated any real ones.
 (( count )) && tmux kill-window -t "$init"
 
-exec tmux attach
+exec tmux attach -d
