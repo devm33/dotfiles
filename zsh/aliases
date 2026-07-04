@@ -295,7 +295,7 @@ csd() {
     printf '\033[?1049l\033[?25h'  # leave alt-screen, show cursor
     # Clean detach/exit -> stop. Any other exit is treated as a drop.
     [[ $rc -eq 0 ]] && break
-    printf 'Codespace connection dropped (rc=%s). Reconnecting... (Ctrl-C to stop)\n' "$rc" >&2
+    printf '[%s] Codespace connection dropped (rc=%s). Reconnecting... (Ctrl-C to stop)\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$rc" >&2
     sleep 1
   done
 }
