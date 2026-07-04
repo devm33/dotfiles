@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Pings running codespaces every 3h so they don't hit the 4h idle timeout.
+     NOTE: launchd StartInterval jobs do NOT run while the Mac is asleep (they
+     fire on wake), so this only covers "Mac awake" periods. For overnight /
+     closed-laptop coverage use the always-on GitHub Action instead
+     (.github/workflows/cs-keepalive.yml).
+
+     Install (once):
+       ln -sfn ~/.dotfiles/config/launchd/com.devm33.cs-keepalive.plist \
+               ~/Library/LaunchAgents/com.devm33.cs-keepalive.plist
+       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.devm33.cs-keepalive.plist
+     Reload after edits:
+       launchctl bootout  gui/$(id -u)/com.devm33.cs-keepalive
+       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.devm33.cs-keepalive.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.devm33.cs-keepalive</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/devm33/.dotfiles/bin/cs-keepalive</string>
+  </array>
+
+  <!-- every 3 hours (must be < the 4h idle timeout) -->
+  <key>StartInterval</key>
+  <integer>10800</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- gh lives in Homebrew; give launchd a usable PATH -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/devm33/.cache/cs-keepalive.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/devm33/.cache/cs-keepalive.log</string>
+</dict>
+</plist>

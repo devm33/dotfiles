@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Keep GitHub Codespaces from hitting their idle timeout (max 4h) by connecting
+# to them periodically: an SSH connection counts as activity and resets the
+# timer, so a ping every <4h prevents the stop that would kill your tmux/yolo
+# sessions. Run it from launchd (Mac, while awake) and/or a scheduled GitHub
+# Action (always-on) -- see config/launchd/ and .github/workflows/cs-keepalive.yml.
+#
+# Only pings codespaces that are already running (state "Available"); it never
+# starts a stopped one -- that would be pointless for keepalive and would
+# resurrect a codespace you deliberately stopped (and burn quota).
+#
+# Usage:
+#   cs-keepalive                 # ping every running codespace (default)
+#   cs-keepalive NAME [NAME...]   # ping only the named codespace(s)
+set -eo pipefail
+
+log() { printf '%s cs-keepalive: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"; }
+
+command -v gh >/dev/null 2>&1 || { log "gh not found on PATH"; exit 127; }
+
+targets=("$@")
+if [ "${#targets[@]}" -eq 0 ]; then
+  # Default: whatever is currently running.
+  while IFS= read -r n; do
+    [ -n "$n" ] && targets+=("$n")
+  done < <(gh codespace list --json name,state \
+             --jq '.[] | select(.state=="Available") | .name')
+fi
+
+if [ "${#targets[@]}" -eq 0 ]; then
+  log "no running codespaces to ping"
+  exit 0
+fi
+
+rc=0
+for cs in "${targets[@]}"; do
+  state="$(gh codespace view -c "$cs" --json state --jq .state 2>/dev/null || echo unknown)"
+  if [ "$state" != "Available" ]; then
+    log "skip $cs (state=$state) -- not resurrecting a stopped codespace"
+    continue
+  fi
+  if gh codespace ssh -c "$cs" -- true 2>/dev/null; then
+    log "pinged $cs (idle timer reset)"
+  else
+    log "ping FAILED for $cs"
+    rc=1
+  fi
+done
+exit "$rc"
