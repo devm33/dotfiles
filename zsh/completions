@@ -17,5 +17,28 @@ _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch re
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm
 
-# Reuse pnpm's completion for the `p` alias (alias p='pnpm').
-compdef p=pnpm
+# Augment pnpm's completion so that at the command position it also offers
+# `pnpm run` script names -- since `pnpm build` (and `p build`, alias p='pnpm')
+# is shorthand for `pnpm run build`. zsh auto-expands the `p` alias to `pnpm`
+# for completion, so hooking `pnpm` covers `p` too.
+#
+# The two sources are merged with `_alternative` (the native zsh helper for
+# offering several completion sources in one context). pnpm only exposes script
+# names through its context-sensitive completion server, so the script source
+# asks it as though the line were `pnpm run <word>`.
+_pnpm_scripts() {
+  local word=$words[CURRENT] line reply si=$IFS
+  line="pnpm run $word"
+  IFS=$'\n' reply=($(COMP_CWORD=2 COMP_LINE="$line" COMP_POINT=$#line \
+    SHELL=zsh pnpm completion-server -- pnpm run "$word"))
+  IFS=$si
+  (( $#reply )) && _describe -t scripts 'script' reply
+}
+_pnpm_with_scripts() {
+  if (( CURRENT == 2 )) && [[ -n $words[CURRENT] ]]; then
+    _alternative 'commands:command:_pnpm' 'scripts:script:_pnpm_scripts'
+  else
+    _pnpm "$@"
+  fi
+}
+compdef _pnpm_with_scripts pnpm
