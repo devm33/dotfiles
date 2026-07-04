@@ -70,9 +70,11 @@ if [[ -n "$existing_win" ]]; then
   exit 0
 fi
 
-# Create a new tmux window at the worktree path.
+# Create a new tmux window at the worktree path. Pass SHELL_LOGGED_IN=true so the
+# codespace's /etc/zsh/zprofile doesn't cd the login shell back to the default
+# workspace dir, which would clobber -c and land every pane in the wrong repo.
 local win
-win=$(tmux new-window -d -c "$wt_path" -P -F '#{window_id}')
+win=$(tmux new-window -d -e SHELL_LOGGED_IN=true -c "$wt_path" -P -F '#{window_id}')
 
 # In the initial pane: run yolo with optional args.
 local cloud_arg=""
@@ -87,7 +89,7 @@ else
 fi
 
 # Split vertically (left | right).
-tmux split-window -h -t "$win" -c "$wt_path"
+tmux split-window -h -e SHELL_LOGGED_IN=true -t "$win" -c "$wt_path"
 
 # Cloud mode runs the agent remotely, so skip the local install/build pane.
 if [[ -n "$cloud_flag" ]]; then
@@ -96,7 +98,7 @@ if [[ -n "$cloud_flag" ]]; then
 fi
 
 # Split the right pane horizontally (right-top / right-bottom).
-tmux split-window -v -t "$win" -c "$wt_path"
+tmux split-window -v -e SHELL_LOGGED_IN=true -t "$win" -c "$wt_path"
 
 # Target panes by index within the window:
 #   0 = left           (yolo is already running here)
