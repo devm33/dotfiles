@@ -11,6 +11,8 @@ if [ -d "/opt/homebrew" ]; then
     export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
     export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:";
     export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
+    # Make homebrew-installed completions (e.g. _pnpm) visible to compinit.
+    fpath=(/opt/homebrew/share/zsh/site-functions $fpath);
 fi
 
 # prepend my bin to path so it's checked first because I'm important
