@@ -212,6 +212,17 @@ cs() {
   name=$(gh codespace create -R "$repo" -b "$branch" --default-permissions "${machine_flag[@]}") || return 1
   echo "$name"
 
+  # The first `gh codespace ssh` against a freshly created codespace has to
+  # spin up the SSH server component in the container, which transiently fails
+  # with "failed to start SSH server" until the container finishes booting.
+  # Poll a trivial command until it succeeds so later ssh calls don't race it.
+  echo "Waiting for SSH server to come up..." >&2
+  local i
+  for i in $(seq 1 60); do
+    gh codespace ssh -c "$name" -- true 2>/dev/null && break
+    sleep 2
+  done
+
   # Codespaces apply dotfiles (which install tmux, zsh, etc.) asynchronously
   # after the container is ready, so connecting immediately races that setup.
   # Wait for install.sh to log completion before returning / connecting.
