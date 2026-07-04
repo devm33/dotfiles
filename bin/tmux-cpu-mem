@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Print current CPU and memory usage for the tmux status bar, e.g. "CPU 12% MEM 43%".
+#
+# Meant for tmux status-right. tmux re-runs this every status-interval (5s), so it
+# stays lightweight: a single cheap syscall/read per metric, no sampling loops.
+#
+# Works on both macOS (Darwin) and Linux.
+
+set -u
+
+cpu_pct=""
+mem_pct=""
+
+case "$(uname -s)" in
+  Darwin)
+    # CPU: derive from the 1-minute load average and the CPU count. This avoids
+    # `top`'s expensive sampling delay while giving a stable utilization figure.
+    read -r ncpu <<<"$(sysctl -n hw.ncpu 2>/dev/null)"
+    load1="$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}')"
+    if [ -n "${load1:-}" ] && [ -n "${ncpu:-}" ] && [ "${ncpu:-0}" -gt 0 ]; then
+      cpu_pct="$(awk -v l="$load1" -v n="$ncpu" 'BEGIN{p=l/n*100; if(p>100)p=100; printf "%.0f", p}')"
+    fi
+
+    # MEM: pages active+wired+compressed over total physical memory, via vm_stat.
+    mem_pct="$(
+      vm_stat 2>/dev/null | awk -v total="$(sysctl -n hw.memsize 2>/dev/null)" '
+        /page size of/ { for (i=1;i<=NF;i++) if ($i ~ /^[0-9]+$/) ps=$i }
+        /Pages active/      { gsub(/\./,"",$3); act=$3 }
+        /Pages wired down/  { gsub(/\./,"",$4); wir=$4 }
+        /Pages occupied by compressor/ { gsub(/\./,"",$5); comp=$5 }
+        END {
+          if (ps=="" || total=="") exit
+          used=(act+wir+comp)*ps
+          printf "%.0f", used/total*100
+        }'
+    )"
+    ;;
+  *)
+    # CPU: two quick reads of /proc/stat 0.2s apart to compute the busy delta.
+    read_cpu() { awk '/^cpu /{idle=$5+$6; total=0; for(i=2;i<=NF;i++) total+=$i; print idle, total}' /proc/stat; }
+    read -r idle1 total1 <<<"$(read_cpu)"
+    sleep 0.2
+    read -r idle2 total2 <<<"$(read_cpu)"
+    if [ -n "${total1:-}" ] && [ -n "${total2:-}" ] && [ "$total2" -ne "$total1" ]; then
+      cpu_pct="$(awk -v i1="$idle1" -v t1="$total1" -v i2="$idle2" -v t2="$total2" \
+        'BEGIN{p=(1-(i2-i1)/(t2-t1))*100; if(p<0)p=0; if(p>100)p=100; printf "%.0f", p}')"
+    fi
+
+    # MEM: (MemTotal - MemAvailable) / MemTotal from /proc/meminfo.
+    mem_pct="$(awk '
+      /^MemTotal:/     { total=$2 }
+      /^MemAvailable:/ { avail=$2 }
+      END { if (total>0) printf "%.0f", (total-avail)/total*100 }' /proc/meminfo 2>/dev/null)"
+    ;;
+esac
+
+[ -n "$cpu_pct" ] && printf 'CPU %s%%' "$cpu_pct"
+[ -n "$cpu_pct" ] && [ -n "$mem_pct" ] && printf ' '
+[ -n "$mem_pct" ] && printf 'MEM %s%%' "$mem_pct"
+printf '\n'
