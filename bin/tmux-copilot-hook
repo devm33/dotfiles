@@ -1,23 +1,51 @@
 #!/usr/bin/env bash
-# Copilot CLI hook to show activity indicator in tmux window status.
+# Copilot CLI hook to show a busy spinner in the tmux window status.
 # Usage: tmux-copilot-hook start | stop
 # Called from ~/.copilot/hooks/tmux-status.json hooks.
 #
-# Must use explicit -t target because hooks are spawned with piped stdio
-# (no TTY), so tmux cannot identify the correct window automatically.
+# Must use an explicit -t target because hooks are spawned with piped stdio
+# (no TTY), so tmux cannot identify the correct pane/window automatically.
+#
+# Why a per-window *set* of pane ids (not the pane's OSC 9;4 progress state):
+#   - The status line's #{pane_pb_state} only reflects a window's *active*
+#     pane, so a Copilot working in a background pane of a window would show no
+#     spinner (and selecting the window would flip it). A window option is
+#     evaluated per-window regardless of which pane is active.
+#   - A window can host several Copilot panes, so a single flag/counter is
+#     ambiguous. We store the set of busy pane ids and treat the window as busy
+#     while the set is non-empty. Dead pane ids are pruned on every update so a
+#     pane that exits mid-turn (without firing 'stop') can't leak a stuck
+#     spinner.
+
+printf '%s pane=%s arg=%s tmux=%s\n' "$(date +%H:%M:%S)" "${TMUX_PANE:-}" "${1:-}" "${TMUX:+set}" \
+    >> "${COPILOT_HOOK_LOG:-/tmp/copilot-hook.log}" 2>/dev/null
 
 [ -n "${TMUX:-}" ] || exit 0
 [ -n "${TMUX_PANE:-}" ] || exit 0
 
-case "${1:-}" in
-    start) tmux set-option -w -t "$TMUX_PANE" @copilot_busy 1 ;;
-    stop)  tmux set-option -wqu -t "$TMUX_PANE" @copilot_busy 2>/dev/null || true ;;
-esac
+win=$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}' 2>/dev/null) || exit 0
+[ -n "$win" ] || exit 0
 
-# Force an immediate status-line repaint. The window status shows a progress
-# spinner from the pane's OSC 9;4 state (#{pane_pb_state}), but tmux only
-# repaints a *background* window's status on the next status-interval tick or
-# when that window is selected -- so the spinner would otherwise lag or vanish
-# until you switch to the window. Refreshing here makes it appear/clear the
-# instant Copilot starts or stops working.
+current=$(tmux show-options -wqv -t "$win" @copilot_busy 2>/dev/null)
+live=" $(tmux list-panes -t "$win" -F '#{pane_id}' 2>/dev/null | tr '\n' ' ') "
+
+# Rebuild the set: keep only still-alive panes, always dropping this pane (it is
+# re-added below only for 'start'). This both removes it on 'stop' and prunes
+# any leaked ids for panes that no longer exist.
+new=""
+for p in $current; do
+    [ "$p" = "$TMUX_PANE" ] && continue
+    case "$live" in *" $p "*) new="$new $p" ;; esac
+done
+[ "${1:-}" = start ] && new="$new $TMUX_PANE"
+new="${new# }"
+
+if [ -n "$new" ]; then
+    tmux set-option -w -t "$win" @copilot_busy "$new"
+else
+    tmux set-option -wqu -t "$win" @copilot_busy 2>/dev/null || true
+fi
+
+# Repaint the status now so the spinner appears/clears immediately instead of
+# waiting for the next status-interval tick or a window selection.
 tmux refresh-client -S 2>/dev/null || true
