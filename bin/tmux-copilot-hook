@@ -17,14 +17,41 @@
 #     pane that exits mid-turn (without firing 'stop') can't leak a stuck
 #     spinner.
 
-printf '%s pane=%s arg=%s tmux=%s\n' "$(date +%H:%M:%S)" "${TMUX_PANE:-}" "${1:-}" "${TMUX:+set}" \
-    >> "${COPILOT_HOOK_LOG:-/tmp/copilot-hook.log}" 2>/dev/null
+# Optional debug logging: set COPILOT_HOOK_LOG=/path to trace hook invocations.
+[ -n "${COPILOT_HOOK_LOG:-}" ] && \
+    printf '%s pane=%s arg=%s tmux=%s\n' "$(date +%H:%M:%S)" "${TMUX_PANE:-}" "${1:-}" "${TMUX:+set}" \
+    >> "$COPILOT_HOOK_LOG" 2>/dev/null
 
 [ -n "${TMUX:-}" ] || exit 0
 [ -n "${TMUX_PANE:-}" ] || exit 0
 
 win=$(tmux display-message -p -t "$TMUX_PANE" '#{window_id}' 2>/dev/null) || exit 0
 [ -n "$win" ] || exit 0
+
+# Serialize concurrent hook invocations for the SAME window. Several Copilot
+# panes in one window can fire start/stop at nearly the same instant; without a
+# lock the read-modify-write on @copilot_busy below races and one process can
+# clobber another (dropping a busy pane's id -> its spinner briefly vanishes).
+# macOS has no flock(1), so use an atomic mkdir lock (portable, no deps).
+lockdir="${TMPDIR:-/tmp}/copilot-busy-${win//[^A-Za-z0-9]/_}.lock"
+have_lock=""
+i=0
+while [ $i -lt 50 ]; do
+    if mkdir "$lockdir" 2>/dev/null; then
+        have_lock=1
+        break
+    fi
+    # Break a stale lock left by a hook that died mid-update (critical section is
+    # a few tmux calls, so a lock older than ~2s is certainly abandoned).
+    lock_mtime=$(stat -f %m "$lockdir" 2>/dev/null || echo 0)
+    if [ "$lock_mtime" -ne 0 ] && [ $(( $(date +%s) - lock_mtime )) -ge 2 ]; then
+        rmdir "$lockdir" 2>/dev/null || true
+    fi
+    sleep 0.05
+    i=$((i + 1))
+done
+# If we still couldn't get the lock, proceed best-effort rather than deadlock.
+[ -n "$have_lock" ] && trap 'rmdir "$lockdir" 2>/dev/null || true' EXIT
 
 current=$(tmux show-options -wqv -t "$win" @copilot_busy 2>/dev/null)
 live=" $(tmux list-panes -t "$win" -F '#{pane_id}' 2>/dev/null | tr '\n' ' ') "
