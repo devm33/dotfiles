@@ -849,6 +849,13 @@ alias datetime='date +%Y%m%dT%H%M%S'
 
 alias proxy='HTTP_PROXY=http://localhost:9090'
 
+# Shorthand for `yolo -i "<prompt>"` that lets you type an unescaped prompt:
+#   yo fix the bug in foo.js and don't break anything
+# All arguments are joined and passed as a single, properly-escaped -i value.
+yo() {
+    yolo -i "$*"
+}
+
 command_not_found_handler() {
     # Guard against recursion: if a command spawned *by* yolo (e.g. `node`
     # missing from PATH in a non-interactive `zsh -c` context) is itself not
