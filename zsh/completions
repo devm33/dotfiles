@@ -16,3 +16,6 @@ compdef _wt_branches wtp
 _wt_worktrees() { compadd $(git worktree list --porcelain | awk -F/ '/^branch refs\/heads\//{print $NF}') }
 compdef _wt_worktrees wtD
 compdef _wt_worktrees wtrm
+
+# Reuse pnpm's completion for the `p` alias (alias p='pnpm').
+compdef p=pnpm
