@@ -1,8 +1,9 @@
 #!/usr/bin/env zsh
-# Fallback `yolo` for machines without zsh/work (e.g. codespaces). Prefer a
+# Fallback `yolo` for machines without a local build (e.g. codespaces). Prefer a
 # locally built CLI in the codespace workspace when present, otherwise use the
-# installed copilot binary. zsh/work overrides this with its own yolo function
-# when available (a shell function shadows this PATH executable in work shells).
+# installed copilot binary. On work machines, dotfiles-work ships a real
+# executable at ~/.local/bin/yolo (earlier on PATH than this ~/.bin/yolo) that
+# execs the local build and so shadows this file.
 #
 # Lives in bin/ (not just as a zsh function) so it is resolvable from bash,
 # tmux send-keys, and non-interactive `zsh -c` contexts (e.g. `csd` / `ta`).

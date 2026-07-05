@@ -678,8 +678,7 @@ _prps_number() {
   if [[ -z "$number" ]]; then
     local branch
     branch=$(git rev-parse --abbrev-ref HEAD) || return 1
-    number=$(gh api "repos/{owner}/{repo}/pulls" \
-      --jq ".[] | select(.head.ref==\"$branch\") | .number" | head -1)
+    number=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
   fi
   if [[ -z "$number" ]]; then
     echo "no open PR found for current branch" >&2
