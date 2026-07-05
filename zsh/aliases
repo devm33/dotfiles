@@ -744,6 +744,31 @@ _pr_info() {
     req_pid=$!
   fi
 
+  # Unresolved review threads also need a GraphQL query (not exposed by
+  # `gh pr view --json`). Run it concurrently and print the result last.
+  local unresolved_file="" unresolved_pid=""
+  if [[ "$state" == "OPEN" && "$url" =~ 'github.com/([^/]+)/([^/]+)/pull/([0-9]+)' ]]; then
+    local u_owner="${match[1]}" u_repo="${match[2]}" u_num="${match[3]}"
+    unresolved_file=$(mktemp)
+    gh api graphql -F owner="$u_owner" -F repo="$u_repo" -F pr="$u_num" -f query='
+      query($owner:String!,$repo:String!,$pr:Int!){
+        repository(owner:$owner,name:$repo){
+          pullRequest(number:$pr){
+            reviewThreads(first:100){nodes{
+              isResolved
+              comments(first:1){nodes{author{login}}}
+            }}
+          }
+        }
+      }' --jq '
+      [.data.repository.pullRequest.reviewThreads.nodes[]
+        | select(.isResolved == false)
+        | .comments.nodes[0].author.login] as $a
+      | "\($a | length)\t\($a | group_by(.) | map("\(.[0]) (\(length))") | join(", "))"
+    ' > "$unresolved_file" 2>/dev/null &
+    unresolved_pid=$!
+  fi
+
   # Author
   local author
   author=$(jq -r '.author.login' <<< "$json")
@@ -867,6 +892,21 @@ _pr_info() {
         echo "required: \033[33m● $req_pending pending\033[0m ($req_passed/$req_total passed)"
       else
         echo "required: \033[32m✓ all $req_total passed\033[0m"
+      fi
+    fi
+  fi
+
+  # Unresolved review comments: wait for the background query, then print
+  if [[ -n "$unresolved_pid" ]]; then
+    wait "$unresolved_pid" 2>/dev/null
+    local unresolved_line unresolved_count unresolved_authors
+    unresolved_line=$(<"$unresolved_file"); rm -f "$unresolved_file"
+    if [[ -n "$unresolved_line" ]]; then
+      IFS=$'\t' read -r unresolved_count unresolved_authors <<< "$unresolved_line"
+      if (( unresolved_count == 0 )); then
+        echo "comments: \033[32m✓ none unresolved\033[0m"
+      else
+        echo "comments: \033[33m● $unresolved_count unresolved\033[0m (from $unresolved_authors)"
       fi
     fi
   fi
