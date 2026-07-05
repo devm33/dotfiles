@@ -42,6 +42,26 @@ all_lock="$cache_dir/.all.lock"
 # between the fast path (reader) and the collector (writer).
 state_key() { local k="$1#$2"; print -r -- "${k//[^A-Za-z0-9._-]/_}" }
 
+# gh needs credentials for the PR-status lookups. On a normal machine gh reads a
+# stored login from disk, but inside a Codespace it authenticates purely from
+# $GITHUB_TOKEN -- and that variable is absent from the tmux server environment
+# this script runs under, so every gh call would fail unauthenticated and all
+# tabs would go blank. When no token is in the environment, fall back to the
+# codespaces-managed env file, whose GITHUB_TOKEN the platform keeps refreshed.
+# Override the path with TMUX_WINDOW_ICON_TOKEN_FILE.
+ensure_gh_token() {
+  # Already have a token in the environment: use it as-is.
+  [[ -n "$GH_TOKEN" || -n "$GITHUB_TOKEN" ]] && return
+  # Outside a Codespace (e.g. a local machine) gh authenticates from its own
+  # stored login on disk, so there is nothing to inject -- leave it alone.
+  [[ -n "$CODESPACES" ]] || return
+  local envf=${TMUX_WINDOW_ICON_TOKEN_FILE:-/workspaces/.codespaces/shared/.env}
+  [[ -r "$envf" ]] || return
+  local t
+  t=$(sed -n 's/^GITHUB_TOKEN=//p' "$envf" 2>/dev/null | head -1)
+  [[ -n "$t" ]] && export GH_TOKEN="$t"
+}
+
 # PR-status glyphs + colors (Catppuccin Mocha).
 # Nerd Font: f058 check-circle, f057 times-circle, f111 circle, e0a0 branch, f071 warning.
 glyph_pass=$'\uf058'
@@ -156,6 +176,7 @@ command_icon() {
 # failure is on a *required* check before turning the tab red.
 if [[ "$1" == --refresh-all ]]; then
   mkdir -p "$cache_dir" 2>/dev/null
+  ensure_gh_token
 
   typeset -A seen repo_alias repo_query
   typeset -A a_branch a_dir a_rev a_top a_ra
