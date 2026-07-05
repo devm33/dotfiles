@@ -660,9 +660,48 @@ alias prs='gh pr view --json state,reviewDecision,mergeStateStatus '
 alias prap='gh pr review --approve'
 alias prr='gh pr ready'
 alias pra='gh pr merge --auto'
-alias prc='gh pr view --comments'
-alias prps='gh pr edit --add-label post-to-slack'
-alias prpu='gh pr edit --remove-label post-to-slack --remove-label already-posted-to-slack'
+prc() {
+  local number
+  number=$(_prps_number "$1") || return 1
+  echo "── PR #${number} ──"
+  gh api "repos/{owner}/{repo}/pulls/${number}" \
+    --jq '"\(.user.login):\n\(.body // "(no description)")\n"'
+  echo "── comments ──"
+  gh api --paginate "repos/{owner}/{repo}/issues/${number}/comments" \
+    --jq '.[] | "\(.user.login): \(.body)\n"'
+  echo "── review comments ──"
+  gh api --paginate "repos/{owner}/{repo}/pulls/${number}/comments" \
+    --jq '.[] | "\(.user.login) [\(.path):\(.line // .original_line)]: \(.body)\n"'
+}
+_prps_number() {
+  local number="$1"
+  if [[ -z "$number" ]]; then
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD) || return 1
+    number=$(gh api "repos/{owner}/{repo}/pulls" \
+      --jq ".[] | select(.head.ref==\"$branch\") | .number" | head -1)
+  fi
+  if [[ -z "$number" ]]; then
+    echo "no open PR found for current branch" >&2
+    return 1
+  fi
+  echo "$number"
+}
+prps() {
+  local number
+  number=$(_prps_number "$1") || return 1
+  gh api "repos/{owner}/{repo}/issues/${number}/labels" \
+    --method POST -f 'labels[]=post-to-slack' --jq '[.[].name]'
+}
+prpu() {
+  local number
+  number=$(_prps_number "$1") || return 1
+  local label
+  for label in post-to-slack already-posted-to-slack; do
+    gh api "repos/{owner}/{repo}/issues/${number}/labels/${label}" \
+      --method DELETE --silent 2>/dev/null
+  done
+}
 
 _pr_info() {
   local json="$1"
