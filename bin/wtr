@@ -1,0 +1,78 @@
+#!/usr/bin/env zsh
+# Rebuild the tmux windows from the last saved snapshot
+# (bin/tmux-window-snapshot) in their original working dirs, then attach.
+# Worktree windows relaunch `yolo --resume`; everything else is a plain shell.
+#
+# Use this after the tmux server (or the codespace) was restarted and you want
+# your previous worktree layout back. Plain attach-or-new is `ta`.
+
+# During a codespace resume the environment (PATH, the tmux binary) may not be
+# ready yet. Fail fast so a reconnect loop just retries instead of tripping
+# command_not_found_handler.
+command -v tmux >/dev/null 2>&1 || exit 1
+
+# Read the saved window dirs into memory *before* creating any tmux windows. The
+# snapshot hooks fire as we rebuild, so reading afterwards would restore whatever
+# transient state those hooks wrote instead of the list we want.
+file="$HOME/.cache/wt/last-windows"
+paths=()
+if [[ -s "$file" ]]; then
+  while IFS= read -r p; do
+    [[ -n "$p" && -d "$p" ]] && paths+=("$p")
+  done < "$file"
+fi
+
+# Nothing saved (or the dirs are gone): fall back to a plain attach-or-new.
+if (( ! ${#paths} )); then
+  if tmux ls >/dev/null 2>&1; then
+    [[ -n "$TMUX" ]] && exit 0
+    exec tmux attach -d
+  fi
+  exec tmux new-session
+fi
+
+# Relaunch `yolo --resume` in a freshly created worktree window. NB: don't name
+# the loop var `path` -- in zsh `$path` is the special array tied to `$PATH`, so
+# reading a dir into it would wipe PATH and make every subsequent `tmux` call
+# fail.
+resume_if_worktree() {
+  local win="$1" dir="$2"
+  [[ "$dir" == *.worktrees/* ]] && tmux send-keys -t "$win" "yolo --resume" Enter
+}
+
+if tmux ls >/dev/null 2>&1; then
+  # A server is already running (e.g. `ta` just started a plain session): add
+  # any saved windows that aren't open yet, rather than rebuilding from scratch.
+  # -e/-g SHELL_LOGGED_IN=true stops the codespace's /etc/zsh/zprofile from
+  # cd'ing new login shells back to the default workspace dir (clobbering -c).
+  tmux set-environment -g SHELL_LOGGED_IN true
+  typeset -A have
+  while IFS= read -r d; do
+    [[ -n "$d" ]] && have[$d]=1
+  done < <(tmux list-windows -a -F '#{pane_current_path}' 2>/dev/null)
+  for p in "${(@)paths}"; do
+    [[ -n "${have[$p]:-}" ]] && continue
+    win=$(tmux new-window -d -e SHELL_LOGGED_IN=true -c "$p" -P -F '#{window_id}')
+    resume_if_worktree "$win" "$p"
+  done
+  # Don't nest when already inside tmux; otherwise attach.
+  [[ -n "$TMUX" ]] && exit 0
+  exec tmux attach -d
+fi
+
+# No server: seed the session with the first dir (so there's no throwaway window
+# to clean up) and add the rest detached (-d) so focus never jumps to each new
+# window.
+tmux new-session -d -e SHELL_LOGGED_IN=true -c "${paths[1]}"
+# Set it server-wide too, so windows opened manually later (prefix-c) also skip
+# the zprofile cd and stay in their own dir.
+tmux set-environment -g SHELL_LOGGED_IN true
+for p in "${(@)paths[2,-1]}"; do
+  tmux new-window -d -e SHELL_LOGGED_IN=true -c "$p"
+done
+
+tmux list-windows -a -F '#{window_id} #{pane_current_path}' | while read -r win dir; do
+  resume_if_worktree "$win" "$dir"
+done
+
+exec tmux attach -d

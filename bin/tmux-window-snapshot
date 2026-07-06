@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Persist the set of currently-open tmux windows (their working directories) so
-# `ta` can rebuild them after the tmux server (or the machine) is restarted.
+# `wtr` can rebuild them after the tmux server (or the machine) is restarted.
 #
 # Invoked from tmux hooks (see tmux.conf) whenever the set of windows changes,
 # so the snapshot always reflects the windows you last had open. Worktree
-# windows are reopened in `yolo --resume` mode by `ta`; everything else reopens
+# windows are reopened in `yolo --resume` mode by `wtr`; everything else reopens
 # as a plain shell.
 
 [ -n "${TMUX:-}" ] || exit 0
@@ -15,22 +15,18 @@ file="$state_dir/last-windows"
 tmp="$file.tmp.$$"
 
 # One working directory per window (active pane), in window order, de-duplicated
-# while preserving order. Blank lines are dropped. Only replace the saved file
-# when we actually captured something, so a transient empty result (e.g. during
-# teardown) can't wipe the snapshot `ta` needs to restore from.
+# while preserving order. Blank lines are dropped.
 tmux list-windows -a -F '#{pane_current_path}' 2>/dev/null \
   | awk 'NF && !seen[$0]++' > "$tmp"
-if [ -s "$tmp" ]; then
-  # Don't let a worktree-less snapshot clobber a saved one that has worktree
-  # windows. A bootstrap/transient default-only session (e.g. `ta` seeding its
-  # first window, or a `csd` reconnect race) would otherwise shrink the cache to
-  # a single default dir and destroy the multi-worktree layout `ta` restores.
-  # Healthy captures still update normally because they contain worktree paths.
-  if grep -q '\.worktrees/' "$file" 2>/dev/null && ! grep -q '\.worktrees/' "$tmp"; then
-    rm -f "$tmp"
-  else
-    mv -f "$tmp" "$file"
-  fi
+
+# Only replace the saved file when the capture actually contains a worktree
+# window. This keeps a plain new session (e.g. `ta` starting a fresh session, or
+# a `csd` reconnect race) from wiping the saved multi-worktree layout that `wtr`
+# restores from -- a worktree-less snapshot never clobbers the cache. A capture
+# that still has worktree windows updates normally (so closing one worktree
+# window is recorded), and a transient empty result can't overwrite anything.
+if [ -s "$tmp" ] && grep -q '\.worktrees/' "$tmp"; then
+  mv -f "$tmp" "$file"
 else
   rm -f "$tmp"
 fi

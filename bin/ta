@@ -1,57 +1,20 @@
 #!/usr/bin/env zsh
-# Attach to the running tmux server. If the server was killed (e.g. the codespace
-# went offline), rebuild the windows from the last saved snapshot
-# (bin/tmux-window-snapshot) in their original working dirs before attaching.
-# Worktree windows relaunch `yolo --resume`; everything else is a plain shell.
+# Attach to the running tmux server, or start a new session if none is running.
+# Deliberately minimal ("tmux attach || tmux") -- the worktree-window restore
+# that used to live here now lives in `wtr`.
 
 # During a codespace resume the environment (PATH, the tmux binary) may not be
 # ready yet. Fail fast so csd's reconnect loop just retries, instead of letting
-# each tmux call below trip command_not_found_handler (which spams "command not
+# the tmux calls below trip command_not_found_handler (which spams "command not
 # found: tmux" and can even misfire yolo on the multi-word command).
 command -v tmux >/dev/null 2>&1 || exit 1
 
-# If a server with at least one session is already running, just attach to it --
-# never fall through to the restore path below. `tmux ls` succeeds only when the
-# server is up AND has sessions, so a *transient* attach failure (e.g. the pty
-# isn't ready yet on a flaky reconnect) exits non-zero and lets csd retry,
-# instead of rebuilding windows on top of the live session (which duplicates
-# them / re-runs yolo). -d detaches any stale/ghost client so this terminal gets
-# the full size immediately.
+# `tmux ls` succeeds only when the server is up AND has sessions, so a *transient*
+# attach failure (e.g. the pty isn't ready yet on a flaky reconnect) exits
+# non-zero and lets csd retry, instead of creating a duplicate session. -d
+# detaches any stale/ghost client so this terminal gets the full size.
 if tmux ls >/dev/null 2>&1; then
   exec tmux attach -d
 fi
 
-# Read the saved window dirs into memory *before* creating any tmux windows. The
-# snapshot hooks fire as we rebuild, so reading afterwards would restore whatever
-# transient state those hooks wrote instead of the list we want.
-file="$HOME/.cache/wt/last-windows"
-paths=()
-if [[ -s "$file" ]]; then
-  while IFS= read -r p; do
-    [[ -n "$p" && -d "$p" ]] && paths+=("$p")
-  done < "$file"
-fi
-
-# Nothing saved (or the dirs are gone): just start a normal session.
-(( ${#paths} )) || exec tmux new-session
-
-# Seed the session with the first dir (so there's no throwaway window to clean
-# up) and add the rest detached (-d) so focus never jumps to each new window.
-# -e SHELL_LOGGED_IN=true stops the codespace's /etc/zsh/zprofile from cd'ing
-# every login shell back to the default workspace dir (which would clobber -c).
-tmux new-session -d -e SHELL_LOGGED_IN=true -c "${paths[1]}"
-# Set it server-wide too, so windows opened manually later (prefix-c) also skip
-# the zprofile cd and stay in their own dir.
-tmux set-environment -g SHELL_LOGGED_IN true
-for p in "${(@)paths[2,-1]}"; do
-  tmux new-window -d -e SHELL_LOGGED_IN=true -c "$p"
-done
-
-# Relaunch `yolo --resume` in every worktree window. NB: don't name the loop var
-# `path` -- in zsh `$path` is the special array tied to `$PATH`, so reading a dir
-# into it would wipe PATH and make every subsequent `tmux` call fail.
-tmux list-windows -a -F '#{window_id} #{pane_current_path}' | while read -r win dir; do
-  [[ "$dir" == *.worktrees/* ]] && tmux send-keys -t "$win" "yolo --resume" Enter
-done
-
-exec tmux attach -d
+exec tmux new-session

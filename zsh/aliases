@@ -14,7 +14,7 @@ alias mmv='noglob zmv -W'
 
 # edit tmux conf
 alias vt='$EDITOR ~/.dotfiles/tmux.conf'
-# Attach to tmux, rebuilding windows from the snapshot if the server died: bin/ta
+# Attach to tmux (or start a session): bin/ta. Rebuild saved worktree windows: bin/wtr
 alias tmrm='tmux kill-window'
 
 # ls
@@ -243,8 +243,9 @@ alias cssh='gh codespace ssh'
 # Durably SSH into a codespace. Improves on plain `cssh` for flaky networks:
 #   * Tight keepalives (~45s) so a dead connection is detected fast instead of
 #     hanging on the socket for minutes.
-#   * Attaches via `ta`, which rebuilds the tmux windows from the last saved
-#     snapshot if the server was killed (e.g. the codespace restarted).
+#   * Attaches via `ta` (plain attach, or a fresh session if the server was
+#     killed, e.g. the codespace restarted). Run `wtr` afterward to rebuild your
+#     saved worktree windows.
 #   * Auto-reconnects on an unexpected drop; a clean tmux detach (prefix-d)
 #     exits 0 and stops the loop.
 #   * Resets local terminal state after each disconnect so an abrupt drop
