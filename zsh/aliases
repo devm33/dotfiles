@@ -98,6 +98,7 @@ alias nw='npm run watch'
 alias pst='pnpm start'
 alias p='pnpm'
 alias pw='pnpm run watch'
+alias pwp='pnpm run watch:pull'
 
 # Bundler
 alias bx='bundle exec'
