@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
-# Keep GitHub Codespaces from hitting their idle timeout (max 4h) by connecting
-# to them periodically: an SSH connection counts as activity and resets the
-# timer, so a ping every <4h prevents the stop that would kill your tmux/yolo
-# sessions. Run it from launchd (Mac, while awake) and/or a scheduled GitHub
-# Action (always-on) -- see config/launchd/ and .github/workflows/cs-keepalive.yml.
+# Keep GitHub Codespaces alive by touching each running one periodically. Two
+# distinct clocks need feeding, and they respond to different actions:
 #
-# Only pings codespaces that are already running (state "Available"); it never
-# starts a stopped one -- that would be pointless for keepalive and would
-# resurrect a codespace you deliberately stopped (and burn quota).
+#   1. idle timeout (stops a RUNNING codespace; 4h max) -- reset ONLY by real
+#      connection activity. An `ssh -- true` counts; a POST /start does NOT
+#      (verified experimentally: a 5-min-idle codespace touched via start every
+#      2 min still stopped at ~5 min). So we SSH-ping to hold it open.
+#   2. last_used_at / retention (deletes a STOPPED codespace after the
+#      retention window) -- refreshed by POST /start on a running codespace,
+#      which is a no-op that does NOT restart it. We also POST /start so
+#      last_used_at stays current.
+#
+# Run from launchd (Mac, while awake) and/or a scheduled GitHub Action
+# (always-on) -- see config/launchd/ and .github/workflows/cs-keepalive.yml.
+#
+# Only touches codespaces that are already running (state "Available"); it
+# never starts a stopped one -- POST /start WOULD resurrect a codespace you
+# deliberately stopped (restarting it, killing its sessions, burning quota),
+# so the "Available" guard is required.
 #
 # Usage:
-#   cs-keepalive                 # ping every running codespace (default)
-#   cs-keepalive NAME [NAME...]   # ping only the named codespace(s)
+#   cs-keepalive                 # touch every running codespace (default)
+#   cs-keepalive NAME [NAME...]   # touch only the named codespace(s)
 set -eo pipefail
 
 log() { printf '%s cs-keepalive: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"; }
@@ -28,7 +38,7 @@ if [ "${#targets[@]}" -eq 0 ]; then
 fi
 
 if [ "${#targets[@]}" -eq 0 ]; then
-  log "no running codespaces to ping"
+  log "no running codespaces to touch"
   exit 0
 fi
 
@@ -39,11 +49,29 @@ for cs in "${targets[@]}"; do
     log "skip $cs (state=$state) -- not resurrecting a stopped codespace"
     continue
   fi
+  # SSH activity resets the idle timer (holds the codespace open).
   if gh codespace ssh -c "$cs" -- true 2>/dev/null; then
-    log "pinged $cs (idle timer reset)"
+    ping_ok=1
   else
-    log "ping FAILED for $cs"
+    ping_ok=0
     rc=1
+  fi
+  # POST /start on the running codespace refreshes last_used_at (retention)
+  # without restarting it; it does NOT reset the idle timer.
+  if gh api --silent -X POST "/user/codespaces/$cs/start" 2>/dev/null; then
+    touch_ok=1
+  else
+    touch_ok=0
+    rc=1
+  fi
+  if [ "$ping_ok" = 1 ] && [ "$touch_ok" = 1 ]; then
+    log "kept $cs alive (idle timer reset, last_used_at refreshed)"
+  elif [ "$ping_ok" = 1 ]; then
+    log "pinged $cs (idle reset) but last_used_at refresh FAILED"
+  elif [ "$touch_ok" = 1 ]; then
+    log "refreshed last_used_at for $cs but SSH idle-reset FAILED"
+  else
+    log "keepalive FAILED for $cs"
   fi
 done
 exit "$rc"
