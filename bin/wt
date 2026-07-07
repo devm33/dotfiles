@@ -43,18 +43,29 @@ git_common_dir=$(git rev-parse --path-format=absolute --git-common-dir) || exit 
 local repo_root="${git_common_dir%/.git}"
 local wt_dir="${repo_root}.worktrees"
 mkdir -p "$wt_dir"
-local wt_path="${wt_dir}/${branch_name}"
 
 # Determine branch name: skip devm33/ prefix if already present or existing.
 local wt_branch
 wt_branch=$(wt_branch_name "$branch_name")
+
+# Derive the path from the resolved branch, not the raw arg. Keying off the raw
+# arg let a devm33/-prefixed branch get checked out at an unprefixed path, so a
+# later unprefixed branch of the same base name would collide with that stale
+# directory and be silently reused (wrong branch, wrong commit).
+local wt_path="${wt_dir}/${wt_branch}"
 
 # Reuse existing worktree if one exists for this branch, otherwise create one.
 local existing_wt
 existing_wt=$(wt_path_for_branch "$wt_branch")
 if [[ -n "$existing_wt" ]]; then
   wt_path="$existing_wt"
-elif [[ ! -d "$wt_path" ]]; then
+elif [[ -d "$wt_path" ]]; then
+  # The path exists but no worktree is checked out on wt_branch there: a stale or
+  # mismatched directory. Refuse to silently reuse it (see path-collision note).
+  echo "wt: '$wt_path' already exists but is not a worktree for '$wt_branch'." >&2
+  echo "wt: remove it (git worktree remove / rm -rf) or choose another branch." >&2
+  return 1 2>/dev/null || exit 1
+else
   if git show-ref --verify --quiet "refs/heads/$wt_branch" || git show-ref --verify --quiet "refs/remotes/origin/$wt_branch"; then
     git worktree add "$wt_path" "$wt_branch" || exit 1
   else
