@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Copy a file OUT of a GitHub Codespace, reliably.
+#
+# `gh codespace cp` runs scp over a localhost port-forward into the codespace.
+# In practice it often fails in both modes:
+#   - default (SFTP)   -> "No such file or directory" even when the file exists
+#   - legacy (`-- -O`) -> "protocol error: filename does not match request"
+# The usual culprit is stray bytes on the remote login shell (an MOTD/banner or
+# an rc file that prints something) corrupting scp's byte-exact control channel.
+# `ssh -- 'cat FILE'` is immune: no control protocol to corrupt, and with no PTY
+# there's no CRLF translation, so the stream is byte-for-byte (binary-safe).
+#
+# Usage:
+#   csget <remote-path> [local-dest] [-c <codespace>] [--verify]
+#
+#   csget /workspaces/foo/demo.mp4                 # -> ./demo.mp4 (picks CS interactively)
+#   csget /workspaces/foo/demo.mp4 ~/Downloads/    # -> ~/Downloads/demo.mp4
+#   csget ~/some/file.txt out.txt -c my-codespace
+#   csget /workspaces/foo/big.bin --verify         # compare sha256 after transfer
+set -euo pipefail
+
+cs=""
+verify=0
+args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c) cs="${2:-}"; shift 2 ;;
+    --verify) verify=1; shift ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+
+src="${args[0]:-}"
+dest="${args[1]:-}"
+if [ -z "$src" ]; then
+  echo "usage: csget <remote-path> [local-dest] [-c <codespace>] [--verify]" >&2
+  exit 1
+fi
+
+# Default dest = basename in cwd; if dest is an existing dir, append basename.
+base="${src##*/}"
+if [ -z "$dest" ]; then
+  dest="$base"
+elif [ -d "$dest" ]; then
+  dest="${dest%/}/$base"
+fi
+
+cflag=()
+[ -n "$cs" ] && cflag=(-c "$cs")
+
+# Single-quote the remote path so the remote shell treats it literally, and
+# escape any embedded single quotes.
+esc_src="${src//\'/\'\\\'\'}"
+
+echo "↓ $src -> $dest" >&2
+
+# Stream to a temp file, then move into place, so a failed transfer never leaves
+# a truncated/empty file at $dest.
+tmp="$(mktemp "${dest}.XXXXXX")"
+trap 'rm -f "$tmp"' EXIT
+
+if ! gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "cat '$esc_src'" > "$tmp"; then
+  echo "csget: transfer failed" >&2
+  exit 1
+fi
+
+if [ "$verify" -eq 1 ]; then
+  local_sum="$(shasum -a 256 < "$tmp" | awk '{print $1}')"
+  remote_sum="$(gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "sha256sum '$esc_src'" | awk '{print $1}')"
+  if [ "$local_sum" != "$remote_sum" ]; then
+    echo "csget: checksum mismatch (local=$local_sum remote=$remote_sum)" >&2
+    exit 1
+  fi
+  echo "✓ sha256 verified" >&2
+fi
+
+mv "$tmp" "$dest"
+trap - EXIT
+
+size=$(( $(wc -c < "$dest") ))
+echo "✓ $dest ($size bytes)" >&2

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Copy a file INTO a GitHub Codespace, reliably.
+#
+# Companion to `csget`. Streams the local file over `ssh -- 'cat > FILE'`,
+# sidestepping the same `gh codespace cp` scp failures (see csget for the why).
+# No PTY is allocated, so the byte stream is unmodified (binary-safe).
+#
+# Usage:
+#   csput <local-path> <remote-path> [-c <codespace>] [--verify]
+#
+#   csput ./patch.diff /workspaces/proj/patch.diff
+#   csput ./big.bin ~/big.bin -c my-codespace --verify
+set -euo pipefail
+
+cs=""
+verify=0
+args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c) cs="${2:-}"; shift 2 ;;
+    --verify) verify=1; shift ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+
+src="${args[0]:-}"
+dest="${args[1]:-}"
+if [ -z "$src" ] || [ -z "$dest" ]; then
+  echo "usage: csput <local-path> <remote-path> [-c <codespace>] [--verify]" >&2
+  exit 1
+fi
+if [ ! -f "$src" ]; then
+  echo "csput: no such local file: $src" >&2
+  exit 1
+fi
+
+cflag=()
+[ -n "$cs" ] && cflag=(-c "$cs")
+
+esc_dest="${dest//\'/\'\\\'\'}"
+
+echo "↑ $src -> $dest" >&2
+
+if ! gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "cat > '$esc_dest'" < "$src"; then
+  echo "csput: transfer failed" >&2
+  exit 1
+fi
+
+if [ "$verify" -eq 1 ]; then
+  local_sum="$(shasum -a 256 < "$src" | awk '{print $1}')"
+  remote_sum="$(gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "sha256sum '$esc_dest'" | awk '{print $1}')"
+  if [ "$local_sum" != "$remote_sum" ]; then
+    echo "csput: checksum mismatch (local=$local_sum remote=$remote_sum)" >&2
+    exit 1
+  fi
+  echo "✓ sha256 verified" >&2
+fi
+
+echo "✓ uploaded" >&2
