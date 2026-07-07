@@ -674,6 +674,9 @@ prc() {
   echo "── review comments ──"
   gh api --paginate "repos/{owner}/{repo}/pulls/${number}/comments" \
     --jq '.[] | "\(.user.login) [\(.path):\(.line // .original_line)]: \(.body)\n"'
+  echo "── reviews ──"
+  gh api --paginate "repos/{owner}/{repo}/pulls/${number}/reviews" \
+    --jq '.[] | select(.body != "") | "\(.user.login) [\(.state)]: \(.body)\n"'
 }
 _prps_number() {
   local number="$1"
