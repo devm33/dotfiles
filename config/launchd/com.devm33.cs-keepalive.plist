@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Pings running codespaces every 3h so they don't hit the 4h idle timeout.
+<!-- Pings running codespaces every 30m so they don't hit the 4h idle timeout.
+     Interval is deliberately WELL under 4h: launchd StartInterval pauses while
+     the Mac sleeps and fires once on wake, so a wide interval (e.g. 3h) can
+     slip past the 4h idle window after a nap. 30m keeps a large safety margin.
      NOTE: launchd StartInterval jobs do NOT run while the Mac is asleep (they
      fire on wake), so this only covers "Mac awake" periods. For overnight /
      closed-laptop coverage use the always-on GitHub Action instead
@@ -23,9 +26,10 @@
     <string>/Users/devm33/.dotfiles/bin/cs-keepalive</string>
   </array>
 
-  <!-- every 3 hours (must be < the 4h idle timeout) -->
+  <!-- every 30 minutes (well under the 4h idle timeout; survives slipped
+       ticks after Mac sleep) -->
   <key>StartInterval</key>
-  <integer>10800</integer>
+  <integer>1800</integer>
 
   <key>RunAtLoad</key>
   <true/>
