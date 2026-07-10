@@ -959,6 +959,7 @@ alias proxy='HTTP_PROXY=http://localhost:9090'
 yo() {
     yolo -i "$*"
 }
+alias yr='yolo --resume'
 
 command_not_found_handler() {
     # Guard against recursion: if a command spawned *by* yolo (e.g. `node`
