@@ -299,6 +299,15 @@ csd() {
     [[ -z "$name" ]] && return 1
     args=(-c "$name" "${args[@]}")
   fi
+  # Resolve the codespace name for log messages (whether from picker or -c/--codespace).
+  local cs_name
+  local i
+  for i in {1..$#args}; do
+    if [[ "${args[$i]}" == "-c" || "${args[$i]}" == "--codespace" ]]; then
+      cs_name=${args[$((i+1))]}
+      break
+    fi
+  done
   while true; do
     gh codespace ssh "${args[@]}" -- \
       -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
@@ -309,7 +318,7 @@ csd() {
     printf '\033[?1049l\033[?25h'  # leave alt-screen, show cursor
     # Clean detach/exit -> stop. Any other exit is treated as a drop.
     [[ $rc -eq 0 ]] && break
-    printf '[%s] Codespace connection dropped (rc=%s). Reconnecting... (Ctrl-C to stop)\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$rc" >&2
+    printf '[%s] Codespace %s connection dropped (rc=%s). Reconnecting... (Ctrl-C to stop)\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$cs_name" "$rc" >&2
     sleep 1
   done
 }
