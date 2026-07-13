@@ -24,6 +24,7 @@
     "showCustom": true
   },
   "colorMode": "github",
+  "copyOnSelect": true,
   "scrollbar": false,
   "notifications": true,
   "remoteSessions": true
