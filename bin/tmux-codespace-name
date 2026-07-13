@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Print the current codespace name (if any) for the tmux status bar.
+#
+# Meant for tmux status-left. Prints a padded, styled name when running inside a
+# GitHub Codespace and nothing otherwise, so the segment disappears elsewhere.
+#
+# tmux's own `#{CODESPACE_NAME}` format is unreliable here: the env var is only
+# exported into interactive login shells, so a tmux server started outside that
+# context (or persisting across reconnects) won't have it. We read $CODESPACE_NAME
+# when present and fall back to the codespace's shared .env file otherwise.
+
+set -u
+
+name="${CODESPACE_NAME:-}"
+
+if [ -z "$name" ]; then
+  env_file="/workspaces/.codespaces/shared/.env"
+  if [ -r "$env_file" ]; then
+    name="$(sed -n 's/^CODESPACE_NAME=//p' "$env_file" 2>/dev/null | head -n1)"
+  fi
+fi
+
+[ -n "$name" ] && printf ' #[fg=cyan]%s#[default] ' "$name"
