@@ -20,4 +20,8 @@ if [ -z "$name" ]; then
   fi
 fi
 
+# Codespace names are `<adjective>-<noun>-<random-id>`; drop the trailing id so
+# only the human-friendly name shows in the status bar.
+name="${name%-*}"
+
 [ -n "$name" ] && printf ' #[fg=cyan]%s#[default] ' "$name"
