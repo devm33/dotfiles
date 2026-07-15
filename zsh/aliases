@@ -715,6 +715,12 @@ prpu() {
       --method DELETE --silent 2>/dev/null
   done
 }
+prag() {
+  local number
+  number=$(_prps_number "$1") || return 1
+  gh api "repos/{owner}/{repo}/issues/${number}/labels" \
+    --method POST -f 'labels[]=agentmerge' --jq '[.[].name]'
+}
 
 _pr_info() {
   local json="$1"
