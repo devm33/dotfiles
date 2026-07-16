@@ -87,10 +87,12 @@ emit() {
   esac
 }
 
-# Seconds since the mtime of $1, or nothing if it does not exist.
+# Seconds since the mtime of $1, or nothing if it does not exist. stat's mtime
+# flag differs by platform (GNU coreutils on Linux vs BSD/macOS), so try both:
+# without this the age is empty on Linux and stale lock reclaim never triggers.
 age() {
   local m
-  m=$(stat -f %m "$1" 2>/dev/null) || return
+  m=$(stat -c %Y "$1" 2>/dev/null) || m=$(stat -f %m "$1" 2>/dev/null) || return
   [[ -n "$m" ]] && printf '%s' $(( $(date +%s) - m ))
 }
 
