@@ -63,7 +63,7 @@ if [ -z "$cs" ]; then
     if command -v fzf >/dev/null 2>&1; then
       choice="$(printf '%s\n' "$list" \
         | fzf --with-nth=2,3,4,5 --delimiter='\t' \
-              --prompt='codespace> ' --height=40% --reverse </dev/tty >/dev/tty)" || true
+              --prompt='codespace> ' --height=40% --reverse)" || true
       cs="$(printf '%s' "$choice" | cut -f1)"
     else
       echo "Select a codespace:" >&2
