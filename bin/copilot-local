@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Launch GitHub Copilot CLI backed by a local Ollama model (BYOK).
+# Usage: copilot-local [copilot args...]
+#   MODEL=<name> copilot-local   # override the model (default: qwen2.5-coder:32b)
+set -euo pipefail
+
+MODEL="${MODEL:-qwen2.5-coder:32b}"
+OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
+
+# Ensure the Ollama server is up; start it in the background if not.
+if ! curl -sf "${OLLAMA_HOST}/api/version" >/dev/null 2>&1; then
+  echo "Starting Ollama server..." >&2
+  ollama serve >/tmp/ollama.log 2>&1 &
+  for _ in $(seq 1 30); do
+    curl -sf "${OLLAMA_HOST}/api/version" >/dev/null 2>&1 && break
+    sleep 0.5
+  done
+fi
+
+# Ensure the model is present.
+if ! ollama list | awk '{print $1}' | grep -qx "${MODEL}"; then
+  echo "Pulling ${MODEL}..." >&2
+  ollama pull "${MODEL}"
+fi
+
+exec env \
+  COPILOT_PROVIDER_BASE_URL="${OLLAMA_HOST}/v1" \
+  COPILOT_MODEL="${MODEL}" \
+  copilot "$@"
