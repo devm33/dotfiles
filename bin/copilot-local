@@ -18,6 +18,17 @@
 #       brew services info ollama       # check status
 #   With the service running, launch as many `copilot-local` sessions as you
 #   like; each detects the running server and leaves it up when it exits.
+#
+# Manual shared server (no login autostart):
+#   If you don't want brew's login autostart, just run the server yourself in a
+#   spare terminal — same shared-server effect:
+#       ollama serve &
+#   Optional performance flags (from Homebrew's caveat), nice-to-have but not
+#   required; they lower memory use and can speed up long-context inference:
+#       OLLAMA_FLASH_ATTENTION=1 \   # memory-efficient Flash Attention
+#       OLLAMA_KV_CACHE_TYPE=q8_0 \  # 8-bit quantized KV cache (less RAM)
+#       ollama serve &
+#   On a 64GB machine these are optional; plain `ollama serve &` works fine.
 set -euo pipefail
 
 MODEL="${MODEL:-qwen2.5-coder:32b}"
