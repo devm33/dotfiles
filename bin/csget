@@ -87,10 +87,6 @@ fi
 
 cflag=(-c "$cs")
 
-# Single-quote the remote path so the remote shell treats it literally, and
-# escape any embedded single quotes.
-esc_src="${src//\'/\'\\\'\'}"
-
 echo "↓ $src -> $dest" >&2
 
 # Stream to a temp file, then move into place, so a failed transfer never leaves
@@ -98,14 +94,14 @@ echo "↓ $src -> $dest" >&2
 tmp="$(mktemp "${dest}.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT
 
-if ! gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "cat '$esc_src'" > "$tmp"; then
+if ! gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "cat $src" > "$tmp"; then
   echo "csget: transfer failed" >&2
   exit 1
 fi
 
 if [ "$verify" -eq 1 ]; then
   local_sum="$(shasum -a 256 < "$tmp" | awk '{print $1}')"
-  remote_sum="$(gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "sha256sum '$esc_src'" | awk '{print $1}')"
+  remote_sum="$(gh cs ssh "${cflag[@]+"${cflag[@]}"}" -- "sha256sum $src" | awk '{print $1}')"
   if [ "$local_sum" != "$remote_sum" ]; then
     echo "csget: checksum mismatch (local=$local_sum remote=$remote_sum)" >&2
     exit 1
