@@ -1,7 +1,23 @@
 #!/usr/bin/env bash
 # Launch GitHub Copilot CLI backed by a local Ollama model (BYOK).
+#
 # Usage: copilot-local [copilot args...]
 #   MODEL=<name> copilot-local   # override the model (default: qwen2.5-coder:32b)
+#
+# Server lifecycle:
+#   - If no Ollama server is running, this script starts one and stops it
+#     again when Copilot exits.
+#   - If a server is already running (e.g. a brew service), it is left alone.
+#
+# Running MULTIPLE concurrent instances:
+#   Start Ollama once as a shared background service so instances share it and
+#   none of them shuts it down on exit:
+#       brew services start ollama      # start now + auto-start at login
+#       brew services stop ollama       # stop the shared server
+#       brew services restart ollama    # restart it
+#       brew services info ollama       # check status
+#   With the service running, launch as many `copilot-local` sessions as you
+#   like; each detects the running server and leaves it up when it exits.
 set -euo pipefail
 
 MODEL="${MODEL:-qwen2.5-coder:32b}"
@@ -14,14 +30,28 @@ MAX_PROMPT_TOKENS="${COPILOT_PROVIDER_MAX_PROMPT_TOKENS:-24576}"
 MAX_OUTPUT_TOKENS="${COPILOT_PROVIDER_MAX_OUTPUT_TOKENS:-8192}"
 
 # Ensure the Ollama server is up; start it in the background if not.
+# Track whether *we* started it so we can stop it again on exit.
+STARTED_OLLAMA=""
+OLLAMA_PID=""
 if ! curl -sf "${OLLAMA_HOST}/api/version" >/dev/null 2>&1; then
   echo "Starting Ollama server..." >&2
   ollama serve >/tmp/ollama.log 2>&1 &
+  OLLAMA_PID=$!
+  STARTED_OLLAMA=1
   for _ in $(seq 1 30); do
     curl -sf "${OLLAMA_HOST}/api/version" >/dev/null 2>&1 && break
     sleep 0.5
   done
 fi
+
+# Stop the server on exit, but only if this script started it.
+cleanup() {
+  if [[ -n "${STARTED_OLLAMA}" && -n "${OLLAMA_PID}" ]]; then
+    echo "Stopping Ollama server (PID ${OLLAMA_PID})..." >&2
+    kill "${OLLAMA_PID}" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
 
 # Ensure the model is present.
 if ! ollama list | awk '{print $1}' | grep -qx "${MODEL}"; then
@@ -29,7 +59,8 @@ if ! ollama list | awk '{print $1}' | grep -qx "${MODEL}"; then
   ollama pull "${MODEL}"
 fi
 
-exec env \
+# Not 'exec' — we must stay alive so the cleanup trap runs after copilot exits.
+env \
   COPILOT_PROVIDER_BASE_URL="${OLLAMA_HOST}/v1" \
   COPILOT_MODEL="${MODEL}" \
   COPILOT_PROVIDER_MAX_PROMPT_TOKENS="${MAX_PROMPT_TOKENS}" \
