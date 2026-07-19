@@ -7,6 +7,12 @@ set -euo pipefail
 MODEL="${MODEL:-qwen2.5-coder:32b}"
 OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
 
+# Qwen2.5-Coder has a 32K context window. These aren't in Copilot's built-in
+# catalog, so set token limits explicitly to silence the fallback warning.
+# Reserve room for output within the 32768-token context.
+MAX_PROMPT_TOKENS="${COPILOT_PROVIDER_MAX_PROMPT_TOKENS:-24576}"
+MAX_OUTPUT_TOKENS="${COPILOT_PROVIDER_MAX_OUTPUT_TOKENS:-8192}"
+
 # Ensure the Ollama server is up; start it in the background if not.
 if ! curl -sf "${OLLAMA_HOST}/api/version" >/dev/null 2>&1; then
   echo "Starting Ollama server..." >&2
@@ -26,4 +32,6 @@ fi
 exec env \
   COPILOT_PROVIDER_BASE_URL="${OLLAMA_HOST}/v1" \
   COPILOT_MODEL="${MODEL}" \
+  COPILOT_PROVIDER_MAX_PROMPT_TOKENS="${MAX_PROMPT_TOKENS}" \
+  COPILOT_PROVIDER_MAX_OUTPUT_TOKENS="${MAX_OUTPUT_TOKENS}" \
   copilot "$@"
