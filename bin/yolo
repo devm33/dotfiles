@@ -10,6 +10,9 @@
 emulate -L zsh
 setopt local_options null_glob
 
+# On codespaces, unset GITHUB_TOKEN so the CLI uses its own auth.
+[[ -n "$CODESPACES" ]] && unset GITHUB_TOKEN
+
 local cli
 for cli in /workspaces/*/dist-cli/index.js; do
   [[ -f "$cli" ]] && exec node "$cli" --yolo "$@"
