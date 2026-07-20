@@ -31,7 +31,9 @@
 #   On a 64GB machine these are optional; plain `ollama serve &` works fine.
 set -euo pipefail
 
-MODEL="${MODEL:-qwen2.5-coder:32b}"
+# MODEL="${MODEL:-qwen2.5-coder:32b}"
+MODEL="${MODEL:-qwen2.5-coder:14b}"
+# MODEL="${MODEL:-qwen3.6}"
 OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
 
 # Qwen2.5-Coder has a 32K context window. These aren't in Copilot's built-in
@@ -73,6 +75,7 @@ fi
 # Add COPILOT_OFFLINE=true to run no external network
 # Not 'exec' — we must stay alive so the cleanup trap runs after copilot exits.
 env \
+  COPILOT_OFFLINE=true \
   COPILOT_PROVIDER_BASE_URL="${OLLAMA_HOST}/v1" \
   COPILOT_MODEL="${MODEL}" \
   COPILOT_PROVIDER_MAX_PROMPT_TOKENS="${MAX_PROMPT_TOKENS}" \
