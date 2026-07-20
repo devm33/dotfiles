@@ -70,6 +70,7 @@ if ! ollama list | awk '{print $1}' | grep -qx "${MODEL}"; then
   ollama pull "${MODEL}"
 fi
 
+# Add COPILOT_OFFLINE=true to run no external network
 # Not 'exec' — we must stay alive so the cleanup trap runs after copilot exits.
 env \
   COPILOT_PROVIDER_BASE_URL="${OLLAMA_HOST}/v1" \
