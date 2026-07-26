@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Print current CPU and memory usage for the tmux status bar, e.g. "CPU 12% MEM 43%".
+# Print current CPU, memory and disk usage for the tmux status bar, e.g. "CPU 12% MEM 43% DISK 57%".
 #
 # Meant for tmux status-right. tmux re-runs this every status-interval (5s), so it
 # stays lightweight: a single cheap syscall/read per metric, no sampling loops.
@@ -10,6 +10,7 @@ set -u
 
 cpu_pct=""
 mem_pct=""
+disk_pct=""
 
 case "$(uname -s)" in
   Darwin)
@@ -54,7 +55,17 @@ case "$(uname -s)" in
     ;;
 esac
 
+# DISK: used percentage of the main data filesystem. On modern macOS (APFS) the
+# boot disk is split into a read-only system volume at "/" and a data volume at
+# "/System/Volumes/Data" that holds actual files, so prefer the latter there.
+# `df -P` is portable and reports capacity in the 5th column as e.g. "57%".
+disk_target="/"
+[ "$(uname -s)" = "Darwin" ] && [ -d /System/Volumes/Data ] && disk_target="/System/Volumes/Data"
+disk_pct="$(df -P "$disk_target" 2>/dev/null | awk 'NR==2 { gsub(/%/,"",$5); print $5 }')"
+
 [ -n "$cpu_pct" ] && printf 'CPU %s%%' "$cpu_pct"
 [ -n "$cpu_pct" ] && [ -n "$mem_pct" ] && printf ' '
 [ -n "$mem_pct" ] && printf 'MEM %s%%' "$mem_pct"
+{ [ -n "$cpu_pct" ] || [ -n "$mem_pct" ]; } && [ -n "$disk_pct" ] && printf ' '
+[ -n "$disk_pct" ] && printf 'DISK %s%%' "$disk_pct"
 printf '\n'
