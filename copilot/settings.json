@@ -27,5 +27,6 @@
   "copyOnSelect": true,
   "scrollbar": false,
   "notifications": true,
-  "remoteSessions": true
+  "remoteSessions": true,
+  "shellShortcut": true
 }
