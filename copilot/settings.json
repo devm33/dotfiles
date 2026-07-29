@@ -21,7 +21,8 @@
     "showYolo": false,
     "showCiStatus": true,
     "showPullRequest": true,
-    "showCustom": true
+    "showCustom": true,
+    "showSchedules": true
   },
   "colorMode": "github",
   "copyOnSelect": true,
