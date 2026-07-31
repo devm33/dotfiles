@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Keep the current Codespace awake by reporting client activity to cs-agent.
+# Run this in a foreground terminal or tmux window; stop it with Ctrl-C.
+
+set -uo pipefail
+
+readonly interval="${CODESPACE_KEEPALIVE_INTERVAL:-60}"
+readonly method="/Codespaces.Grpc.CodespaceHostService.v1.CodespaceHost/NotifyCodespaceOfClientActivity"
+
+log() {
+  printf '%s codespace-stay-awake: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*" >&2
+}
+
+case "$interval" in
+  ''|*[!0-9]*|0)
+    log "CODESPACE_KEEPALIVE_INTERVAL must be a positive integer"
+    exit 2
+    ;;
+esac
+
+command -v curl >/dev/null 2>&1 || {
+  log "curl not found on PATH"
+  exit 127
+}
+
+socket=""
+for candidate in \
+  "${HOME:-}/.codespaces/shared/cs-agent.sock" \
+  /root/.codespaces/shared/cs-agent.sock \
+  /home/vscode/.codespaces/shared/cs-agent.sock \
+  /home/codespace/.codespaces/shared/cs-agent.sock \
+  /workspaces/.codespaces/shared/cs-agent.sock \
+  /.codespaces/shared/cs-agent.sock
+do
+  if [ -S "$candidate" ]; then
+    socket="$candidate"
+    break
+  fi
+done
+
+if [ -z "$socket" ]; then
+  log "Codespaces agent socket not found; run this inside a GitHub Codespace"
+  exit 1
+fi
+
+headers="$(mktemp "${TMPDIR:-/tmp}/codespace-stay-awake.XXXXXX")" || exit 1
+body="$(mktemp "${TMPDIR:-/tmp}/codespace-stay-awake.XXXXXX")" || {
+  rm -f "$headers"
+  exit 1
+}
+cleanup() {
+  rm -f "$headers" "$body"
+}
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+notify() {
+  : >"$headers"
+  : >"$body"
+
+  # gRPC frame containing:
+  # NotifyCodespaceOfClientActivityRequest {
+  #   ClientId: "dotfiles-keepalive"
+  #   ClientActivities: ["dotfiles-keepalive"]
+  # }
+  printf '\000\000\000\000\050\012\022dotfiles-keepalive\022\022dotfiles-keepalive' |
+    curl --silent --show-error --fail-with-body \
+      --http2-prior-knowledge \
+      --unix-socket "$socket" \
+      --max-time 5 \
+      --request POST \
+      --header 'content-type: application/grpc' \
+      --header 'te: trailers' \
+      --header 'authorization: ******' \
+      --header 'user-agent: dotfiles-codespace-keepalive/1' \
+      --data-binary @- \
+      --dump-header "$headers" \
+      --output "$body" \
+      "http://localhost${method}" &&
+    grep -Eiq '^grpc-status:[[:space:]]*0[[:space:]]*$' "$headers"
+}
+
+log "active; notifying cs-agent every ${interval}s (Ctrl-C to stop)"
+failed=0
+while true; do
+  if notify; then
+    if [ "$failed" -eq 1 ]; then
+      log "keepalive recovered"
+    fi
+    failed=0
+  else
+    if [ "$failed" -eq 0 ]; then
+      log "keepalive failed; retrying every ${interval}s"
+    fi
+    failed=1
+  fi
+  sleep "$interval"
+done
