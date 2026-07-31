@@ -8,7 +8,7 @@ readonly interval="${CODESPACE_KEEPALIVE_INTERVAL:-60}"
 readonly method="/Codespaces.Grpc.CodespaceHostService.v1.CodespaceHost/NotifyCodespaceOfClientActivity"
 
 log() {
-  printf '%s codespace-stay-awake: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*" >&2
+  printf '%s codespace-stay-awake: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"
 }
 
 case "$interval" in
@@ -87,6 +87,7 @@ while true; do
     if [ "$failed" -eq 1 ]; then
       log "keepalive recovered"
     fi
+    log "ping acknowledged"
     failed=0
   else
     if [ "$failed" -eq 0 ]; then
