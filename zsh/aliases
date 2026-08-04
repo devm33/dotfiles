@@ -738,9 +738,8 @@ _pr_info() {
   base=$(jq -r '.baseRefName' <<< "$json")
   head_oid=$(jq -r '.headRefOid' <<< "$json")
 
-  # Required checks need a separate GraphQL query (statusCheckRollup has no
-  # isRequired flag). Kick it off in the background so it runs concurrently while
-  # we print everything else; the result is printed last once it completes.
+  # Required checks and merge queue state need a separate GraphQL query. Kick it
+  # off in the background so it runs concurrently while we print everything else.
   local req_file="" req_pid=""
   if [[ "$state" == "OPEN" && "$url" =~ 'github.com/([^/]+)/([^/]+)/pull/([0-9]+)' ]]; then
     local owner="${match[1]}" repo="${match[2]}" num="${match[3]}"
@@ -749,6 +748,7 @@ _pr_info() {
       query($owner:String!,$repo:String!,$pr:Int!){
         repository(owner:$owner,name:$repo){
           pullRequest(number:$pr){
+            mergeQueueEntry { state position }
             commits(last:1){nodes{commit{statusCheckRollup{contexts(first:100){nodes{
               __typename
               ... on CheckRun { conclusion isRequired(pullRequestNumber:$pr) }
@@ -759,7 +759,8 @@ _pr_info() {
       }' --jq '
       [.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[]
         | select(.isRequired == true) | (.conclusion // .state)] as $r
-      | "\($r | length) \([$r[] | select(. == "SUCCESS")] | length) \([$r[] | select(. == "FAILURE" or . == "ERROR")] | length)"
+      | .data.repository.pullRequest.mergeQueueEntry as $q
+      | "\($r | length) \([$r[] | select(. == "SUCCESS")] | length) \([$r[] | select(. == "FAILURE" or . == "ERROR")] | length) \($q.state // "-") \($q.position // "-")"
     ' > "$req_file" 2>/dev/null &
     req_pid=$!
   fi
@@ -869,7 +870,26 @@ _pr_info() {
     *)           echo "merge:    \033[33m● unknown\033[0m" ;;
   esac
 
-  if [[ "$auto_merge" == "true" ]]; then
+  local req_counts="" req_total="" req_passed="" req_failed=""
+  local queue_state="" queue_position=""
+  if [[ -n "$req_pid" ]]; then
+    wait "$req_pid" 2>/dev/null
+    req_counts=$(<"$req_file"); rm -f "$req_file"
+    req_pid=""
+    if [[ -n "$req_counts" ]]; then
+      read -r req_total req_passed req_failed queue_state queue_position <<< "$req_counts"
+    fi
+  fi
+
+  if [[ -n "$queue_state" && "$queue_state" != "-" ]]; then
+    local queue_label="${queue_state:l}"
+    queue_label="${queue_label//_/ }"
+    if [[ "$queue_position" != "-" ]]; then
+      echo "queue:    \033[33m● $queue_label\033[0m (position $queue_position)"
+    else
+      echo "queue:    \033[33m● $queue_label\033[0m"
+    fi
+  elif [[ "$auto_merge" == "true" ]]; then
     echo "automerge:\033[32m ✓ enabled\033[0m"
   else
     echo "automerge:\033[90m ✗ disabled\033[0m"
@@ -897,22 +917,17 @@ _pr_info() {
   fi
 
   # Required checks: wait for the background query launched earlier, then print
-  if [[ -n "$req_pid" ]]; then
-    wait "$req_pid" 2>/dev/null
-    local req_counts req_total req_passed req_failed req_pending
-    req_counts=$(<"$req_file"); rm -f "$req_file"
-    if [[ -n "$req_counts" ]]; then
-      read -r req_total req_passed req_failed <<< "$req_counts"
-      req_pending=$(( req_total - req_passed - req_failed ))
-      if (( req_total == 0 )); then
-        echo "required: \033[90mnone\033[0m"
-      elif (( req_failed > 0 )); then
-        echo "required: \033[31m✗ $req_failed failing\033[0m ($req_passed/$req_total passed)"
-      elif (( req_pending > 0 )); then
-        echo "required: \033[33m● $req_pending pending\033[0m ($req_passed/$req_total passed)"
-      else
-        echo "required: \033[32m✓ all $req_total passed\033[0m"
-      fi
+  if [[ -n "$req_counts" ]]; then
+    local req_pending
+    req_pending=$(( req_total - req_passed - req_failed ))
+    if (( req_total == 0 )); then
+      echo "required: \033[90mnone\033[0m"
+    elif (( req_failed > 0 )); then
+      echo "required: \033[31m✗ $req_failed failing\033[0m ($req_passed/$req_total passed)"
+    elif (( req_pending > 0 )); then
+      echo "required: \033[33m● $req_pending pending\033[0m ($req_passed/$req_total passed)"
+    else
+      echo "required: \033[32m✓ all $req_total passed\033[0m"
     fi
   fi
 
