@@ -88,6 +88,7 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("n", "<C-c>", "<cmd>qall<CR>", { desc = "Quit all" })
 vim.keymap.set("i", "<C-c>", "<cmd>qall<CR>", { desc = "Quit all" })
 
+vim.keymap.set("n", "<leader>w", "<cmd>write<CR>", { desc = "Write current buffer" })
 vim.keymap.set("n", "<leader>d", "<cmd>Explore %:p:h<CR>", { desc = "Explore current file directory" })
 
 -- Diagnostic keymaps
