@@ -62,3 +62,12 @@
 	enabled = true
 [gpg]
 	format = ssh
+[credential]
+	helper = 
+	helper = /usr/local/share/gcm-core/git-credential-manager
+	azreposCredentialType = oauth
+[credential "https://dev.azure.com"]
+	useHttpPath = true
+[credential "azrepos:org/office"]
+	username = devrajmehta@microsoft.com
+	azureAuthority = https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47
