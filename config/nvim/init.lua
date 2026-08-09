@@ -33,6 +33,12 @@ end)
 -- Wrapping
 vim.o.breakindent = true
 
+-- Indentation
+vim.o.expandtab = true
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+vim.o.softtabstop = -1
+
 -- Search
 vim.o.ignorecase = true
 vim.o.smartcase = true
