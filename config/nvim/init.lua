@@ -88,6 +88,8 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("n", "<C-c>", "<cmd>qall<CR>", { desc = "Quit all" })
 vim.keymap.set("i", "<C-c>", "<cmd>qall<CR>", { desc = "Quit all" })
 
+vim.keymap.set("n", "<leader>d", "<cmd>Explore %:p:h<CR>", { desc = "Explore current file directory" })
+
 -- Diagnostic keymaps
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
 
