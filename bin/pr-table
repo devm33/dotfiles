@@ -1,0 +1,361 @@
+#!/usr/bin/env bash
+# Print a dashboard for open, non-draft pull requests.
+#
+# Usage: pr-table [--repo OWNER/REPO] [--author LOGIN] [--markdown]
+#   --repo    repository to query (default: current repository)
+#   --author  PR author (default: authenticated gh user)
+#   --markdown  print a Markdown table instead of a terminal table
+
+set -euo pipefail
+
+usage() {
+  sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "pr-table: required command not found: $1" >&2
+    exit 1
+  fi
+}
+
+pad_cell() {
+  local value="$1" width="$2" measured extra max_chars padding
+  measured=${value//✅/xx}
+  measured=${measured//❌/xx}
+  measured=${measured//⏳/xx}
+  if [[ ${#measured} -gt $width ]]; then
+    extra=$((${#measured} - ${#value}))
+    max_chars=$((width - 3 - extra))
+    value="${value:0:$max_chars}..."
+    measured=${value//✅/xx}
+    measured=${measured//❌/xx}
+    measured=${measured//⏳/xx}
+  fi
+  padding=$((width - ${#measured}))
+  printf '%s%*s' "$value" "$padding" ''
+}
+
+terminal_link() {
+  local url="$1" label="$2" width="$3" padded
+  padded=$(pad_cell "$label" "$width")
+  if [[ -t 1 ]]; then
+    printf '\033]8;;%s\033\\%s\033]8;;\033\\' "$url" "$padded"
+  else
+    printf '%s' "$padded"
+  fi
+}
+
+terminal_status() {
+  printf '%s' "$1"
+}
+
+terminal_width() {
+  local width=""
+  if [[ -r /dev/tty ]]; then
+    width=$(stty size </dev/tty 2>/dev/null | awk '{print $2}')
+  fi
+  if [[ -z "$width" ]]; then
+    width=$(tput cols 2>/dev/null || true)
+  fi
+  printf '%s' "${width:-${COLUMNS:-140}}"
+}
+
+spinner_pid=""
+
+start_spinner() {
+  if [[ ! -t 2 ]]; then
+    return
+  fi
+
+  (
+    trap 'exit 0' INT TERM
+    trap 'printf "\r\033[K\033[?25h" >&2' EXIT
+    printf '\033[?25l' >&2
+    while true; do
+      for frame in '⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏'; do
+        printf '\r%s Loading PR status…' "$frame" >&2
+        sleep 0.1
+      done
+    done
+  ) &
+  spinner_pid=$!
+}
+
+stop_spinner() {
+  if [[ -n "$spinner_pid" ]]; then
+    kill "$spinner_pid" 2>/dev/null || true
+    wait "$spinner_pid" 2>/dev/null || true
+    spinner_pid=""
+  fi
+}
+
+fetch_pr() {
+  local repo="$1" number="$2" output_dir="$3"
+  local sha base_sha behind
+
+  gh api "repos/$repo/pulls/$number" >"$output_dir/$number.detail.json"
+  sha=$(jq -r '.head.sha' "$output_dir/$number.detail.json")
+  base_sha=$(jq -r '.base.sha' "$output_dir/$number.detail.json")
+
+  if behind=$(gh api "repos/$repo/compare/$base_sha...$sha" --jq '.behind_by'); then
+    printf '%s' "$behind" >"$output_dir/$number.behind"
+  else
+    printf '?' >"$output_dir/$number.behind"
+  fi
+
+  gh api --paginate --slurp -X GET \
+    "repos/$repo/commits/$sha/check-runs" \
+    -f per_page=100 >"$output_dir/$number.checks.json"
+
+  gh api graphql \
+    -F owner="${repo%%/*}" \
+    -F name="${repo#*/}" \
+    -F number="$number" \
+    -f query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){mergeable reviewThreads(first:100){nodes{isResolved} pageInfo{hasNextPage}}}}}' \
+    >"$output_dir/$number.threads.json"
+
+  gh api --paginate --slurp -X GET \
+    "repos/$repo/issues/$number/comments" \
+    -f per_page=100 |
+    jq -r '
+      [
+        .[][] |
+        select((.body // "") | contains("<!-- posted-slack-link -->")) |
+        (.body // "") |
+        scan("https://[^[:space:]>)]*slack\\.com/archives/[^/[:space:]>)]*/p[0-9][^[:space:]>)]*")
+      ] |
+      last // ""
+    ' >"$output_dir/$number.slack"
+}
+
+if [[ "${1:-}" == "--fetch-pr" ]]; then
+  fetch_pr "$2" "$3" "$4"
+  exit
+fi
+
+repo=""
+author=""
+markdown=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      repo="${2:-}"
+      shift 2
+      ;;
+    --author)
+      author="${2:-}"
+      shift 2
+      ;;
+    --markdown)
+      markdown=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit
+      ;;
+    *)
+      echo "pr-table: unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+require_command gh
+require_command jq
+
+if [[ -z "$repo" ]]; then
+  if ! repo=$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null); then
+    echo "pr-table: not in a GitHub repository; pass --repo OWNER/REPO" >&2
+    exit 1
+  fi
+fi
+
+if [[ -z "$author" ]]; then
+  author=$(gh api user --jq '.login')
+fi
+
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/pr-table.XXXXXX")
+cleanup() {
+  stop_spinner
+  rm -rf "$tmp_dir"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+start_spinner
+gh api -X GET search/issues \
+  -f q="repo:$repo is:pr is:open author:$author draft:false" \
+  -f per_page=100 >"$tmp_dir/search.json"
+
+ruleset_id=$(
+  gh api "repos/$repo/rulesets" --paginate --jq \
+    '.[] | select(.name == "main" and .enforcement == "active") | .id' |
+    head -1
+)
+
+if [[ -n "$ruleset_id" ]]; then
+  required_json=$(
+    gh api "repos/$repo/rulesets/$ruleset_id" |
+      jq -c '
+        [
+          .rules[] |
+          select(.type == "required_status_checks") |
+          .parameters.required_status_checks[].context
+        ]
+      '
+  )
+else
+  required_json='[
+    "runtime-test",
+    "build-and-test",
+    "executable",
+    "changed-tests-flaky-check",
+    "changed-e2e-shard-flaky-check",
+    "offline",
+    "rust",
+    "oop"
+  ]'
+fi
+
+export GH_PAGER=cat
+script_path=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
+count=$(jq '.items | length' "$tmp_dir/search.json")
+if [[ "$count" -gt 0 ]]; then
+  jq -r '.items[].number' "$tmp_dir/search.json" |
+    xargs -P 6 -I{} "$script_path" --fetch-pr "$repo" {} "$tmp_dir"
+fi
+stop_spinner
+
+if [[ "$markdown" == true ]]; then
+  printf '%s open, non-draft PRs.\n\n' "$count"
+  printf '| PR | Required CI | Other CI | Unresolved | Behind | Merge | Slack |\n'
+  printf '|---|---|---|---:|---:|---|---|\n'
+else
+  terminal_columns=$(terminal_width)
+  title_width=$((terminal_columns - 95))
+  if [[ $title_width -lt 24 ]]; then
+    title_width=24
+  fi
+
+  printf '%s open, non-draft PRs.\n\n' "$count"
+  printf '%-7s  %-*s  %-19s  %-22s  %-10s  %-6s  %-11s  %-6s\n' \
+    "PR" "$title_width" "Title" "Required CI" "Other CI" "Unresolved" "Behind" "Merge" "Slack"
+  printf '%-7s  %-*s  %-19s  %-22s  %-10s  %-6s  %-11s  %-6s\n' \
+    "-------" "$title_width" "$(printf '%*s' "$title_width" '' | tr ' ' '-')" \
+    "-------------------" "----------------------" "----------" "------" "-----------" "------"
+fi
+
+for number in $(
+  jq -s 'sort_by(.updated_at) | reverse | .[].number' "$tmp_dir"/*.detail.json
+); do
+  detail="$tmp_dir/$number.detail.json"
+  checks="$tmp_dir/$number.checks.json"
+  threads="$tmp_dir/$number.threads.json"
+
+  ci=$(
+    jq -r --argjson required "$required_json" '
+      ([.[]?.check_runs[]?] | sort_by(.id) | group_by(.name) | map(max_by(.id))) as $runs |
+      ([$runs[] | select(.name as $name | $required | index($name))]) as $required_runs |
+      ([$runs[] | select((.name as $name | $required | index($name)) | not)]) as $other_runs |
+      def failed:
+        select(
+          .status == "completed" and
+          ((.conclusion == "success" or .conclusion == "neutral" or .conclusion == "skipped") | not)
+        );
+      def pending: select(.status != "completed" or .conclusion == null);
+      ($required - [$required_runs[].name]) as $missing |
+      ([$required_runs[] | failed] | length) as $required_failed |
+      ([$required_runs[] | pending] | length) as $required_pending |
+      ([$other_runs[] | failed] | length) as $other_failed |
+      ([$other_runs[] | pending] | length) as $other_pending |
+      [
+        if $required_failed > 0 then
+          "❌ \($required_failed) fail"
+        elif ($required_pending + ($missing | length)) > 0 then
+          "⏳ \($required_pending + ($missing | length)) pending/missing"
+        else
+          "✅ \($required | length)/\($required | length)"
+        end,
+        if $other_failed > 0 then
+          "❌ \($other_failed) fail" +
+          (if $other_pending > 0 then " · \($other_pending) pending" else "" end)
+        elif $other_pending > 0 then
+          "⏳ \($other_pending) pending"
+        elif ($other_runs | length) == 0 then
+          "—"
+        else
+          "✅ \($other_runs | length)"
+        end
+      ] |
+      @tsv
+    ' "$checks"
+  )
+  required_ci=${ci%%$'\t'*}
+  other_ci=${ci#*$'\t'}
+
+  unresolved=$(
+    jq '
+      [
+        .data.repository.pullRequest.reviewThreads.nodes[] |
+        select(.isResolved == false)
+      ] |
+      length
+    ' "$threads"
+  )
+  behind=$(<"$tmp_dir/$number.behind")
+
+  merge=$(
+    jq -nr \
+      --slurpfile detail "$detail" \
+      --slurpfile threads "$threads" '
+      ($detail[0].mergeable) as $rest |
+      ($threads[0].data.repository.pullRequest.mergeable) as $graphql |
+      if $rest == true or $graphql == "MERGEABLE" then
+        "✅ clean"
+      elif $rest == false or $graphql == "CONFLICTING" then
+        "❌ conflict"
+      else
+        "? unknown"
+      end
+    '
+  )
+
+  slack_url=$(<"$tmp_dir/$number.slack")
+  if [[ -n "$slack_url" ]]; then
+    slack="[thread]($slack_url)"
+  else
+    slack="—"
+  fi
+
+  title=$(jq -r '.title' "$detail")
+  url=$(jq -r '.html_url' "$detail")
+
+  if [[ "$markdown" == true ]]; then
+    title=${title//|/\\|}
+    printf '| [#%s](%s) %s | %s | %s | %s | %s | %s | %s |\n' \
+      "$number" "$url" "$title" "$required_ci" "$other_ci" "$unresolved" "$behind" "$merge" "$slack"
+  else
+    required_display=$(pad_cell "$(terminal_status "$required_ci")" 19)
+    other_display=$(pad_cell "$(terminal_status "$other_ci")" 22)
+    merge_display=$(pad_cell "$(terminal_status "$merge")" 11)
+    terminal_link "$url" "#$number" 7
+    printf '  %s  %s  %s  %-10s  %-6s  %s  ' \
+      "$(pad_cell "$title" "$title_width")" \
+      "$required_display" \
+      "$other_display" \
+      "$unresolved" \
+      "$behind" \
+      "$merge_display"
+    if [[ -n "$slack_url" ]]; then
+      terminal_link "$slack_url" "thread" 6
+    else
+      printf '%-6s' "-"
+    fi
+    printf '\n'
+  fi
+done
