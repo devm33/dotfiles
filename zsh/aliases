@@ -986,6 +986,7 @@ yo() {
     yolo -i "$*"
 }
 alias yr='yolo --resume'
+alias slack='yolo --enable-mcp-server slack'
 
 command_not_found_handler() {
     # Guard against recursion: if a command spawned *by* yolo (e.g. `node`
