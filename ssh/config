@@ -54,3 +54,10 @@ Host openyumil
     LocalForward 9091 127.0.0.1:9091
     PermitLocalCommand yes
     LocalCommand open http://localhost:9091
+
+Host wsl
+    HostName localhost
+    User devrajmehta
+    Port 50270
+    IdentityFile ~/.ssh/id_ed25519_2
+    IdentitiesOnly yes
