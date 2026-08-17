@@ -987,27 +987,3 @@ yo() {
 }
 alias yr='yolo --resume'
 alias slack='yolo --enable-mcp-server slack'
-
-command_not_found_handler() {
-    # Guard against recursion: if a command spawned *by* yolo (e.g. `node`
-    # missing from PATH in a non-interactive `zsh -c` context) is itself not
-    # found, do NOT feed it back into yolo — that recurses forever and segfaults.
-    if [[ -n "$_CNF_ACTIVE" ]]; then
-        echo "zsh: command not found: $1" >&2
-        return 127
-    fi
-    if [[ $# -gt 1 ]]; then
-        if ! type yolo >/dev/null 2>&1; then
-            echo "zsh: command not found: $1" >&2
-            return 127
-        fi
-        local prompt="$*"
-        export _CNF_ACTIVE=1
-        eval "yolo -i ${(q)prompt}"
-        local rc=$?
-        unset _CNF_ACTIVE
-        return $rc
-    fi
-    echo "zsh: command not found: $1" >&2
-    return 127
-}
