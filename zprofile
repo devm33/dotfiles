@@ -6,3 +6,4 @@ if command -v sccache >/dev/null 2>&1; then
   export RUSTC_WRAPPER=sccache
   export SCCACHE_CACHE_SIZE=20G
 fi
+export PATH="$HOME/.local/bin:$PATH"
