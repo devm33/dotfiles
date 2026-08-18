@@ -91,6 +91,7 @@ stty -ixon
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use  # This loads nvm without auto-using
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -d "$NVM_DIR/versions/node/v24.19.0/bin" ] && export PATH="$NVM_DIR/versions/node/v24.19.0/bin:$PATH"
 
 # rbenv
 #eval "$(rbenv init - zsh)"
@@ -105,4 +106,3 @@ export PATH="/home/devraj/.local/bin:$PATH"
 
 # vscode
 export VSCODE_VERBOSE_LOGGING="true"
-
