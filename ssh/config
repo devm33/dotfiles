@@ -58,6 +58,6 @@ Host openyumil
 Host wsl
     HostName localhost
     User devrajmehta
-    Port 50270
+    Port 60721
     IdentityFile ~/.ssh/id_ed25519_2
     IdentitiesOnly yes
