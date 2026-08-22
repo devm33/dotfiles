@@ -237,9 +237,15 @@ if [[ "$markdown" == true ]]; then
   printf '|---|---|---|---:|---:|---|---|\n'
 else
   terminal_columns=$(terminal_width)
-  title_width=$((terminal_columns - 95))
-  if [[ $title_width -lt 24 ]]; then
-    title_width=24
+  available_title_width=$((terminal_columns - 95))
+  if [[ $available_title_width -lt 5 ]]; then
+    available_title_width=5
+  fi
+  title_width=$(jq '[.items[].title | length] | max // 5' "$tmp_dir/search.json")
+  if [[ $title_width -gt $available_title_width ]]; then
+    title_width=$available_title_width
+  elif [[ $title_width -lt 5 ]]; then
+    title_width=5
   fi
 
   printf '%s open, non-draft PRs.\n\n' "$count"
