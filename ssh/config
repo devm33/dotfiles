@@ -55,9 +55,8 @@ Host openyumil
     PermitLocalCommand yes
     LocalCommand open http://localhost:9091
 
-Host wsl
+Host devbox
     HostName localhost
     User devrajmehta
-    Port 60721
     IdentityFile ~/.ssh/id_ed25519_2
     IdentitiesOnly yes
