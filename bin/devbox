@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+command -v devtunnel >/dev/null 2>&1 || {
+  echo "devbox: devtunnel is not installed or not in PATH" >&2
+  exit 1
+}
+
+command -v jq >/dev/null 2>&1 || {
+  echo "devbox: jq is required to read the dev tunnel list" >&2
+  exit 1
+}
+
+tunnels=()
+while IFS= read -r tunnel; do
+  [[ -n "$tunnel" ]] && tunnels+=("$tunnel")
+done < <(devtunnel list --json | jq -r '.tunnels[]?.tunnelId')
+
+case ${#tunnels[@]} in
+  0)
+    echo "devbox: no dev tunnels found" >&2
+    exit 1
+    ;;
+  1)
+    tunnel=${tunnels[0]}
+    ;;
+  *)
+    echo "Select a dev tunnel:" >&2
+    PS3="Tunnel: "
+    select tunnel in "${tunnels[@]}"; do
+      if [[ -n "$tunnel" ]]; then
+        break
+      fi
+      echo "Invalid selection." >&2
+    done
+    ;;
+esac
+
+log=$(mktemp "${TMPDIR:-/tmp}/devbox.XXXXXX")
+tunnel_pid=""
+
+cleanup() {
+  if [[ -n "$tunnel_pid" ]] && kill -0 "$tunnel_pid" 2>/dev/null; then
+    kill "$tunnel_pid" 2>/dev/null || true
+    wait "$tunnel_pid" 2>/dev/null || true
+  fi
+  rm -f "$log"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+echo "Connecting to tunnel: $tunnel" >&2
+devtunnel connect "$tunnel" >"$log" 2>&1 &
+tunnel_pid=$!
+
+port=""
+for _ in $(seq 1 150); do
+  port=$(sed -nE \
+    's/.*127\.0\.0\.1:([0-9]+) to host port 22\..*/\1/p' \
+    "$log" | head -n 1)
+
+  [[ -n "$port" ]] && break
+  kill -0 "$tunnel_pid" 2>/dev/null || break
+  sleep 0.1
+done
+
+if [[ -z "$port" ]]; then
+  echo "devbox: could not determine the forwarded SSH port" >&2
+  cat "$log" >&2
+  exit 1
+fi
+
+echo "Connecting to devbox through localhost:$port" >&2
+ssh -p "$port" devbox "$@"
