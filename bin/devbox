@@ -51,26 +51,61 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-echo "Connecting to tunnel: $tunnel" >&2
-devtunnel connect "$tunnel" >"$log" 2>&1 &
-tunnel_pid=$!
+start_tunnel() {
+  : >"$log"
+  echo "Connecting to tunnel: $tunnel" >&2
+  devtunnel connect "$tunnel" >"$log" 2>&1 &
+  tunnel_pid=$!
 
-port=""
-for _ in $(seq 1 150); do
-  port=$(sed -nE \
-    's/.*127\.0\.0\.1:([0-9]+) to host port 22\..*/\1/p' \
-    "$log" | head -n 1)
+  port=""
+  for _ in $(seq 1 150); do
+    port=$(sed -nE \
+      's/.*127\.0\.0\.1:([0-9]+) to host port 22\..*/\1/p' \
+      "$log" | head -n 1)
 
-  [[ -n "$port" ]] && break
-  kill -0 "$tunnel_pid" 2>/dev/null || break
-  sleep 0.1
-done
+    [[ -n "$port" ]] && return 0
+    kill -0 "$tunnel_pid" 2>/dev/null || break
+    sleep 0.1
+  done
 
-if [[ -z "$port" ]]; then
   echo "devbox: could not determine the forwarded SSH port" >&2
   cat "$log" >&2
-  exit 1
+  return 1
+}
+
+start_tunnel || exit 1
+
+ssh_options=(
+  -o ServerAliveInterval=15
+  -o ServerAliveCountMax=3
+  -o TCPKeepAlive=yes
+)
+
+# A remote command cannot safely be replayed, so only interactive sessions
+# reconnect automatically.
+if (($# > 0)); then
+  if ssh "${ssh_options[@]}" -p "$port" devbox "$@"; then
+    exit 0
+  else
+    exit $?
+  fi
 fi
 
-echo "Connecting to devbox through localhost:$port" >&2
-ssh -p "$port" devbox "$@"
+while true; do
+  echo "Connecting to devbox through localhost:$port" >&2
+  if ssh "${ssh_options[@]}" -p "$port" devbox; then
+    exit 0
+  fi
+
+  echo "devbox: SSH disconnected; reconnecting in 3 seconds (Ctrl-C to stop)" >&2
+  sleep 3
+
+  if ! kill -0 "$tunnel_pid" 2>/dev/null; then
+    wait "$tunnel_pid" 2>/dev/null || true
+    tunnel_pid=""
+    until start_tunnel; do
+      echo "devbox: tunnel unavailable; retrying in 5 seconds" >&2
+      sleep 5
+    done
+  fi
+done
