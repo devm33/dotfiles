@@ -8,10 +8,14 @@ Sets up an SSH-accessible WSL devbox behind a resilient Microsoft dev tunnel.
 
 .EXAMPLE
 .\setup-devbox.ps1 -LinuxUser devrajmehta -SshPublicKeyPath C:\Users\me\.ssh\id_ed25519_2.pub
+
+.EXAMPLE
+.\setup-devbox.ps1 -WslLocation Q:\WSL\Ubuntu -LinuxUser devrajmehta
 #>
 [CmdletBinding()]
 param(
     [string]$Distro = "Ubuntu",
+    [string]$WslLocation,
     [string]$LinuxUser = ([string]$env:USERNAME).ToLowerInvariant(),
     [string]$TunnelId,
     [string]$SshPublicKeyPath,
@@ -56,9 +60,18 @@ if (-not (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
     throw "wsl.exe is unavailable. This script requires Windows 10 2004+ or Windows 11."
 }
 
+if (-not $WslLocation -and (Test-Path "Q:\" -PathType Container)) {
+    $WslLocation = Join-Path "Q:\WSL" $Distro
+}
+
 if ($Distro -notin (Get-InstalledDistros)) {
     Write-Host "Installing WSL and $Distro..."
-    & wsl.exe --install --distribution $Distro --no-launch
+    $installArguments = @("--install", "--distribution", $Distro, "--no-launch")
+    if ($WslLocation) {
+        $installArguments += @("--location", $WslLocation)
+        Write-Host "WSL storage location: $WslLocation"
+    }
+    & wsl.exe @installArguments
 
     if ($Distro -notin (Get-InstalledDistros)) {
         Write-Warning "Windows must restart to finish installing WSL. Reboot, then run this script again."
