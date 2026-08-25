@@ -132,6 +132,7 @@ apt-get install -y \
   curl \
   dbus \
   gnome-keyring \
+  libicu-dev \
   libsecret-1-0 \
   openssh-server \
   sudo \
