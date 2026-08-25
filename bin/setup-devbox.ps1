@@ -205,10 +205,14 @@ case "$(uname -m)" in
     exit 1
     ;;
 esac
+devtunnel_tmp=$(mktemp "$home_dir/bin/.devtunnel.XXXXXX")
+trap 'rm -f "$devtunnel_tmp"' EXIT
 curl --fail --silent --show-error --location \
-  --output "$home_dir/bin/devtunnel" "$devtunnel_url"
-chown "$linux_user:$linux_user" "$home_dir/bin/devtunnel"
-chmod 0755 "$home_dir/bin/devtunnel"
+  --output "$devtunnel_tmp" "$devtunnel_url"
+chown "$linux_user:$linux_user" "$devtunnel_tmp"
+chmod 0755 "$devtunnel_tmp"
+mv -f "$devtunnel_tmp" "$home_dir/bin/devtunnel"
+trap - EXIT
 
 cat >"$home_dir/bin/devtunnel-session" <<'EOF'
 #!/usr/bin/env bash
@@ -366,7 +370,9 @@ WantedBy=timers.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now ssh.service devtunnel-ssh.service devtunnel-refresh.timer
+systemctl enable --now ssh.service devtunnel-refresh.timer
+systemctl enable devtunnel-ssh.service
+systemctl restart devtunnel-ssh.service
 systemctl --no-pager --full status devtunnel-ssh.service
 '@
 $serviceSetup = $serviceSetup.Replace("__LINUX_USER__", $LinuxUser)
