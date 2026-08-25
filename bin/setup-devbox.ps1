@@ -201,7 +201,8 @@ cat >"$home_dir/bin/devtunnel-session" <<'EOF'
 set -euo pipefail
 
 exec dbus-run-session -- bash -c '
-  eval "$(printf "\n" | gnome-keyring-daemon --start --components=secrets --unlock)"
+  eval "$(gnome-keyring-daemon --start --components=secrets)"
+  printf "\n" | gnome-keyring-daemon --unlock >/dev/null
   exec "$@"
 ' bash "$HOME/bin/devtunnel" "$@"
 EOF
@@ -263,12 +264,23 @@ if (-not $TunnelId) {
 }
 
 Write-Host "Configuring dev tunnel $TunnelId..."
-& wsl.exe --distribution $Distro --user $LinuxUser --exec $devtunnel show $TunnelId
-if ($LASTEXITCODE -ne 0) {
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$tunnelStatus = (& wsl.exe --distribution $Distro --user $LinuxUser --exec $devtunnel show $TunnelId 2>&1 |
+    Out-String)
+$tunnelStatusExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
+if ($tunnelStatusExitCode -ne 0 -and $tunnelStatus -match "Tunnel not found") {
     & wsl.exe --distribution $Distro --user $LinuxUser --exec $devtunnel create $TunnelId --expiration 30d
     if ($LASTEXITCODE -ne 0) {
         throw "Could not create dev tunnel $TunnelId."
     }
+}
+elseif ($tunnelStatusExitCode -ne 0) {
+    throw "Could not inspect dev tunnel $TunnelId`: $($tunnelStatus.Trim())"
+}
+else {
+    Write-Host ($tunnelStatus.Trim())
 }
 
 & wsl.exe --distribution $Distro --user $LinuxUser --exec $devtunnel port show $TunnelId --port-number 22
