@@ -95,7 +95,13 @@ if ($installedVersion -ne "2") {
     }
 }
 
-if (-not $SshPublicKey) {
+$hasAuthorizedKey = $false
+if (-not $SshPublicKey -and -not $SshPublicKeyPath) {
+    & wsl.exe --distribution $Distro --user root --exec test -s "/home/$LinuxUser/.ssh/authorized_keys"
+    $hasAuthorizedKey = $LASTEXITCODE -eq 0
+}
+
+if (-not $SshPublicKey -and -not $hasAuthorizedKey) {
     if (-not $SshPublicKeyPath) {
         $candidates = @(
             (Join-Path $HOME ".ssh\id_ed25519_2.pub"),
@@ -114,11 +120,17 @@ if (-not $SshPublicKey) {
     }
 }
 
-if ($SshPublicKey -notmatch '^ssh-(ed25519|rsa|ecdsa-[^ ]+) [A-Za-z0-9+/=]+(?: .*)?$') {
+if ($SshPublicKey -and $SshPublicKey -notmatch '^ssh-(ed25519|rsa|ecdsa-[^ ]+) [A-Za-z0-9+/=]+(?: .*)?$') {
     throw "The supplied SSH public key is not in a recognized OpenSSH public-key format."
 }
 
-$publicKeyBase64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($SshPublicKey))
+if ($hasAuthorizedKey) {
+    Write-Host "Reusing the SSH public key already configured in WSL."
+    $publicKeyBase64 = ""
+}
+else {
+    $publicKeyBase64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($SshPublicKey))
+}
 $bootstrap = @'
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
@@ -148,10 +160,12 @@ chmod 0440 "/etc/sudoers.d/90-$linux_user"
 
 home_dir="/home/$linux_user"
 install -d -m 0700 -o "$linux_user" -g "$linux_user" "$home_dir/.ssh"
-public_key=$(printf '%s' "$public_key_base64" | base64 --decode)
 touch "$home_dir/.ssh/authorized_keys"
-if ! grep -qxF "$public_key" "$home_dir/.ssh/authorized_keys"; then
-  printf '%s\n' "$public_key" >>"$home_dir/.ssh/authorized_keys"
+if [[ -n "$public_key_base64" ]]; then
+  public_key=$(printf '%s' "$public_key_base64" | base64 --decode)
+  if ! grep -qxF "$public_key" "$home_dir/.ssh/authorized_keys"; then
+    printf '%s\n' "$public_key" >>"$home_dir/.ssh/authorized_keys"
+  fi
 fi
 chown "$linux_user:$linux_user" "$home_dir/.ssh/authorized_keys"
 chmod 0600 "$home_dir/.ssh/authorized_keys"
