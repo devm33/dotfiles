@@ -369,6 +369,15 @@ RandomizedDelaySec=10m
 WantedBy=timers.target
 EOF
 
+cat >/usr/local/sbin/devbox-keepalive <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+systemctl start ssh.service devtunnel-ssh.service devtunnel-refresh.timer
+exec /usr/bin/sleep infinity
+EOF
+chmod 0755 /usr/local/sbin/devbox-keepalive
+
 systemctl daemon-reload
 systemctl enable --now ssh.service devtunnel-refresh.timer
 systemctl enable devtunnel-ssh.service
@@ -380,12 +389,15 @@ $serviceSetup = $serviceSetup.Replace("__TUNNEL_ID__", $TunnelId)
 Invoke-WslScript -Script $serviceSetup
 
 $taskName = "Devbox WSL tunnel ($Distro)"
-$taskArguments = "-d `"$Distro`" -u root -- /bin/systemctl start ssh.service devtunnel-ssh.service devtunnel-refresh.timer"
+$taskArguments = "-d `"$Distro`" -u root -- /usr/local/sbin/devbox-keepalive"
 $taskAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\wsl.exe" -Argument $taskArguments
 $logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $watchdogTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
     -RepetitionInterval (New-TimeSpan -Minutes 1)
-$taskSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew
+$taskSettings = New-ScheduledTaskSettingsSet `
+    -StartWhenAvailable `
+    -MultipleInstances IgnoreNew `
+    -ExecutionTimeLimit ([TimeSpan]::Zero)
 
 Register-ScheduledTask `
     -TaskName $taskName `

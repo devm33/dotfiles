@@ -70,10 +70,18 @@ start_tunnel() {
 
   echo "devbox: could not determine the forwarded SSH port" >&2
   cat "$log" >&2
+  if kill -0 "$tunnel_pid" 2>/dev/null; then
+    kill "$tunnel_pid" 2>/dev/null || true
+    wait "$tunnel_pid" 2>/dev/null || true
+  fi
+  tunnel_pid=""
   return 1
 }
 
-start_tunnel || exit 1
+until start_tunnel; do
+  echo "devbox: tunnel host unavailable; retrying in 5 seconds (Ctrl-C to stop)" >&2
+  sleep 5
+done
 
 ssh_options=(
   -o ServerAliveInterval=15

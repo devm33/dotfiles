@@ -59,6 +59,7 @@ Host devbox
     HostName localhost
     User devrajmehta
     IdentityFile ~/.ssh/id_ed25519_2
+    IdentityFile ~/.ssh/id_ed25519
     IdentitiesOnly yes
     StrictHostKeyChecking no
     UserKnownHostsFile /dev/null
