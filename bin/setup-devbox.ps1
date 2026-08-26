@@ -323,6 +323,7 @@ linux_user="__LINUX_USER__"
 tunnel_id="__TUNNEL_ID__"
 home_dir="/home/$linux_user"
 
+install -d -m 0700 -o "$linux_user" -g "$linux_user" "$home_dir/.config"
 install -d -m 0700 -o "$linux_user" -g "$linux_user" "$home_dir/.config/devbox"
 printf '%s\n' "$tunnel_id" >"$home_dir/.config/devbox/tunnel-id"
 chown "$linux_user:$linux_user" "$home_dir/.config/devbox/tunnel-id"
