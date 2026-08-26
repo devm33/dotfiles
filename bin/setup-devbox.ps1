@@ -26,6 +26,13 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $env:WSL_UTF8 = "1"
 
+$windowsPrincipal = [Security.Principal.WindowsPrincipal]::new(
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+)
+if (-not $windowsPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    throw "Administrator privileges are required. Open Windows Terminal as administrator and rerun this command."
+}
+
 if ($LinuxUser -notmatch '^[a-z_][a-z0-9_-]*$') {
     throw "LinuxUser must contain only lowercase letters, numbers, underscores, and hyphens."
 }
