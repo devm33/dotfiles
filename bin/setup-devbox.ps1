@@ -396,32 +396,45 @@ $serviceSetup = $serviceSetup.Replace("__TUNNEL_ID__", $TunnelId)
 Invoke-WslScript -Script $serviceSetup
 
 $taskName = "Devbox WSL tunnel ($Distro)"
-$taskArguments = "-d `"$Distro`" -u root -- /usr/local/sbin/devbox-keepalive"
-$taskAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\wsl.exe" -Argument $taskArguments
-$windowsIdentity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-$taskPrincipal = New-ScheduledTaskPrincipal `
-    -UserId $windowsIdentity `
-    -LogonType Interactive `
-    -RunLevel Highest
-$logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $windowsIdentity
-$watchdogTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
-    -RepetitionInterval (New-TimeSpan -Minutes 1)
-$taskSettings = New-ScheduledTaskSettingsSet `
-    -AllowStartIfOnBatteries `
-    -DontStopIfGoingOnBatteries `
-    -StartWhenAvailable `
-    -MultipleInstances IgnoreNew `
-    -ExecutionTimeLimit ([TimeSpan]::Zero)
+if (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue) {
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+}
 
-Register-ScheduledTask `
-    -TaskName $taskName `
-    -Action $taskAction `
-    -Principal $taskPrincipal `
-    -Trigger @($logonTrigger, $watchdogTrigger) `
-    -Settings $taskSettings `
-    -Description "Starts WSL SSH and keeps the resilient dev tunnel service running." `
-    -Force | Out-Null
-Start-ScheduledTask -TaskName $taskName
+$watchdogDirectory = Join-Path $env:LOCALAPPDATA "Devbox"
+New-Item -ItemType Directory -Force $watchdogDirectory | Out-Null
+$safeDistroName = $Distro -replace '[^A-Za-z0-9_.-]', '-'
+$watchdogPath = Join-Path $watchdogDirectory "watchdog-$safeDistroName.ps1"
+$mutexName = "Local\DevboxWslWatchdog-$safeDistroName"
+$distroLiteral = $Distro.Replace("'", "''")
+
+$watchdogScript = @'
+$createdNew = $false
+$mutex = New-Object System.Threading.Mutex($true, '__MUTEX_NAME__', [ref]$createdNew)
+if (-not $createdNew) {
+    exit 0
+}
+
+while ($true) {
+    & "$env:SystemRoot\System32\wsl.exe" `
+        --distribution '__DISTRO__' `
+        --user root `
+        --exec /usr/local/sbin/devbox-keepalive
+    Start-Sleep -Seconds 5
+}
+'@
+$watchdogScript = $watchdogScript.Replace("__MUTEX_NAME__", $mutexName)
+$watchdogScript = $watchdogScript.Replace("__DISTRO__", $distroLiteral)
+Set-Content -Path $watchdogPath -Value $watchdogScript -Encoding UTF8
+
+$startupDirectory = [Environment]::GetFolderPath("Startup")
+$launcherPath = Join-Path $startupDirectory "Devbox WSL Watchdog.vbs"
+$vbsWatchdogPath = $watchdogPath.Replace('"', '""')
+$launcherScript = @"
+Set shell = CreateObject("WScript.Shell")
+shell.Run "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$vbsWatchdogPath""", 0, False
+"@
+Set-Content -Path $launcherPath -Value $launcherScript -Encoding ASCII
+Start-Process "$env:SystemRoot\System32\wscript.exe" -ArgumentList "`"$launcherPath`""
 
 Write-Host ""
 Write-Host "Devbox setup complete." -ForegroundColor Green
@@ -429,3 +442,4 @@ Write-Host "Tunnel ID: $TunnelId"
 Write-Host "Linux user: $LinuxUser"
 Write-Host "Client command: devtunnel connect $TunnelId"
 Write-Host "Service logs: wsl -d `"$Distro`" -u root -- journalctl -u devtunnel-ssh.service -f"
+Write-Host "Watchdog: $watchdogPath"
