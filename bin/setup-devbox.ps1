@@ -391,10 +391,17 @@ Invoke-WslScript -Script $serviceSetup
 $taskName = "Devbox WSL tunnel ($Distro)"
 $taskArguments = "-d `"$Distro`" -u root -- /usr/local/sbin/devbox-keepalive"
 $taskAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\wsl.exe" -Argument $taskArguments
-$logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+$windowsIdentity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+$taskPrincipal = New-ScheduledTaskPrincipal `
+    -UserId $windowsIdentity `
+    -LogonType Interactive `
+    -RunLevel Highest
+$logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $windowsIdentity
 $watchdogTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
     -RepetitionInterval (New-TimeSpan -Minutes 1)
 $taskSettings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
     -StartWhenAvailable `
     -MultipleInstances IgnoreNew `
     -ExecutionTimeLimit ([TimeSpan]::Zero)
@@ -402,10 +409,12 @@ $taskSettings = New-ScheduledTaskSettingsSet `
 Register-ScheduledTask `
     -TaskName $taskName `
     -Action $taskAction `
+    -Principal $taskPrincipal `
     -Trigger @($logonTrigger, $watchdogTrigger) `
     -Settings $taskSettings `
     -Description "Starts WSL SSH and keeps the resilient dev tunnel service running." `
     -Force | Out-Null
+Start-ScheduledTask -TaskName $taskName
 
 Write-Host ""
 Write-Host "Devbox setup complete." -ForegroundColor Green
