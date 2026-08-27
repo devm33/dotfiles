@@ -13,8 +13,10 @@ if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
 fi
 sudo locale-gen
 sudo update-locale LANG=en_US.UTF-8
-sudo npm i -g npm
-sudo npm install --global pnpm
+mkdir -p "$HOME/.local/bin"
+npm config set prefix "$HOME/.local"
+export PATH="$HOME/.local/bin:$PATH"
+npm install --global npm pnpm
 
 # Install Rust and Cargo
 if ! command -v cargo >/dev/null 2>&1; then
