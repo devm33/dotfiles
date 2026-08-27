@@ -477,6 +477,7 @@ if ($githubAuthStatusExitCode -ne 0) {
     & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth login `
         --hostname github.com `
         --git-protocol ssh `
+        --scopes "admin:public_key,admin:ssh_signing_key" `
         --web
     if ($LASTEXITCODE -ne 0) {
         throw "GitHub CLI login failed."
@@ -531,6 +532,55 @@ if (-not $githubKeyExists) {
     $ErrorActionPreference = $previousErrorActionPreference
     if ($addKeyExitCode -ne 0 -and $addKeyOutput -notmatch '(?i)(already in use|key already exists)') {
         throw "Could not add the generated SSH key to GitHub: $($addKeyOutput.Trim())"
+    }
+}
+
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$githubSigningKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh api `
+    user/ssh_signing_keys `
+    --paginate `
+    --jq '.[].key' 2>&1 | Out-String)
+$githubSigningKeysExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
+
+$hasSigningKeyScope = $githubSigningKeysExitCode -eq 0
+if (
+    $githubSigningKeysExitCode -ne 0 -and
+    $githubSigningKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 403|not accessible)'
+) {
+    throw "Could not list GitHub SSH signing keys: $($githubSigningKeysOutput.Trim())"
+}
+
+$githubSigningKeyExists = $false
+if ($githubSigningKeysExitCode -eq 0) {
+    $githubSigningKeyExists = @($githubSigningKeysOutput -split '\r?\n') -contains $githubPublicKey
+}
+
+if (-not $githubSigningKeyExists) {
+    if (-not $hasSigningKeyScope) {
+        Write-Host "Authorizing GitHub CLI to manage SSH signing keys."
+        & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth refresh `
+            --hostname github.com `
+            --scopes admin:ssh_signing_key
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not authorize GitHub CLI to manage SSH signing keys."
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
+        "/home/$LinuxUser/.ssh/id_ed25519.pub" `
+        --type signing `
+        --title "$env:COMPUTERNAME WSL signing" 2>&1 | Out-String)
+    $addSigningKeyExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    if (
+        $addSigningKeyExitCode -ne 0 -and
+        $addSigningKeyOutput -notmatch '(?i)(already in use|key already exists)'
+    ) {
+        throw "Could not add the GitHub SSH signing key: $($addSigningKeyOutput.Trim())"
     }
 }
 
