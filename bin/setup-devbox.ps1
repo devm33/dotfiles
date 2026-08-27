@@ -534,6 +534,25 @@ if (-not $githubKeyExists) {
     }
 }
 
+$workDotfilesSetup = @'
+set -euo pipefail
+
+work_repo="$HOME/code/dotfiles-work"
+mkdir -p "$HOME/code"
+export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+
+if [[ -d "$work_repo/.git" ]]; then
+  git -C "$work_repo" pull --ff-only
+elif [[ -e "$work_repo" ]]; then
+  echo "$work_repo already exists but is not a git repository" >&2
+  exit 1
+else
+  git clone git@github.com:devm33/dotfiles-work.git "$work_repo"
+fi
+'@
+Write-Host "Installing work dotfiles..."
+Invoke-WslScript -Script $workDotfilesSetup -User $LinuxUser
+
 Write-Host "Installing dotfiles..."
 # Run directly so any downstream interactive steps retain Windows Terminal input.
 & wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
