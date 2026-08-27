@@ -8,3 +8,4 @@ secrets.json
 .ropeproject/
 .vimrc
 .DS_Store
+.claude/
