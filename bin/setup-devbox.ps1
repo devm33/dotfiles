@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-Sets up an SSH-accessible WSL devbox behind a resilient Microsoft dev tunnel.
+Sets up an SSH-accessible WSL devbox, GitHub authentication, and dotfiles.
 
 .EXAMPLE
 .\setup-devbox.ps1 -LinuxUser devrajmehta
@@ -150,13 +150,23 @@ apt-get install -y \
   ca-certificates \
   curl \
   dbus \
+  gh \
+  git \
   gnome-keyring \
   libicu-dev \
   libsecret-1-0 \
+  locales \
   openssh-server \
   sudo \
   systemd \
   systemd-sysv
+
+sed -i -E 's/^# *en_US\.UTF-8 +UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
+  printf '%s\n' 'en_US.UTF-8 UTF-8' >>/etc/locale.gen
+fi
+locale-gen
+update-locale LANG=en_US.UTF-8
 
 if ! id "$linux_user" >/dev/null 2>&1; then
   useradd --create-home --shell /bin/bash "$linux_user"
@@ -166,6 +176,7 @@ printf '%s ALL=(ALL) NOPASSWD:ALL\n' "$linux_user" >"/etc/sudoers.d/90-$linux_us
 chmod 0440 "/etc/sudoers.d/90-$linux_user"
 
 home_dir="/home/$linux_user"
+install -d -m 0700 -o "$linux_user" -g "$linux_user" "$home_dir/.config"
 install -d -m 0700 -o "$linux_user" -g "$linux_user" "$home_dir/.ssh"
 touch "$home_dir/.ssh/authorized_keys"
 if [[ -n "$public_key_base64" ]]; then
@@ -436,6 +447,100 @@ shell.Run "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Wi
 "@
 Set-Content -Path $launcherPath -Value $launcherScript -Encoding ASCII
 Start-Process "$env:SystemRoot\System32\wscript.exe" -ArgumentList "`"$launcherPath`""
+
+$githubKeySetup = @'
+set -euo pipefail
+
+install -d -m 0700 "$HOME/.ssh"
+if [[ ! -f "$HOME/.ssh/id_ed25519" ]]; then
+  ssh-keygen \
+    -t ed25519 \
+    -N "" \
+    -C "$(whoami)@$(hostname)-wsl" \
+    -f "$HOME/.ssh/id_ed25519"
+fi
+if [[ ! -f "$HOME/.ssh/id_ed25519.pub" ]]; then
+  ssh-keygen -y -f "$HOME/.ssh/id_ed25519" >"$HOME/.ssh/id_ed25519.pub"
+fi
+chmod 0600 "$HOME/.ssh/id_ed25519"
+chmod 0644 "$HOME/.ssh/id_ed25519.pub"
+'@
+Invoke-WslScript -Script $githubKeySetup -User $LinuxUser
+
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth status --hostname github.com
+$githubAuthStatusExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
+if ($githubAuthStatusExitCode -ne 0) {
+    Write-Host "GitHub CLI login is interactive. Authorize GitHub and upload the generated WSL SSH key."
+    & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth login `
+        --hostname github.com `
+        --git-protocol ssh `
+        --web
+    if ($LASTEXITCODE -ne 0) {
+        throw "GitHub CLI login failed."
+    }
+}
+
+$githubPublicKey = (& wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
+    'awk ''{print $1 " " $2}'' "$HOME/.ssh/id_ed25519.pub"' | Out-String).Trim()
+if (-not $githubPublicKey) {
+    throw "Could not read the generated GitHub SSH public key."
+}
+
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$githubKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh api `
+    user/keys `
+    --paginate `
+    --jq '.[].key' 2>&1 | Out-String)
+$githubKeysExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
+
+$hasPublicKeyScope = $githubKeysExitCode -eq 0
+if (
+    $githubKeysExitCode -ne 0 -and
+    $githubKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 403|not accessible)'
+) {
+    throw "Could not list GitHub SSH keys: $($githubKeysOutput.Trim())"
+}
+
+$githubKeyExists = $false
+if ($githubKeysExitCode -eq 0) {
+    $githubKeyExists = @($githubKeysOutput -split '\r?\n') -contains $githubPublicKey
+}
+
+if (-not $githubKeyExists) {
+    if (-not $hasPublicKeyScope) {
+        Write-Host "Authorizing GitHub CLI to manage SSH keys."
+        & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth refresh `
+            --hostname github.com `
+            --scopes admin:public_key
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not authorize GitHub CLI to manage SSH keys."
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
+        "/home/$LinuxUser/.ssh/id_ed25519.pub" `
+        --title "$env:COMPUTERNAME WSL" 2>&1 | Out-String)
+    $addKeyExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($addKeyExitCode -ne 0 -and $addKeyOutput -notmatch '(?i)(already in use|key already exists)') {
+        throw "Could not add the generated SSH key to GitHub: $($addKeyOutput.Trim())"
+    }
+}
+
+Write-Host "Installing dotfiles..."
+# Run directly so any downstream interactive steps retain Windows Terminal input.
+& wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
+    'export DOTFILES_HOST=github; export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"; bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/ubuntu.sh)"'
+if ($LASTEXITCODE -ne 0) {
+    throw "Dotfiles installation failed."
+}
 
 Write-Host ""
 Write-Host "Devbox setup complete." -ForegroundColor Green

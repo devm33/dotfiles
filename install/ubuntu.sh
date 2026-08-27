@@ -6,8 +6,15 @@
 # before running ensure that there is a valid ssh key authorized for github
 
 # Ubuntu/Debian Specific install
-sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ripgrep pkg-config libssl-dev unzip jq
+sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ripgrep pkg-config libssl-dev unzip jq locales zsh
+sudo sed -i -E 's/^# *en_US\.UTF-8 +UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
+    echo 'en_US.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen >/dev/null
+fi
+sudo locale-gen
+sudo update-locale LANG=en_US.UTF-8
 sudo npm i -g npm
+sudo npm install --global pnpm
 
 # Install Rust and Cargo
 if ! command -v cargo >/dev/null 2>&1; then
@@ -22,3 +29,9 @@ fi
 
 # Install common components
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit
+
+zsh_path="$(command -v zsh)"
+current_shell="$(getent passwd "$USER" | cut -d: -f7)"
+if [ "$current_shell" != "$zsh_path" ]; then
+    sudo chsh -s "$zsh_path" "$USER"
+fi
