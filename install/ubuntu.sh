@@ -16,7 +16,7 @@ sudo update-locale LANG=en_US.UTF-8
 mkdir -p "$HOME/.local/bin"
 npm config set prefix "$HOME/.local"
 export PATH="$HOME/.local/bin:$PATH"
-npm install --global npm pnpm
+npm install --global pnpm
 
 # Install Rust and Cargo
 if ! command -v cargo >/dev/null 2>&1; then
