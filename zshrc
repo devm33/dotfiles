@@ -89,9 +89,11 @@ stty -ixon
 [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use  # This loads nvm without auto-using
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    \. "$NVM_DIR/nvm.sh" --no-use
+    nvm use --silent default >/dev/null
+fi
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-[ -d "$NVM_DIR/versions/node/v24.19.0/bin" ] && export PATH="$NVM_DIR/versions/node/v24.19.0/bin:$PATH"
 
 # rbenv
 #eval "$(rbenv init - zsh)"

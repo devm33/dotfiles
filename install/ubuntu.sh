@@ -13,9 +13,25 @@ if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
 fi
 sudo locale-gen
 sudo update-locale LANG=en_US.UTF-8
-mkdir -p "$HOME/.local/bin"
-npm config set prefix "$HOME/.local"
-export PATH="$HOME/.local/bin:$PATH"
+
+# NVM-managed global packages are user-owned; an npm prefix override conflicts
+# with NVM and may have been left by an older version of this installer.
+if [ -f "$HOME/.npmrc" ]; then
+    sed -i '/^prefix=/d' "$HOME/.npmrc"
+fi
+
+NVM_VERSION='v0.40.7'
+export NVM_DIR="$HOME/.nvm"
+if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" |
+        PROFILE=/dev/null bash
+fi
+
+# shellcheck source=/dev/null
+. "$NVM_DIR/nvm.sh"
+nvm install 24
+nvm alias default 24
+nvm use default
 npm install --global pnpm
 
 # Install Rust and Cargo
