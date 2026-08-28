@@ -91,7 +91,7 @@ stty -ixon
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
     \. "$NVM_DIR/nvm.sh" --no-use
-    nvm use --silent default >/dev/null
+    nvm use --delete-prefix default --silent >/dev/null
 fi
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 

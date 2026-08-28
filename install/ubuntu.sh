@@ -17,7 +17,7 @@ sudo update-locale LANG=en_US.UTF-8
 # NVM-managed global packages are user-owned; an npm prefix override conflicts
 # with NVM and may have been left by an older version of this installer.
 if [ -f "$HOME/.npmrc" ]; then
-    sed -i '/^prefix=/d' "$HOME/.npmrc"
+    sed -i -E '/^[[:space:]]*(prefix|globalconfig)[[:space:]]*=/d' "$HOME/.npmrc"
 fi
 
 NVM_VERSION='v0.40.7'
@@ -31,7 +31,7 @@ fi
 . "$NVM_DIR/nvm.sh"
 nvm install 24
 nvm alias default 24
-nvm use default
+nvm use --delete-prefix default --silent
 npm install --global pnpm
 
 # Install Rust and Cargo
