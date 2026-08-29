@@ -40,7 +40,17 @@ esac
 log=$(mktemp "${TMPDIR:-/tmp}/devbox.XXXXXX")
 tunnel_pid=""
 
+reset_terminal() {
+  [[ -t 0 ]] || return 0
+
+  # Remote TUIs cannot restore these modes when the SSH transport disappears.
+  printf '\033[?1000l\033[?1002l\033[?1003l\033[?1005l\033[?1006l\033[?1015l' >/dev/tty
+  printf '\033[?1004l\033[?2004l\033[?1049l\033[?25h' >/dev/tty
+  stty sane </dev/tty 2>/dev/null || true
+}
+
 cleanup() {
+  reset_terminal
   if [[ -n "$tunnel_pid" ]] && kill -0 "$tunnel_pid" 2>/dev/null; then
     kill "$tunnel_pid" 2>/dev/null || true
     wait "$tunnel_pid" 2>/dev/null || true
@@ -104,6 +114,7 @@ while true; do
   if ssh "${ssh_options[@]}" -p "$port" devbox; then
     exit 0
   fi
+  reset_terminal
 
   echo "devbox: SSH disconnected; reconnecting in 3 seconds (Ctrl-C to stop)" >&2
   sleep 3
