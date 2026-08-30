@@ -71,14 +71,16 @@ alias vgc='vagrant destroy -f && gclean'
 # Bower
 alias bower='noglob bower'
 
-# Grunt / Gulp
+# pnpm / Grunt / Gulp
 grunt_and_gulp() {
-    if [ -f 'gulpfile.js' -o -f 'Gulpfile.js' ]; then
-        gulp $*;
+    if [ -f 'pnpm-lock.yaml' ]; then
+        pnpm build "$@";
+    elif [ -f 'gulpfile.js' -o -f 'Gulpfile.js' ]; then
+        gulp "$@";
     elif [ -f 'gruntfile.js' -o -f 'Gruntfile.js' ]; then
-        grunt $*;
+        grunt "$@";
     else
-        echo 'no grunt or gulp file found';
+        echo 'no pnpm, grunt, or gulp project found';
     fi
 }
 alias grlp='grunt_and_gulp'
