@@ -634,12 +634,18 @@ $githubKeyTitle = "wsl devbox $machineSuffix"
 
 $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
-& wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth status --hostname github.com
+& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+    "GNOME_KEYRING_CONTROL=" `
+    gh auth status --hostname github.com
 $githubAuthStatusExitCode = $LASTEXITCODE
 $ErrorActionPreference = $previousErrorActionPreference
 if ($githubAuthStatusExitCode -ne 0) {
     Write-Host "GitHub CLI login is interactive. Press Enter when prompted, then authorize GitHub in the browser."
-    & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth login `
+    & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh auth login `
         --hostname github.com `
         --git-protocol ssh `
         --insecure-storage `
@@ -664,7 +670,10 @@ if (-not $githubPublicKey) {
 
 $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
-$githubKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh api `
+$githubKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+    "GNOME_KEYRING_CONTROL=" `
+    gh api `
     user/keys `
     --paginate `
     --jq '.[].key' 2>&1 | Out-String)
@@ -687,7 +696,10 @@ if ($githubKeysExitCode -eq 0) {
 if (-not $githubKeyExists) {
     if (-not $hasPublicKeyScope) {
         Write-Host "Authorizing GitHub CLI to manage SSH keys."
-        & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth refresh `
+        & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh auth refresh `
             --hostname github.com `
             --scopes admin:public_key
         if ($LASTEXITCODE -ne 0) {
@@ -697,7 +709,10 @@ if (-not $githubKeyExists) {
 
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
+    $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh ssh-key add `
         "/home/$LinuxUser/.ssh/id_ed25519.pub" `
         --title $githubKeyTitle 2>&1 | Out-String)
     $addKeyExitCode = $LASTEXITCODE
@@ -709,7 +724,10 @@ if (-not $githubKeyExists) {
 
 $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
-$githubSigningKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh api `
+$githubSigningKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+    "GNOME_KEYRING_CONTROL=" `
+    gh api `
     user/ssh_signing_keys `
     --paginate `
     --jq '.[].key' 2>&1 | Out-String)
@@ -732,7 +750,10 @@ if ($githubSigningKeysExitCode -eq 0) {
 if (-not $githubSigningKeyExists) {
     if (-not $hasSigningKeyScope) {
         Write-Host "Authorizing GitHub CLI to manage SSH signing keys."
-        & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth refresh `
+        & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh auth refresh `
             --hostname github.com `
             --scopes admin:ssh_signing_key
         if ($LASTEXITCODE -ne 0) {
@@ -742,7 +763,10 @@ if (-not $githubSigningKeyExists) {
 
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
+    $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh ssh-key add `
         "/home/$LinuxUser/.ssh/id_ed25519.pub" `
         --type signing `
         --title "$githubKeyTitle signing" 2>&1 | Out-String)
