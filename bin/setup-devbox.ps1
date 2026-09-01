@@ -272,6 +272,8 @@ export DEBIAN_FRONTEND=noninteractive
 linux_user="__LINUX_USER__"
 public_key_base64="__PUBLIC_KEY_BASE64__"
 
+dpkg --configure -a || apt-get install --fix-broken -y
+dpkg --configure -a
 apt-get update -y
 apt-get install -y \
   ca-certificates \

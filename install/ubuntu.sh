@@ -8,6 +8,8 @@ set -euo pipefail
 # before running ensure that there is a valid ssh key authorized for github
 
 # Ubuntu/Debian Specific install
+sudo dpkg --configure -a || sudo apt-get install --fix-broken --yes
+sudo dpkg --configure -a
 sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ripgrep pkg-config libssl-dev unzip jq locales zsh
 sudo sed -i -E 's/^# *en_US\.UTF-8 +UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
