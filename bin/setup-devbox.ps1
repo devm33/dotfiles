@@ -102,6 +102,32 @@ if ($installedVersion -ne "2") {
     }
 }
 
+function Test-WslDistro {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & wsl.exe --distribution $Distro --user root --exec /bin/true 2>$null
+    $exitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    return $exitCode -eq 0
+}
+
+if (-not (Test-WslDistro)) {
+    Write-Host "WSL is not responding. Restarting its Windows service..."
+    $wslService = Get-Service WslService -ErrorAction SilentlyContinue
+    if (-not $wslService) {
+        $wslService = Get-Service LxssManager -ErrorAction SilentlyContinue
+    }
+    if (-not $wslService) {
+        throw "WSL is not responding and its Windows service could not be found. Reboot Windows and rerun setup."
+    }
+
+    Restart-Service $wslService.Name -Force
+    Start-Sleep -Seconds 5
+    if (-not (Test-WslDistro)) {
+        throw "WSL is still not responding after restarting $($wslService.Name). Reboot Windows and rerun setup."
+    }
+}
+
 $hasAuthorizedKey = $false
 if (-not $SshPublicKey -and -not $SshPublicKeyPath) {
     & wsl.exe --distribution $Distro --user root --exec test -s "/home/$LinuxUser/.ssh/authorized_keys"
