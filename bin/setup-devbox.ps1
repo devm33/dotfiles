@@ -111,6 +111,35 @@ function Test-WslDistro {
     return $exitCode -eq 0
 }
 
+function Restart-WslService {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name,
+        [int]$TimeoutSeconds = 45
+    )
+
+    $restartJob = Start-Job -ScriptBlock {
+        param($ServiceName)
+        Restart-Service $ServiceName -Force -ErrorAction Stop
+    } -ArgumentList $Name
+
+    try {
+        if (-not (Wait-Job $restartJob -Timeout $TimeoutSeconds)) {
+            Stop-Job $restartJob
+            return $false
+        }
+
+        Receive-Job $restartJob -ErrorAction Stop | Out-Null
+        return $restartJob.State -eq "Completed"
+    }
+    catch {
+        return $false
+    }
+    finally {
+        Remove-Job $restartJob -Force
+    }
+}
+
 if (-not (Test-WslDistro)) {
     Write-Host "WSL is not responding. Restarting its Windows service..."
     $wslService = Get-Service WslService -ErrorAction SilentlyContinue
@@ -121,7 +150,9 @@ if (-not (Test-WslDistro)) {
         throw "WSL is not responding and its Windows service could not be found. Reboot Windows and rerun setup."
     }
 
-    Restart-Service $wslService.Name -Force
+    if (-not (Restart-WslService -Name $wslService.Name)) {
+        throw "Timed out restarting $($wslService.Name). Reboot Windows and rerun setup."
+    }
     Start-Sleep -Seconds 5
     if (-not (Test-WslDistro)) {
         throw "WSL is still not responding after restarting $($wslService.Name). Reboot Windows and rerun setup."
@@ -275,8 +306,8 @@ cat >"$home_dir/bin/devtunnel-session" <<'EOF'
 set -euo pipefail
 
 exec dbus-run-session -- bash -c '
-  eval "$(gnome-keyring-daemon --start --components=secrets)"
-  printf "\n" | gnome-keyring-daemon --unlock >/dev/null
+  eval "$(gnome-keyring-daemon --start --components=secrets 2>/dev/null)"
+  printf "\n" | gnome-keyring-daemon --unlock >/dev/null 2>&1
   exec "$@"
 ' bash "$HOME/bin/devtunnel" "$@"
 EOF
@@ -607,7 +638,7 @@ $ErrorActionPreference = "Continue"
 $githubAuthStatusExitCode = $LASTEXITCODE
 $ErrorActionPreference = $previousErrorActionPreference
 if ($githubAuthStatusExitCode -ne 0) {
-    Write-Host "GitHub CLI login is interactive. Authorize GitHub in the browser."
+    Write-Host "GitHub CLI login is interactive. Press Enter when prompted, then authorize GitHub in the browser."
     & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth login `
         --hostname github.com `
         --git-protocol ssh `
