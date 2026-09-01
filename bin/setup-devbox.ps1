@@ -159,6 +159,32 @@ if (-not (Test-WslDistro)) {
     }
 }
 
+function Read-GitHubToken {
+    Write-Host "GitHub authentication requires a classic personal access token with these scopes:"
+    Write-Host "  repo, read:org, gist, admin:public_key, admin:ssh_signing_key"
+    $token = Read-Host "Paste the GitHub token (input is hidden)" -AsSecureString
+    if ($token.Length -eq 0) {
+        throw "A GitHub personal access token is required."
+    }
+    return $token
+}
+
+$githubToken = $null
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+    "GNOME_KEYRING_CONTROL=" `
+    gh auth token --hostname github.com *> $null
+$hasCachedGitHubAuth = $LASTEXITCODE -eq 0
+$ErrorActionPreference = $previousErrorActionPreference
+if ($hasCachedGitHubAuth) {
+    Write-Host "Reusing the GitHub credential already cached in WSL."
+}
+else {
+    $githubToken = Read-GitHubToken
+}
+
 $hasAuthorizedKey = $false
 if (-not $SshPublicKey -and -not $SshPublicKeyPath) {
     & wsl.exe --distribution $Distro --user root --exec test -s "/home/$LinuxUser/.ssh/authorized_keys"
@@ -641,18 +667,41 @@ $ErrorActionPreference = "Continue"
 $githubAuthStatusExitCode = $LASTEXITCODE
 $ErrorActionPreference = $previousErrorActionPreference
 if ($githubAuthStatusExitCode -ne 0) {
-    Write-Host "GitHub CLI login is interactive. Press Enter when prompted, then authorize GitHub in the browser."
-    & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-        "GNOME_KEYRING_CONTROL=" `
-        gh auth login `
-        --hostname github.com `
-        --git-protocol ssh `
-        --insecure-storage `
-        --scopes "admin:public_key,admin:ssh_signing_key" `
-        --skip-ssh-key `
-        --web
-    if ($LASTEXITCODE -ne 0) {
+    if (-not $githubToken) {
+        Write-Warning "The cached GitHub credential is no longer valid."
+        $githubToken = Read-GitHubToken
+    }
+
+    $tokenPointer = [IntPtr]::Zero
+    $plainTextToken = $null
+    $githubLoginExitCode = -1
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $tokenPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($githubToken)
+        $plainTextToken = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($tokenPointer)
+
+        $ErrorActionPreference = "Continue"
+        $plainTextToken | & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh auth login `
+            --hostname github.com `
+            --git-protocol ssh `
+            --insecure-storage `
+            --skip-ssh-key `
+            --with-token
+        $githubLoginExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $plainTextToken = $null
+        $githubToken = $null
+        if ($tokenPointer -ne [IntPtr]::Zero) {
+            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($tokenPointer)
+        }
+    }
+
+    if ($githubLoginExitCode -ne 0) {
         throw "GitHub CLI login failed."
     }
 }
@@ -695,16 +744,7 @@ if ($githubKeysExitCode -eq 0) {
 
 if (-not $githubKeyExists) {
     if (-not $hasPublicKeyScope) {
-        Write-Host "Authorizing GitHub CLI to manage SSH keys."
-        & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-            "GNOME_KEYRING_CONTROL=" `
-            gh auth refresh `
-            --hostname github.com `
-            --scopes admin:public_key
-        if ($LASTEXITCODE -ne 0) {
-            throw "Could not authorize GitHub CLI to manage SSH keys."
-        }
+        throw "The GitHub token cannot manage SSH keys. Grant it the admin:public_key scope and rerun setup."
     }
 
     $previousErrorActionPreference = $ErrorActionPreference
@@ -749,16 +789,7 @@ if ($githubSigningKeysExitCode -eq 0) {
 
 if (-not $githubSigningKeyExists) {
     if (-not $hasSigningKeyScope) {
-        Write-Host "Authorizing GitHub CLI to manage SSH signing keys."
-        & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-            "GNOME_KEYRING_CONTROL=" `
-            gh auth refresh `
-            --hostname github.com `
-            --scopes admin:ssh_signing_key
-        if ($LASTEXITCODE -ne 0) {
-            throw "Could not authorize GitHub CLI to manage SSH signing keys."
-        }
+        throw "The GitHub token cannot manage SSH signing keys. Grant it the admin:ssh_signing_key scope and rerun setup."
     }
 
     $previousErrorActionPreference = $ErrorActionPreference
