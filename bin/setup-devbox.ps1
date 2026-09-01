@@ -586,21 +586,31 @@ chmod 0644 "$HOME/.ssh/id_ed25519.pub"
 '@
 Invoke-WslScript -Script $githubKeySetup -User $LinuxUser
 
+$machineSuffix = (($env:COMPUTERNAME -split "-")[-1]).ToLowerInvariant()
+$githubKeyTitle = "wsl devbox $machineSuffix"
+
 $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth status --hostname github.com
 $githubAuthStatusExitCode = $LASTEXITCODE
 $ErrorActionPreference = $previousErrorActionPreference
 if ($githubAuthStatusExitCode -ne 0) {
-    Write-Host "GitHub CLI login is interactive. Authorize GitHub and upload the generated WSL SSH key."
+    Write-Host "GitHub CLI login is interactive. Authorize GitHub in the browser."
     & wsl.exe --distribution $Distro --user $LinuxUser --exec gh auth login `
         --hostname github.com `
         --git-protocol ssh `
+        --insecure-storage `
         --scopes "admin:public_key,admin:ssh_signing_key" `
+        --skip-ssh-key `
         --web
     if ($LASTEXITCODE -ne 0) {
         throw "GitHub CLI login failed."
     }
+}
+& wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
+    'if [ -f "$HOME/.config/gh/hosts.yml" ]; then chmod 600 "$HOME/.config/gh/hosts.yml"; fi'
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not secure the GitHub CLI credentials file."
 }
 
 $githubPublicKey = (& wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
@@ -646,7 +656,7 @@ if (-not $githubKeyExists) {
     $ErrorActionPreference = "Continue"
     $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
         "/home/$LinuxUser/.ssh/id_ed25519.pub" `
-        --title "$env:COMPUTERNAME WSL" 2>&1 | Out-String)
+        --title $githubKeyTitle 2>&1 | Out-String)
     $addKeyExitCode = $LASTEXITCODE
     $ErrorActionPreference = $previousErrorActionPreference
     if ($addKeyExitCode -ne 0 -and $addKeyOutput -notmatch '(?i)(already in use|key already exists)') {
@@ -692,7 +702,7 @@ if (-not $githubSigningKeyExists) {
     $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec gh ssh-key add `
         "/home/$LinuxUser/.ssh/id_ed25519.pub" `
         --type signing `
-        --title "$env:COMPUTERNAME WSL signing" 2>&1 | Out-String)
+        --title "$githubKeyTitle signing" 2>&1 | Out-String)
     $addSigningKeyExitCode = $LASTEXITCODE
     $ErrorActionPreference = $previousErrorActionPreference
     if (
