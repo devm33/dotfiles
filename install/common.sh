@@ -1,23 +1,24 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Script to download, setup, and install deps for dotfiles
 # Common components
 
 cd "$HOME" || exit 1
 
 
-if [ -z "$installreadonly" ]; then
+if [ -z "${installreadonly:-}" ]; then
     repo='git@github.com:devm33/dotfiles.git'
 else 
     repo='https://github.com/devm33/dotfiles.git'
 fi
 
 if [ -d "$HOME/.dotfiles/.git" ]; then
-    echo "updating existing config repo"
-    git -C "$HOME/.dotfiles" pull --ff-only || {
-        echo "failed to update $HOME/.dotfiles" >&2
-        exit 1
-    }
+    echo "resetting existing config repo to its upstream"
+    git -C "$HOME/.dotfiles" fetch --prune
+    git -C "$HOME/.dotfiles" reset --hard '@{upstream}'
+    git -C "$HOME/.dotfiles" clean -fd
 elif [ -e "$HOME/.dotfiles" ]; then
     echo "$HOME/.dotfiles already exists but is not a git repository" >&2
     exit 1

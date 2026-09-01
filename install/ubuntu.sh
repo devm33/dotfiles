@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Script to download, setup, and install deps for dotfiles
 # Ubuntu version
 
@@ -32,17 +34,22 @@ fi
 nvm install 24
 nvm alias default 24
 nvm use --delete-prefix default --silent
-npm install --global pnpm
+if ! command -v pnpm >/dev/null 2>&1; then
+    npm install --global pnpm
+fi
 
 # Install Rust and Cargo
 if ! command -v cargo >/dev/null 2>&1; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 fi
-[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+if [ -f "$HOME/.cargo/env" ]; then
+    # shellcheck source=/dev/null
+    . "$HOME/.cargo/env"
+fi
 
 # Install the Rust compiler cache without requiring it to already exist
 if ! command -v sccache >/dev/null 2>&1; then
-    RUSTC_WRAPPER= cargo install sccache --locked
+    RUSTC_WRAPPER='' cargo install sccache --locked
 fi
 
 # Install common components
