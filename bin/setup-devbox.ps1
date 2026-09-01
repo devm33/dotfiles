@@ -105,7 +105,7 @@ if ($installedVersion -ne "2") {
 function Test-WslDistro {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    & wsl.exe --distribution $Distro --user root --exec /bin/true 2>$null
+    & wsl.exe --distribution $Distro --user root --exec /bin/true *> $null
     $exitCode = $LASTEXITCODE
     $ErrorActionPreference = $previousErrorActionPreference
     return $exitCode -eq 0
@@ -176,7 +176,6 @@ apt-get install -y \
   ca-certificates \
   curl \
   dbus \
-  gh \
   git \
   gnome-keyring \
   libicu-dev \
@@ -186,6 +185,19 @@ apt-get install -y \
   sudo \
   systemd \
   systemd-sysv
+
+install -d -m 0755 /etc/apt/keyrings /etc/apt/sources.list.d
+github_keyring=$(mktemp)
+curl --fail --silent --show-error --location \
+  --output "$github_keyring" \
+  https://cli.github.com/packages/githubcli-archive-keyring.gpg
+install -m 0644 "$github_keyring" /etc/apt/keyrings/githubcli-archive-keyring.gpg
+rm -f "$github_keyring"
+printf '%s\n' \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+  >/etc/apt/sources.list.d/github-cli.list
+apt-get update -y
+apt-get install -y gh
 
 sed -i -E 's/^# *en_US\.UTF-8 +UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
