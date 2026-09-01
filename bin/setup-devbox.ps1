@@ -169,6 +169,50 @@ function Read-GitHubToken {
     return $token
 }
 
+function Set-GitHubAuthentication {
+    param(
+        [Parameter(Mandatory)]
+        [Security.SecureString]$Token
+    )
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh auth logout --hostname github.com *> $null
+
+    $tokenPointer = [IntPtr]::Zero
+    $plainTextToken = $null
+    $githubLoginExitCode = -1
+    try {
+        $tokenPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($Token)
+        $plainTextToken = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($tokenPointer)
+
+        $plainTextToken | & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh auth login `
+            --hostname github.com `
+            --git-protocol ssh `
+            --insecure-storage `
+            --skip-ssh-key `
+            --with-token
+        $githubLoginExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+        $plainTextToken = $null
+        if ($tokenPointer -ne [IntPtr]::Zero) {
+            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($tokenPointer)
+        }
+    }
+
+    if ($githubLoginExitCode -ne 0) {
+        throw "GitHub CLI login failed."
+    }
+}
+
 $githubToken = $null
 $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
@@ -672,38 +716,8 @@ if ($githubAuthStatusExitCode -ne 0) {
         $githubToken = Read-GitHubToken
     }
 
-    $tokenPointer = [IntPtr]::Zero
-    $plainTextToken = $null
-    $githubLoginExitCode = -1
-    $previousErrorActionPreference = $ErrorActionPreference
-    try {
-        $tokenPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($githubToken)
-        $plainTextToken = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($tokenPointer)
-
-        $ErrorActionPreference = "Continue"
-        $plainTextToken | & wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-            "GNOME_KEYRING_CONTROL=" `
-            gh auth login `
-            --hostname github.com `
-            --git-protocol ssh `
-            --insecure-storage `
-            --skip-ssh-key `
-            --with-token
-        $githubLoginExitCode = $LASTEXITCODE
-    }
-    finally {
-        $ErrorActionPreference = $previousErrorActionPreference
-        $plainTextToken = $null
-        $githubToken = $null
-        if ($tokenPointer -ne [IntPtr]::Zero) {
-            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($tokenPointer)
-        }
-    }
-
-    if ($githubLoginExitCode -ne 0) {
-        throw "GitHub CLI login failed."
-    }
+    Set-GitHubAuthentication -Token $githubToken
+    $githubToken = $null
 }
 & wsl.exe --distribution $Distro --user $LinuxUser --exec bash -lc `
     'if [ -f "$HOME/.config/gh/hosts.yml" ]; then chmod 600 "$HOME/.config/gh/hosts.yml"; fi'
@@ -717,24 +731,30 @@ if (-not $githubPublicKey) {
     throw "Could not read the generated GitHub SSH public key."
 }
 
-$previousErrorActionPreference = $ErrorActionPreference
-$ErrorActionPreference = "Continue"
-$githubKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-    "GNOME_KEYRING_CONTROL=" `
-    gh api `
-    user/keys `
-    --paginate `
-    --jq '.[].key' 2>&1 | Out-String)
-$githubKeysExitCode = $LASTEXITCODE
-$ErrorActionPreference = $previousErrorActionPreference
+while ($true) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $githubKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh api `
+        user/keys `
+        --paginate `
+        --jq '.[].key' 2>&1 | Out-String)
+    $githubKeysExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
 
-$hasPublicKeyScope = $githubKeysExitCode -eq 0
-if (
-    $githubKeysExitCode -ne 0 -and
-    $githubKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 403|not accessible)'
-) {
-    throw "Could not list GitHub SSH keys: $($githubKeysOutput.Trim())"
+    if ($githubKeysExitCode -eq 0) {
+        break
+    }
+    if ($githubKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 40[134]|bad credentials|not accessible)') {
+        throw "Could not list GitHub SSH keys: $($githubKeysOutput.Trim())"
+    }
+
+    Write-Warning "The cached GitHub token cannot manage SSH keys."
+    $githubToken = Read-GitHubToken
+    Set-GitHubAuthentication -Token $githubToken
+    $githubToken = $null
 }
 
 $githubKeyExists = $false
@@ -743,43 +763,73 @@ if ($githubKeysExitCode -eq 0) {
 }
 
 if (-not $githubKeyExists) {
-    if (-not $hasPublicKeyScope) {
-        throw "The GitHub token cannot manage SSH keys. Grant it the admin:public_key scope and rerun setup."
-    }
+    while ($true) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh ssh-key add `
+            "/home/$LinuxUser/.ssh/id_ed25519.pub" `
+            --title $githubKeyTitle 2>&1 | Out-String)
+        $addKeyExitCode = $LASTEXITCODE
+        $ErrorActionPreference = $previousErrorActionPreference
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    $addKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-        "GNOME_KEYRING_CONTROL=" `
-        gh ssh-key add `
-        "/home/$LinuxUser/.ssh/id_ed25519.pub" `
-        --title $githubKeyTitle 2>&1 | Out-String)
-    $addKeyExitCode = $LASTEXITCODE
-    $ErrorActionPreference = $previousErrorActionPreference
-    if ($addKeyExitCode -ne 0 -and $addKeyOutput -notmatch '(?i)(already in use|key already exists)') {
-        throw "Could not add the generated SSH key to GitHub: $($addKeyOutput.Trim())"
+        if ($addKeyExitCode -eq 0 -or $addKeyOutput -match '(?i)(already in use|key already exists)') {
+            break
+        }
+        if ($addKeyOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 40[134]|bad credentials|not accessible)') {
+            throw "Could not add the generated SSH key to GitHub: $($addKeyOutput.Trim())"
+        }
+
+        Write-Warning "The cached GitHub token cannot add SSH keys."
+        $githubToken = Read-GitHubToken
+        Set-GitHubAuthentication -Token $githubToken
+        $githubToken = $null
     }
 }
 
-$previousErrorActionPreference = $ErrorActionPreference
-$ErrorActionPreference = "Continue"
-$githubSigningKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-    "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-    "GNOME_KEYRING_CONTROL=" `
-    gh api `
-    user/ssh_signing_keys `
-    --paginate `
-    --jq '.[].key' 2>&1 | Out-String)
-$githubSigningKeysExitCode = $LASTEXITCODE
-$ErrorActionPreference = $previousErrorActionPreference
+while ($true) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $githubSigningKeysOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+        "GNOME_KEYRING_CONTROL=" `
+        gh api `
+        user/ssh_signing_keys `
+        --paginate `
+        --jq '.[].key' 2>&1 | Out-String)
+    $githubSigningKeysExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
 
-$hasSigningKeyScope = $githubSigningKeysExitCode -eq 0
-if (
-    $githubSigningKeysExitCode -ne 0 -and
-    $githubSigningKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 403|not accessible)'
-) {
-    throw "Could not list GitHub SSH signing keys: $($githubSigningKeysOutput.Trim())"
+    if ($githubSigningKeysExitCode -eq 0) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $publicKeyScopeOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh api user/keys --silent 2>&1 | Out-String)
+        $publicKeyScopeExitCode = $LASTEXITCODE
+        $ErrorActionPreference = $previousErrorActionPreference
+
+        if ($publicKeyScopeExitCode -eq 0) {
+            break
+        }
+        if ($publicKeyScopeOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 40[134]|bad credentials|not accessible)') {
+            throw "Could not validate the GitHub SSH-key scope: $($publicKeyScopeOutput.Trim())"
+        }
+        Write-Warning "The cached GitHub token cannot manage SSH keys."
+    }
+    elseif ($githubSigningKeysOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 40[134]|bad credentials|not accessible)') {
+        throw "Could not list GitHub SSH signing keys: $($githubSigningKeysOutput.Trim())"
+    }
+    else {
+        Write-Warning "The cached GitHub token cannot manage SSH signing keys."
+    }
+
+    $githubToken = Read-GitHubToken
+    Set-GitHubAuthentication -Token $githubToken
+    $githubToken = $null
 }
 
 $githubSigningKeyExists = $false
@@ -788,26 +838,33 @@ if ($githubSigningKeysExitCode -eq 0) {
 }
 
 if (-not $githubSigningKeyExists) {
-    if (-not $hasSigningKeyScope) {
-        throw "The GitHub token cannot manage SSH signing keys. Grant it the admin:ssh_signing_key scope and rerun setup."
-    }
+    while ($true) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
+            "GNOME_KEYRING_CONTROL=" `
+            gh ssh-key add `
+            "/home/$LinuxUser/.ssh/id_ed25519.pub" `
+            --type signing `
+            --title "$githubKeyTitle signing" 2>&1 | Out-String)
+        $addSigningKeyExitCode = $LASTEXITCODE
+        $ErrorActionPreference = $previousErrorActionPreference
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    $addSigningKeyOutput = (& wsl.exe --distribution $Distro --user $LinuxUser --exec env `
-        "DBUS_SESSION_BUS_ADDRESS=unix:path=/dev/null" `
-        "GNOME_KEYRING_CONTROL=" `
-        gh ssh-key add `
-        "/home/$LinuxUser/.ssh/id_ed25519.pub" `
-        --type signing `
-        --title "$githubKeyTitle signing" 2>&1 | Out-String)
-    $addSigningKeyExitCode = $LASTEXITCODE
-    $ErrorActionPreference = $previousErrorActionPreference
-    if (
-        $addSigningKeyExitCode -ne 0 -and
-        $addSigningKeyOutput -notmatch '(?i)(already in use|key already exists)'
-    ) {
-        throw "Could not add the GitHub SSH signing key: $($addSigningKeyOutput.Trim())"
+        if (
+            $addSigningKeyExitCode -eq 0 -or
+            $addSigningKeyOutput -match '(?i)(already in use|key already exists)'
+        ) {
+            break
+        }
+        if ($addSigningKeyOutput -notmatch '(?i)(scope|permission|forbidden|HTTP 40[134]|bad credentials|not accessible)') {
+            throw "Could not add the GitHub SSH signing key: $($addSigningKeyOutput.Trim())"
+        }
+
+        Write-Warning "The cached GitHub token cannot add SSH signing keys."
+        $githubToken = Read-GitHubToken
+        Set-GitHubAuthentication -Token $githubToken
+        $githubToken = $null
     }
 }
 
