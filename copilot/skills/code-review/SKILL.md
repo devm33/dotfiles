@@ -1,12 +1,12 @@
 ---
 name: code-review
-description: Run code review with GPT-5.5 and Opus 4.8 and output review comments without making local changes.
+description: Run code review with the latest GPT and Opus models and output review comments without making local changes.
 allowed-tools: "*"
 ---
 
 # Code Review
 
-Run `/review` with both `gpt-5.5` and `opus-4.8`. Do not make any local changes. Only output code review comments.
+Run `/review` with both the latest GPT and Opus models. Do not make any local changes. Only output code review comments.
 
 ## Prepare the correct diff first
 
