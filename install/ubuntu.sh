@@ -31,11 +31,13 @@ if [ ! -s "$NVM_DIR/nvm.sh" ]; then
         PROFILE=/dev/null bash
 fi
 
+set +u
 # shellcheck source=/dev/null
 . "$NVM_DIR/nvm.sh"
 nvm install 24
 nvm alias default 24
 nvm use --delete-prefix default --silent
+set -u
 if ! command -v pnpm >/dev/null 2>&1; then
     npm install --global pnpm
 fi

@@ -599,22 +599,35 @@ Start-Process "$env:SystemRoot\System32\wscript.exe" -ArgumentList "`"$launcherP
 $healthCheckPath = Join-Path $watchdogDirectory "health-$safeDistroName.ps1"
 $healthLogPath = Join-Path $watchdogDirectory "health-$safeDistroName.log"
 $healthScript = @'
-$probeArguments = '--distribution "__DISTRO__" --user root --exec /bin/true'
-$probe = Start-Process `
-    -FilePath "$env:SystemRoot\System32\wsl.exe" `
-    -ArgumentList $probeArguments `
-    -WindowStyle Hidden `
-    -PassThru
-
 $restartWsl = $false
-if (-not $probe.WaitForExit(60000)) {
-    Stop-Process -Id $probe.Id -Force -ErrorAction SilentlyContinue
-    Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe timed out."
-    $restartWsl = $true
+$probeOutputPath = [IO.Path]::GetTempFileName()
+$probeErrorPath = [IO.Path]::GetTempFileName()
+try {
+    $probeArguments = '--distribution "__DISTRO__" --user root --exec /bin/printf devbox-health-ok'
+    $probe = Start-Process `
+        -FilePath "$env:SystemRoot\System32\wsl.exe" `
+        -ArgumentList $probeArguments `
+        -WindowStyle Hidden `
+        -RedirectStandardOutput $probeOutputPath `
+        -RedirectStandardError $probeErrorPath `
+        -PassThru
+
+    if (-not $probe.WaitForExit(60000)) {
+        Stop-Process -Id $probe.Id -Force -ErrorAction SilentlyContinue
+        Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe timed out."
+        $restartWsl = $true
+    }
+    else {
+        $probeResponse = [IO.File]::ReadAllText($probeOutputPath).Trim()
+        if ($probeResponse -ne "devbox-health-ok") {
+            $probeError = [IO.File]::ReadAllText($probeErrorPath).Trim()
+            Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe returned no health marker (exit $($probe.ExitCode)): $probeError"
+            $restartWsl = $true
+        }
+    }
 }
-elseif ($probe.ExitCode -ne 0) {
-    Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe exited with code $($probe.ExitCode)."
-    $restartWsl = $true
+finally {
+    Remove-Item $probeOutputPath, $probeErrorPath -Force -ErrorAction SilentlyContinue
 }
 
 if ($restartWsl) {
@@ -681,6 +694,7 @@ Register-ScheduledTask `
     -Settings $healthSettings `
     -Description "Recovers a hung WSL service and restarts the devbox watchdog." `
     -Force | Out-Null
+Enable-ScheduledTask -TaskName $healthTaskName | Out-Null
 
 $githubKeySetup = @'
 set -euo pipefail
