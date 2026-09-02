@@ -1,3 +1,8 @@
 # Ghostty's prompt click handling conflicts with tmux mouse reporting and can
 # make pane and TUI actions require a second click.
 cursor-click-to-move = false
+
+keybind = control+page_down=next_tab
+keybind = control+page_up=previous_tab
+keybind = command+alt+right=next_tab
+keybind = command+alt+left=previous_tab
