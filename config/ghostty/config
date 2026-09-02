@@ -1,0 +1,3 @@
+# Ghostty's prompt click handling conflicts with tmux mouse reporting and can
+# make pane and TUI actions require a second click.
+cursor-click-to-move = false
