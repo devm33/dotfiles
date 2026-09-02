@@ -598,103 +598,12 @@ Start-Process "$env:SystemRoot\System32\wscript.exe" -ArgumentList "`"$launcherP
 
 $healthCheckPath = Join-Path $watchdogDirectory "health-$safeDistroName.ps1"
 $healthLogPath = Join-Path $watchdogDirectory "health-$safeDistroName.log"
-$healthScript = @'
-$restartWsl = $false
-$probeOutputPath = [IO.Path]::GetTempFileName()
-$probeErrorPath = [IO.Path]::GetTempFileName()
-try {
-    $probeArguments = '--distribution "__DISTRO__" --user root --exec /bin/printf devbox-health-ok'
-    $probe = Start-Process `
-        -FilePath "$env:SystemRoot\System32\wsl.exe" `
-        -ArgumentList $probeArguments `
-        -WindowStyle Hidden `
-        -RedirectStandardOutput $probeOutputPath `
-        -RedirectStandardError $probeErrorPath `
-        -PassThru
-
-    if (-not $probe.WaitForExit(60000)) {
-        Stop-Process -Id $probe.Id -Force -ErrorAction SilentlyContinue
-        Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe timed out."
-        $restartWsl = $true
-    }
-    else {
-        $probeResponse = [IO.File]::ReadAllText($probeOutputPath).Trim()
-        if ($probeResponse -ne "devbox-health-ok") {
-            $probeError = [IO.File]::ReadAllText($probeErrorPath).Trim()
-            Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) WSL probe returned no health marker (exit $($probe.ExitCode)): $probeError"
-            $restartWsl = $true
-        }
-    }
-}
-finally {
-    Remove-Item $probeOutputPath, $probeErrorPath -Force -ErrorAction SilentlyContinue
-}
-
-if ($restartWsl) {
-    $wslService = Get-Service WslService -ErrorAction SilentlyContinue
-    if (-not $wslService) {
-        $wslService = Get-Service LxssManager -ErrorAction SilentlyContinue
-    }
-    if ($wslService) {
-        $restartJob = Start-Job -ScriptBlock {
-            param($ServiceName)
-            Restart-Service $ServiceName -Force -ErrorAction Stop
-        } -ArgumentList $wslService.Name
-        if (-not (Wait-Job $restartJob -Timeout 45)) {
-            Stop-Job $restartJob
-            Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) Timed out restarting $($wslService.Name)."
-        }
-        elseif ($restartJob.State -ne 'Completed') {
-            Add-Content '__HEALTH_LOG__' "$(Get-Date -Format o) Failed restarting $($wslService.Name)."
-        }
-        Remove-Job $restartJob -Force
-        Start-Sleep -Seconds 5
-    }
-}
-
-$watchdog = Get-CimInstance Win32_Process |
-    Where-Object CommandLine -Like '*watchdog-__SAFE_DISTRO__.ps1*' |
-    Select-Object -First 1
-if (-not $watchdog) {
-    Start-Process "$env:SystemRoot\System32\wscript.exe" -ArgumentList '"__LAUNCHER_PATH__"'
-}
-'@
-$healthScript = $healthScript.Replace("__DISTRO__", $Distro.Replace('"', '\"'))
-$healthScript = $healthScript.Replace("__SAFE_DISTRO__", $safeDistroName)
-$healthScript = $healthScript.Replace("__HEALTH_LOG__", $healthLogPath.Replace("'", "''"))
-$healthScript = $healthScript.Replace("__LAUNCHER_PATH__", $launcherPath.Replace('"', '""'))
-Set-Content -Path $healthCheckPath -Value $healthScript -Encoding UTF8
-
 $healthTaskName = "Devbox WSL health ($Distro)"
-$windowsIdentity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-$healthPrincipal = New-ScheduledTaskPrincipal `
-    -UserId $windowsIdentity `
-    -LogonType Interactive `
-    -RunLevel Highest
-$healthAction = New-ScheduledTaskAction `
-    -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" `
-    -Argument "-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$healthCheckPath`""
-$healthLogonTrigger = New-ScheduledTaskTrigger -AtLogOn -User $windowsIdentity
-$healthTimerTrigger = New-ScheduledTaskTrigger `
-    -Once `
-    -At (Get-Date).AddMinutes(1) `
-    -RepetitionInterval (New-TimeSpan -Minutes 5)
-$healthSettings = New-ScheduledTaskSettingsSet `
-    -AllowStartIfOnBatteries `
-    -DontStopIfGoingOnBatteries `
-    -StartWhenAvailable `
-    -MultipleInstances IgnoreNew `
-    -ExecutionTimeLimit (New-TimeSpan -Minutes 3)
-
-Register-ScheduledTask `
-    -TaskName $healthTaskName `
-    -Action $healthAction `
-    -Principal $healthPrincipal `
-    -Trigger @($healthLogonTrigger, $healthTimerTrigger) `
-    -Settings $healthSettings `
-    -Description "Recovers a hung WSL service and restarts the devbox watchdog." `
-    -Force | Out-Null
-Enable-ScheduledTask -TaskName $healthTaskName | Out-Null
+if (Get-ScheduledTask -TaskName $healthTaskName -ErrorAction SilentlyContinue) {
+    Stop-ScheduledTask -TaskName $healthTaskName -ErrorAction SilentlyContinue
+    Unregister-ScheduledTask -TaskName $healthTaskName -Confirm:$false
+}
+Remove-Item $healthCheckPath, $healthLogPath -Force -ErrorAction SilentlyContinue
 
 $githubKeySetup = @'
 set -euo pipefail
@@ -911,8 +820,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "Dotfiles installation failed."
 }
 
-Start-ScheduledTask -TaskName $healthTaskName
-
 Write-Host ""
 Write-Host "Devbox setup complete." -ForegroundColor Green
 Write-Host "Tunnel ID: $TunnelId"
@@ -920,4 +827,3 @@ Write-Host "Linux user: $LinuxUser"
 Write-Host "Client command: devtunnel connect $TunnelId"
 Write-Host "Service logs: wsl -d `"$Distro`" -u root -- journalctl -u devtunnel-ssh.service -f"
 Write-Host "Watchdog: $watchdogPath"
-Write-Host "Health check: $healthCheckPath"
