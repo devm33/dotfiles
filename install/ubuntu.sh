@@ -51,11 +51,6 @@ if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
 fi
 
-# Install the Rust compiler cache without requiring it to already exist
-if ! command -v sccache >/dev/null 2>&1; then
-    RUSTC_WRAPPER='' cargo install sccache --locked
-fi
-
 # Install common components
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/devm33/dotfiles/main/install/common.sh)" || exit
 
