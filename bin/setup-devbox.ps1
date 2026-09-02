@@ -496,7 +496,6 @@ Environment=PATH=$home_dir/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 ExecStart=$home_dir/bin/devtunnel-session host $tunnel_id
 Restart=always
 RestartSec=5
-RuntimeMaxSec=6h
 TimeoutStopSec=15
 
 [Install]

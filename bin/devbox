@@ -68,10 +68,16 @@ start_tunnel() {
   tunnel_pid=$!
 
   port=""
-  for _ in $(seq 1 150); do
+  for attempt in $(seq 1 300); do
     port=$(sed -nE \
       's/.*127\.0\.0\.1:([0-9]+) to host port 22\..*/\1/p' \
       "$log" | head -n 1)
+
+    if [[ -z "$port" ]] && ((attempt % 10 == 0)) && command -v lsof >/dev/null 2>&1; then
+      port=$(lsof -nP -a -p "$tunnel_pid" -iTCP -sTCP:LISTEN -Fn 2>/dev/null |
+        sed -nE 's/^n(127\.0\.0\.1|\[::1\]):([0-9]+)$/\2/p' |
+        head -n 1)
+    fi
 
     [[ -n "$port" ]] && return 0
     kill -0 "$tunnel_pid" 2>/dev/null || break
@@ -79,7 +85,11 @@ start_tunnel() {
   done
 
   echo "devbox: could not determine the forwarded SSH port" >&2
-  cat "$log" >&2
+  if [[ -s "$log" ]]; then
+    cat "$log" >&2
+  else
+    echo "devbox: devtunnel produced no diagnostic output" >&2
+  fi
   if kill -0 "$tunnel_pid" 2>/dev/null; then
     kill "$tunnel_pid" 2>/dev/null || true
     wait "$tunnel_pid" 2>/dev/null || true
