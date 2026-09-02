@@ -10,13 +10,64 @@ set -euo pipefail
 # Ubuntu/Debian Specific install
 sudo dpkg --configure -a || sudo apt-get install --fix-broken --yes
 sudo dpkg --configure -a
-sudo apt-get install --yes cmake tmux silversearcher-ag nodejs npm neovim fzf ripgrep pkg-config libssl-dev unzip jq locales zsh
+sudo apt-get install --yes \
+    build-essential \
+    cmake \
+    fzf \
+    jq \
+    libssl-dev \
+    locales \
+    neovim \
+    nodejs \
+    npm \
+    pkg-config \
+    python3 \
+    ripgrep \
+    silversearcher-ag \
+    tmux \
+    unzip \
+    zip \
+    zsh
 sudo sed -i -E 's/^# *en_US\.UTF-8 +UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
 if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
     echo 'en_US.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen >/dev/null
 fi
 sudo locale-gen
 sudo update-locale LANG=en_US.UTF-8
+
+# Bazelisk selects the Bazel version pinned by each repository.
+if [ ! -x "$HOME/.local/bin/bazel" ]; then
+    case "$(uname -m)" in
+        x86_64) bazelisk_arch='amd64' ;;
+        aarch64 | arm64) bazelisk_arch='arm64' ;;
+        *)
+            echo "Unsupported architecture for Bazelisk: $(uname -m)" >&2
+            exit 1
+            ;;
+    esac
+
+    bazelisk_version='v1.29.0'
+    bazelisk_asset="bazelisk-linux-${bazelisk_arch}"
+    bazelisk_url="https://github.com/bazelbuild/bazelisk/releases/download/${bazelisk_version}"
+    bazelisk_tmp="$(mktemp)"
+    bazelisk_checksum_tmp="$(mktemp)"
+    trap 'rm -f -- "$bazelisk_tmp" "$bazelisk_checksum_tmp"' EXIT
+
+    curl -fsSLo "$bazelisk_tmp" "$bazelisk_url/$bazelisk_asset"
+    curl -fsSLo "$bazelisk_checksum_tmp" "$bazelisk_url/$bazelisk_asset.sha256"
+    expected_checksum="$(tr -d '[:space:]' <"$bazelisk_checksum_tmp")"
+    actual_checksum="$(sha256sum "$bazelisk_tmp" | awk '{print $1}')"
+    if [[ ! "$expected_checksum" =~ ^[0-9a-fA-F]{64}$ ]] ||
+        [ "$actual_checksum" != "$expected_checksum" ]; then
+        echo "Checksum verification failed for $bazelisk_asset" >&2
+        exit 1
+    fi
+
+    install -Dm0755 "$bazelisk_tmp" "$HOME/.local/bin/bazel"
+    ln -sfn bazel "$HOME/.local/bin/bazelisk"
+    rm -f -- "$bazelisk_tmp" "$bazelisk_checksum_tmp"
+    trap - EXIT
+fi
 
 # NVM-managed global packages are user-owned; an npm prefix override conflicts
 # with NVM and may have been left by an older version of this installer.
