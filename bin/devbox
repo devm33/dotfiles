@@ -49,12 +49,19 @@ reset_terminal() {
   stty sane </dev/tty 2>/dev/null || true
 }
 
-cleanup() {
-  reset_terminal
-  if [[ -n "$tunnel_pid" ]] && kill -0 "$tunnel_pid" 2>/dev/null; then
-    kill "$tunnel_pid" 2>/dev/null || true
+stop_tunnel() {
+  if [[ -n "$tunnel_pid" ]]; then
+    if kill -0 "$tunnel_pid" 2>/dev/null; then
+      kill "$tunnel_pid" 2>/dev/null || true
+    fi
     wait "$tunnel_pid" 2>/dev/null || true
   fi
+  tunnel_pid=""
+}
+
+cleanup() {
+  reset_terminal
+  stop_tunnel
   rm -f "$log"
 }
 trap cleanup EXIT
@@ -90,11 +97,7 @@ start_tunnel() {
   else
     echo "devbox: devtunnel produced no diagnostic output" >&2
   fi
-  if kill -0 "$tunnel_pid" 2>/dev/null; then
-    kill "$tunnel_pid" 2>/dev/null || true
-    wait "$tunnel_pid" 2>/dev/null || true
-  fi
-  tunnel_pid=""
+  stop_tunnel
   return 1
 }
 
@@ -126,15 +129,12 @@ while true; do
   fi
   reset_terminal
 
-  echo "devbox: SSH disconnected; reconnecting in 3 seconds (Ctrl-C to stop)" >&2
+  echo "devbox: SSH disconnected; restarting tunnel in 3 seconds (Ctrl-C to stop)" >&2
   sleep 3
 
-  if ! kill -0 "$tunnel_pid" 2>/dev/null; then
-    wait "$tunnel_pid" 2>/dev/null || true
-    tunnel_pid=""
-    until start_tunnel; do
-      echo "devbox: tunnel unavailable; retrying in 5 seconds" >&2
-      sleep 5
-    done
-  fi
+  stop_tunnel
+  until start_tunnel; do
+    echo "devbox: tunnel unavailable; retrying in 5 seconds" >&2
+    sleep 5
+  done
 done
