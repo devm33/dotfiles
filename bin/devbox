@@ -70,6 +70,19 @@ trap 'exit 143' TERM
 
 start_tunnel() {
   : >"$log"
+
+  host_connections=$(devtunnel list --json |
+    jq -r --arg tunnel "$tunnel" \
+      '.tunnels[] | select(.tunnelId == $tunnel) | .hostConnections // 0')
+  if [[ -z "$host_connections" ]]; then
+    echo "devbox: tunnel no longer exists: $tunnel" >&2
+    return 1
+  fi
+  if [[ "$host_connections" == "0" ]]; then
+    echo "devbox: remote tunnel host is offline: $tunnel" >&2
+    return 1
+  fi
+
   echo "Connecting to tunnel: $tunnel" >&2
   devtunnel connect "$tunnel" >"$log" 2>&1 &
   tunnel_pid=$!
