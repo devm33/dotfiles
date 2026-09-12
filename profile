@@ -22,3 +22,4 @@ export IBUS_ENABLE_SYNC_MODE=1
 . "$HOME/.cargo/env"
 
 export CARGO_INCREMENTAL=0
+export PATH="$HOME/.local/bin:$PATH"
