@@ -12,19 +12,22 @@ sudo dpkg --configure -a || sudo apt-get install --fix-broken --yes
 sudo dpkg --configure -a
 sudo apt-get install --yes \
     build-essential \
+    bison \
+    ca-certificates \
     cmake \
     fzf \
     jq \
+    libevent-dev \
+    libncurses-dev \
     libssl-dev \
     locales \
-    neovim \
     nodejs \
     npm \
+    openssh-client \
     pkg-config \
     python3 \
     ripgrep \
     silversearcher-ag \
-    tmux \
     unzip \
     zip \
     zsh
@@ -34,6 +37,60 @@ if ! grep -Eq '^en_US\.UTF-8[[:space:]]+UTF-8' /etc/locale.gen; then
 fi
 sudo locale-gen
 sudo update-locale LANG=en_US.UTF-8
+
+# Install the latest stable Neovim release from its official prebuilt archive.
+NVIM_FALLBACK='v0.11.2'
+nvim_version="$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest 2>/dev/null |
+    sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
+[ -n "$nvim_version" ] || nvim_version="$NVIM_FALLBACK"
+if ! command -v nvim >/dev/null 2>&1 ||
+    [ "$(nvim --version | sed -n '1s/^NVIM //p')" != "$nvim_version" ]; then
+    case "$(uname -m)" in
+        x86_64 | amd64) nvim_arch='x86_64' ;;
+        aarch64 | arm64) nvim_arch='arm64' ;;
+        *)
+            echo "Unsupported architecture for Neovim: $(uname -m)" >&2
+            exit 1
+            ;;
+    esac
+
+    nvim_asset="nvim-linux-${nvim_arch}.tar.gz"
+    nvim_tmp="$(mktemp -d)"
+    trap 'rm -rf -- "$nvim_tmp"' EXIT
+    (
+        cd "$nvim_tmp"
+        curl -fsSLO "https://github.com/neovim/neovim/releases/download/$nvim_version/$nvim_asset"
+        tar -xf "$nvim_asset"
+        nvim_dir="${nvim_asset%.tar.gz}"
+        sudo cp -a "$nvim_dir/bin/." /usr/local/bin/
+        sudo cp -a "$nvim_dir/lib/." /usr/local/lib/
+        sudo cp -a "$nvim_dir/share/." /usr/local/share/
+    )
+    rm -rf -- "$nvim_tmp"
+    trap - EXIT
+fi
+
+# Build the latest stable tmux instead of using the older Ubuntu package.
+TMUX_FALLBACK='3.7'
+tmux_version="$(curl -fsSL https://api.github.com/repos/tmux/tmux/releases/latest 2>/dev/null |
+    sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
+[ -n "$tmux_version" ] || tmux_version="$TMUX_FALLBACK"
+if ! command -v tmux >/dev/null 2>&1 ||
+    [ "$(tmux -V | sed 's/^tmux //')" != "$tmux_version" ]; then
+    tmux_tmp="$(mktemp -d)"
+    trap 'rm -rf -- "$tmux_tmp"' EXIT
+    (
+        cd "$tmux_tmp"
+        curl -fsSLO "https://github.com/tmux/tmux/releases/download/$tmux_version/tmux-$tmux_version.tar.gz"
+        tar -xf "tmux-$tmux_version.tar.gz"
+        cd "tmux-$tmux_version"
+        ./configure
+        make -j"$(nproc)"
+        sudo make install
+    )
+    rm -rf -- "$tmux_tmp"
+    trap - EXIT
+fi
 
 # Bazelisk selects the Bazel version pinned by each repository.
 if [ ! -x "$HOME/.local/bin/bazel" ]; then

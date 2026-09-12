@@ -9,8 +9,23 @@ Managed using [thoughtbot/rcm](https://github.com/thoughtbot/rcm)
 
 ## Quick Install
 
--   Add a github authorized ssh key
--   Then run the script tailored to the environment
+The installer downloads the latest GitHub CLI, prompts for authentication when
+needed, creates and registers an SSH authentication/signing key, and then
+installs the remaining dependencies.
+
+Set `DOTFILES_HOST` to select a profile without the interactive prompt. For a
+GitHub development machine:
+
+```bash
+export DOTFILES_HOST=github
+```
+
+The `github` profile also clones `devm33/dotfiles-work` into
+`~/code/dotfiles-work`. GitHub requires a one-time browser confirmation to
+authorize a new SSH key for organization SSO; the installer prints the
+authorization URL and resumes after confirmation.
+
+Then run the script tailored to the environment:
 
     -   For Ubuntu-like environments:
 

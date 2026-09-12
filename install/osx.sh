@@ -17,6 +17,7 @@ NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebre
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install homebrew packages
+brew install gh
 brew install node
 brew install cmake
 brew install ffmpeg
