@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Keep expensive tmux status values in options so redraws never run subprocesses.
+
+set -u
+
+refresh_interval=${TMUX_STATUS_REFRESH_INTERVAL:-5}
+icon_interval=${TMUX_STATUS_ICON_INTERVAL:-30}
+codespace_interval=${TMUX_STATUS_CODESPACE_INTERVAL:-60}
+
+mode="${1:-}"
+if [ "$mode" = "--once" ]; then
+    socket="${TMUX%%,*}"
+else
+    socket="${1:-${TMUX%%,*}}"
+fi
+[ -n "$socket" ] || exit 0
+
+tmux_cmd() {
+    tmux -S "$socket" "$@"
+}
+
+refresh_global() {
+    local value
+
+    value="$(tmux-cpu-mem 2>/dev/null)" &&
+        tmux_cmd set-option -gq @cpu_mem "$value" 2>/dev/null
+
+    if [ "$1" -ge "$2" ]; then
+        value="$(tmux-codespace-name 2>/dev/null || true)"
+        tmux_cmd set-option -gq @codespace_name "$value" 2>/dev/null
+    fi
+}
+
+refresh_icons() {
+    tmux-window-icon --update-options
+}
+
+refresh_once() {
+    local now
+    now="$(date +%s)"
+    refresh_global "$now" 0
+    refresh_icons
+    tmux_cmd refresh-client -S 2>/dev/null || true
+}
+
+server_pid="$(tmux_cmd display-message -p '#{pid}' 2>/dev/null)" || exit 0
+[ -n "$server_pid" ] || exit 0
+# Child helpers use ordinary tmux commands, so point their environment at this
+# exact server rather than a possibly stale TMUX inherited from an outer tmux.
+export TMUX="$socket,$server_pid,0"
+
+if [ "$mode" = "--once" ]; then
+    refresh_once
+    exit
+fi
+
+lockdir="${TMPDIR:-/tmp}/tmux-status-cache-${UID:-$(id -u)}-$server_pid.lock"
+if ! mkdir "$lockdir" 2>/dev/null; then
+    exit 0
+fi
+trap 'rmdir "$lockdir" 2>/dev/null || true' EXIT HUP INT TERM
+
+next_icon=0
+next_codespace=0
+while tmux_cmd has-session 2>/dev/null; do
+    now="$(date +%s)"
+    refresh_global "$now" "$next_codespace"
+
+    if [ "$now" -ge "$next_icon" ]; then
+        refresh_icons
+        next_icon=$((now + icon_interval))
+    fi
+    if [ "$now" -ge "$next_codespace" ]; then
+        next_codespace=$((now + codespace_interval))
+    fi
+
+    tmux_cmd refresh-client -S 2>/dev/null || true
+    sleep "$refresh_interval"
+done

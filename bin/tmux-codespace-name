@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Print the current codespace name (if any) for the tmux status bar.
 #
-# Meant for tmux status-left. Prints a padded, styled name when running inside a
+# Called periodically by tmux-status-cache and stored in the global
+# @codespace_name option. Prints a padded, styled name when running inside a
 # GitHub Codespace and nothing otherwise, so the segment disappears elsewhere.
 #
 # tmux's own `#{CODESPACE_NAME}` format is unreliable here: the env var is only

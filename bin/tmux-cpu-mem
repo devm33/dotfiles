@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Print current CPU, memory and disk usage for the tmux status bar, e.g. "CPU 12% MEM 43% DISK 57%".
 #
-# Meant for tmux status-right. tmux re-runs this every status-interval (5s), so it
-# stays lightweight: a single cheap syscall/read per metric, no sampling loops.
+# Called periodically by tmux-status-cache and stored in the global @cpu_mem
+# option, so status redraws do not start a new process.
 #
 # Works on both macOS (Darwin) and Linux.
 

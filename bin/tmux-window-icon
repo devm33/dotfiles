@@ -2,17 +2,13 @@
 # Print the Nerd Font glyph for a tmux tab: the current branch's PR status when
 # the branch has a pull request, otherwise the icon for the running command.
 #
-# Meant for tmux window-status-format, taking the pane path and current command.
-# The surrounding format supplies the spacing and resets fg afterwards so a PR
-# status color does not bleed into the window name, e.g.:
-#   "... #I #(tmux-window-icon #{pane_current_path} #{pane_current_command}) #[fg=cyan]#{b:...} ..."
+# Called by tmux-status-cache, which stores the result in each window's
+# @window_icon option. tmux renders that option directly, avoiding a shell and
+# several git commands for every window on every status redraw.
 #
-# tmux re-expands every window's status line on each redraw (status-interval),
-# so this stays cheap: it only reads a per-branch cache file and prints a glyph.
-# Refreshing is done out of band by a single batched collector (--refresh-all)
-# that fetches the PR status for *every* visible window in ONE GraphQL request,
-# instead of one API call per window. Non-git / non-GitHub / no-PR tabs print
-# nothing.
+# --update-options renders every window from the local cache and starts the
+# batched collector when the PR cache is stale. --refresh-all fetches PR status
+# for every visible window in one GraphQL request.
 #
 # Ported from caarlos0/dotfiles bin/tmux-window-icon (fish -> zsh).
 
@@ -170,6 +166,19 @@ command_icon() {
   esac
 }
 
+# --- option updater: tmux-window-icon --update-options ---
+# Refresh every window's cached icon without putting command substitutions in
+# window-status-format. Paths may contain spaces, so use a tab-delimited format
+# and pass each field as one quoted argument to the normal renderer below.
+if [[ "$1" == --update-options ]]; then
+  while IFS=$'\t' read -r win dir cmd; do
+    [[ -n "$win" ]] || continue
+    icon=$("$0" "$dir" "$cmd")
+    tmux set-option -wq -t "$win" @window_icon "$icon" 2>/dev/null
+  done < <(tmux list-windows -a -F $'#{window_id}\t#{pane_current_path}\t#{pane_current_command}' 2>/dev/null)
+  exit 0
+fi
+
 # --- batched collector: tmux-window-icon --refresh-all ---
 # Fetches PR status for every branch currently shown in a tmux window using a
 # single GraphQL request (one repository block per repo, one pullRequests alias
@@ -274,10 +283,13 @@ if [[ "$1" == --refresh-all ]]; then
 
   : > "$stampfile"
   rm -rf "$all_lock"
+  # Publish the newly fetched states immediately instead of waiting for the
+  # status cache's next icon interval.
+  "$0" --update-options
   exit 0
 fi
 
-# --- fast path (called by tmux with a pane path and the current command) ---
+# --- renderer (called by --update-options with a pane path and command) ---
 # Last arg is the command (for the icon fallback); the rest is the path.
 cmd=""
 dir=""
