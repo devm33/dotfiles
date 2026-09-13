@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: copilot-session-clean [options]
+
+When disk usage reaches the threshold, removes old Copilot session-state
+directories oldest-first. Sessions referenced by a running process through its
+working directory, command line, or open file descriptors are preserved.
+
+Options:
+  --once                Check once and exit.
+  --threshold PERCENT   Cleanup threshold (default: 80).
+  --interval SECONDS    Delay between checks (default: 300).
+  --min-age-hours H     Minimum inactive session age (default: 6).
+  --help, -h            Show this help.
+
+Environment:
+  COPILOT_SESSION_CLEAN_ROOT
+  COPILOT_SESSION_CLEAN_THRESHOLD
+  COPILOT_SESSION_CLEAN_INTERVAL
+  COPILOT_SESSION_CLEAN_MIN_AGE_HOURS
+EOF
+}
+
+log() {
+    printf '%s copilot-session-clean: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"
+}
+
+is_integer() {
+    [[ "$1" =~ ^[0-9]+$ ]]
+}
+
+once=0
+threshold="${COPILOT_SESSION_CLEAN_THRESHOLD:-80}"
+interval="${COPILOT_SESSION_CLEAN_INTERVAL:-300}"
+min_age_hours="${COPILOT_SESSION_CLEAN_MIN_AGE_HOURS:-6}"
+session_root="${COPILOT_SESSION_CLEAN_ROOT:-$HOME/.copilot/session-state}"
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --once) once=1 ;;
+        --threshold | --interval | --min-age-hours)
+            [ "$#" -ge 2 ] || {
+                log "$1 requires a value"
+                exit 2
+            }
+            case "$1" in
+                --threshold) threshold="$2" ;;
+                --interval) interval="$2" ;;
+                --min-age-hours) min_age_hours="$2" ;;
+            esac
+            shift
+            ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        *)
+            log "unknown option: $1"
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+is_integer "$threshold" && [ "$threshold" -ge 1 ] && [ "$threshold" -le 99 ] || {
+    log 'threshold must be an integer from 1 through 99'
+    exit 2
+}
+is_integer "$interval" && [ "$interval" -ge 1 ] || {
+    log 'interval must be a positive integer'
+    exit 2
+}
+is_integer "$min_age_hours" || {
+    log 'minimum age must be a nonnegative integer'
+    exit 2
+}
+
+mkdir -p "$session_root"
+session_root="$(realpath "$session_root")"
+lock_dir="${XDG_RUNTIME_DIR:-/tmp}"
+exec 9>"$lock_dir/copilot-session-clean-$UID.lock"
+if ! flock -n 9; then
+    log 'another session cleanup watcher is already running'
+    exit 0
+fi
+
+temp_dir="$(mktemp -d "$lock_dir/copilot-session-clean.XXXXXX")"
+trap 'rm -rf -- "$temp_dir"' EXIT
+trap 'log "stopping"; exit 0' INT TERM
+
+disk_usage_percent() {
+    df -P "$HOME" | awk 'NR == 2 { gsub(/%/, "", $5); print $5 }'
+}
+
+is_above_threshold() {
+    [ "$(disk_usage_percent)" -ge "$threshold" ]
+}
+
+is_session_name() {
+    [[ "$1" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]
+}
+
+session_last_activity() {
+    find "$1" -maxdepth 1 -printf '%T@\n' 2>/dev/null |
+        sort -n |
+        tail -n 1 |
+        cut -d. -f1
+}
+
+session_is_active() {
+    local session="$1" proc value argument
+    for proc in /proc/[0-9]*; do
+        value="$(readlink "$proc/cwd" 2>/dev/null || true)"
+        case "$value/" in
+            "$session/"*) return 0 ;;
+        esac
+
+        [ -r "$proc/cmdline" ] || continue
+        while IFS= read -r -d '' argument; do
+            case "$argument" in
+                *"$session"*) return 0 ;;
+            esac
+        done <"$proc/cmdline" 2>/dev/null || true
+    done
+
+    [ -z "$(find /proc/[0-9]*/fd -maxdepth 1 -type l -lname "$session/*" -print -quit 2>/dev/null)" ] || return 0
+    return 1
+}
+
+collect_candidates() {
+    local output="$1" session name last_activity now minimum_age
+    : >"$output"
+    now="$(date +%s)"
+    minimum_age=$((min_age_hours * 3600))
+
+    while IFS= read -r -d '' session; do
+        name="$(basename "$session")"
+        is_session_name "$name" || continue
+        last_activity="$(session_last_activity "$session")"
+        [ -n "$last_activity" ] || continue
+        [ $((now - last_activity)) -ge "$minimum_age" ] || continue
+        printf '%s\t%s\n' "$last_activity" "$session" >>"$output"
+    done < <(find "$session_root" -mindepth 1 -maxdepth 1 -type d -print0)
+
+    sort -n -o "$output" "$output"
+}
+
+remove_session() {
+    local session="$1" resolved name size
+    resolved="$(realpath -e "$session")" || return
+    [ "$(dirname "$resolved")" = "$session_root" ] || {
+        log "refusing session outside $session_root: $resolved"
+        return
+    }
+    name="$(basename "$resolved")"
+    is_session_name "$name" || {
+        log "refusing non-session directory: $resolved"
+        return
+    }
+    if session_is_active "$resolved"; then
+        log "preserving active session: $resolved"
+        return
+    fi
+
+    size="$(du -sh "$resolved" 2>/dev/null | awk '{print $1}')"
+    log "removing inactive session ${size:-unknown size}: $resolved"
+    rm -rf -- "$resolved"
+}
+
+cleanup_cycle() {
+    local usage candidates _last_activity session
+    usage="$(disk_usage_percent)"
+    log "disk usage is ${usage}% (cleanup threshold ${threshold}%)"
+    [ "$usage" -ge "$threshold" ] || return
+
+    candidates="$temp_dir/candidates"
+    collect_candidates "$candidates"
+    while IFS=$'\t' read -r _last_activity session; do
+        [ -d "$session" ] || continue
+        remove_session "$session"
+        is_above_threshold || {
+            log "cleanup complete at $(disk_usage_percent)%"
+            return
+        }
+    done <"$candidates"
+
+    log "inactive session candidates exhausted; disk usage remains $(disk_usage_percent)%"
+}
+
+log "started; root=$session_root; minimum age=${min_age_hours}h; interval=${interval}s"
+while true; do
+    cleanup_cycle
+    [ "$once" -eq 0 ] || break
+    sleep "$interval"
+done

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: disk-space-monitor
+
+Runs the Copilot runtime repository disk cleanup watcher and the personal
+Copilot session-state cleanup watcher as one systemd service.
+
+Environment:
+  COPILOT_RUNTIME_REPO  Repository containing script/watch-clean.ts.
+EOF
+}
+
+if [ "${1:-}" = '--help' ] || [ "${1:-}" = '-h' ]; then
+    usage
+    exit 0
+fi
+[ "$#" -eq 0 ] || {
+    usage >&2
+    exit 2
+}
+
+log() {
+    printf '%s disk-space-monitor: %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"
+}
+
+find_runtime_repo() {
+    local candidate watcher
+    for candidate in \
+        "${COPILOT_RUNTIME_REPO:-}" \
+        "$HOME/code/copilot-agent-runtime" \
+        "$HOME/code/copilot-agent-runtime.worktrees/add-worktree-cleanup-watcher"; do
+        [ -n "$candidate" ] || continue
+        [ -f "$candidate/script/watch-clean.ts" ] || continue
+        realpath "$candidate"
+        return
+    done
+
+    watcher="$(find "$HOME/code" -maxdepth 4 -type f -path '*/script/watch-clean.ts' -print -quit 2>/dev/null || true)"
+    [ -n "$watcher" ] || return 1
+    realpath "$(dirname "$(dirname "$watcher")")"
+}
+
+runtime_repo="$(find_runtime_repo)" || {
+    log 'could not find a Copilot runtime repository containing script/watch-clean.ts'
+    exit 1
+}
+
+if ! command -v pnpm >/dev/null 2>&1 && [ -s "$HOME/.nvm/nvm.sh" ]; then
+    set +u
+    # shellcheck source=/dev/null
+    . "$HOME/.nvm/nvm.sh"
+    nvm use default --silent >/dev/null
+    set -u
+fi
+command -v pnpm >/dev/null 2>&1 || {
+    log 'pnpm is not available'
+    exit 1
+}
+
+repo_pid=
+session_pid=
+stop_children() {
+    trap - INT TERM EXIT
+    [ -z "$repo_pid" ] || ! kill -0 "$repo_pid" 2>/dev/null || kill "$repo_pid"
+    [ -z "$session_pid" ] || ! kill -0 "$session_pid" 2>/dev/null || kill "$session_pid"
+    [ -z "$repo_pid" ] || wait "$repo_pid" 2>/dev/null || true
+    [ -z "$session_pid" ] || wait "$session_pid" 2>/dev/null || true
+}
+trap stop_children INT TERM EXIT
+
+log "starting repository cleanup from $runtime_repo"
+(
+    cd "$runtime_repo"
+    exec pnpm watch:clean
+) &
+repo_pid=$!
+
+log 'starting Copilot session-state cleanup'
+"$HOME/.dotfiles/bin/copilot-session-clean" &
+session_pid=$!
+
+set +e
+wait -n "$repo_pid" "$session_pid"
+status=$?
+set -e
+log "a cleanup watcher exited with status $status; stopping both"
+exit "$status"

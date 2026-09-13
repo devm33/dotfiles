@@ -168,7 +168,10 @@ ln -sfn "$HOME/.dotfiles/host-codespace/rcrc" "$HOME/.rcrc"
 log "Running rcup"
 rcup -v -f
 
-# 7. Trust the mitmproxy CA so intercepted TLS works from inside the codespace.
+# 7. Install the disk cleanup service when user systemd is available.
+bash "$DOTFILES_DIR/install/disk-space-monitor.sh"
+
+# 8. Trust the mitmproxy CA so intercepted TLS works from inside the codespace.
 #    mitmproxy generates a CA on first run at ~/.mitmproxy/mitmproxy-ca-cert.pem;
 #    install that into the system trust store. Most codespace base images don't
 #    ship mitmproxy, so fall back to installing it (pipx, then pip3). Best effort
@@ -221,7 +224,7 @@ trust_mitmproxy_ca() {
 }
 trust_mitmproxy_ca || log "mitmproxy CA trust setup failed; continuing"
 
-# 8. Make zsh the default shell when possible (non-fatal).
+# 9. Make zsh the default shell when possible (non-fatal).
 if command -v zsh >/dev/null 2>&1; then
     zsh_path="$(command -v zsh)"
     if [ "${SHELL:-}" != "$zsh_path" ]; then

@@ -273,3 +273,5 @@ fi
 
 ln -sfn ".dotfiles/host-$host/rcrc" .rcrc
 rcup -v -f
+
+bash "$HOME/.dotfiles/install/disk-space-monitor.sh"
