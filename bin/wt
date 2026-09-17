@@ -116,7 +116,7 @@ tmux split-window -v -e SHELL_LOGGED_IN=true -t "$win" -c "$wt_path"
 #   1 = right-top
 #   2 = right-bottom
 
-# Install deps (non-blocking, in pane 2) and optionally run watch.
+# Install deps (non-blocking, in pane 2) and optionally run b.
 local install_cmd=""
 if [ -f "$wt_path/pnpm-lock.yaml" ]; then
   install_cmd="pnpm install"
@@ -132,11 +132,11 @@ if [[ -n "$install_cmd" ]]; then
   fi
   if $has_watch; then
     if [ -f "$wt_path/pnpm-lock.yaml" ]; then
-      tmux send-keys -t "${win}.2" "$install_cmd && pnpm run watch" Enter
+      tmux send-keys -t "${win}.2" "$install_cmd && b" Enter
     elif [ -f "$wt_path/bun.lock" ]; then
-      tmux send-keys -t "${win}.2" "$install_cmd && bun run watch" Enter
+      tmux send-keys -t "${win}.2" "$install_cmd && b" Enter
     else
-      tmux send-keys -t "${win}.2" "$install_cmd && npm run watch" Enter
+      tmux send-keys -t "${win}.2" "$install_cmd && b" Enter
     fi
   else
     tmux send-keys -t "${win}.2" "$install_cmd" Enter
