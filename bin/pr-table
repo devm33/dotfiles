@@ -112,7 +112,7 @@ fetch_pr() {
     -F owner="${repo%%/*}" \
     -F name="${repo#*/}" \
     -F number="$number" \
-    -f query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){mergeable reviewThreads(first:100){nodes{isResolved} pageInfo{hasNextPage}}}}}' \
+    -f query='query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){mergeable reviewDecision reviewThreads(first:100){nodes{isResolved} pageInfo{hasNextPage}}}}}' \
     >"$output_dir/$number.threads.json"
 
   gh api --paginate --slurp -X GET \
@@ -233,11 +233,11 @@ stop_spinner
 
 if [[ "$markdown" == true ]]; then
   printf '%s open, non-draft PRs.\n\n' "$count"
-  printf '| PR | Required CI | Other CI | Unresolved | Behind | Merge | Slack |\n'
-  printf '|---|---|---|---:|---:|---|---|\n'
+  printf '| PR | Required CI | Other CI | Approval | Unresolved | Behind | Merge | Slack |\n'
+  printf '|---|---|---|---|---:|---:|---|---|\n'
 else
   terminal_columns=$(terminal_width)
-  available_title_width=$((terminal_columns - 95))
+  available_title_width=$((terminal_columns - 117))
   if [[ $available_title_width -lt 5 ]]; then
     available_title_width=5
   fi
@@ -249,11 +249,11 @@ else
   fi
 
   printf '%s open, non-draft PRs.\n\n' "$count"
-  printf '%-7s  %-*s  %-19s  %-22s  %-10s  %-6s  %-11s  %-6s\n' \
-    "PR" "$title_width" "Title" "Required CI" "Other CI" "Unresolved" "Behind" "Merge" "Slack"
-  printf '%-7s  %-*s  %-19s  %-22s  %-10s  %-6s  %-11s  %-6s\n' \
+  printf '%-7s  %-*s  %-19s  %-22s  %-20s  %-10s  %-6s  %-11s  %-6s\n' \
+    "PR" "$title_width" "Title" "Required CI" "Other CI" "Approval" "Unresolved" "Behind" "Merge" "Slack"
+  printf '%-7s  %-*s  %-19s  %-22s  %-20s  %-10s  %-6s  %-11s  %-6s\n' \
     "-------" "$title_width" "$(printf '%*s' "$title_width" '' | tr ' ' '-')" \
-    "-------------------" "----------------------" "----------" "------" "-----------" "------"
+    "-------------------" "----------------------" "--------------------" "----------" "------" "-----------" "------"
 fi
 
 for number in $(
@@ -304,6 +304,21 @@ for number in $(
   required_ci=${ci%%$'\t'*}
   other_ci=${ci#*$'\t'}
 
+  approval=$(
+    jq -r '
+      .data.repository.pullRequest.reviewDecision as $decision |
+      if $decision == "APPROVED" then
+        "✅ approved"
+      elif $decision == "CHANGES_REQUESTED" then
+        "❌ changes requested"
+      elif $decision == "REVIEW_REQUIRED" then
+        "⏳ review required"
+      else
+        "⏳ pending"
+      end
+    ' "$threads"
+  )
+
   unresolved=$(
     jq '
       [
@@ -343,17 +358,19 @@ for number in $(
 
   if [[ "$markdown" == true ]]; then
     title=${title//|/\\|}
-    printf '| [#%s](%s) %s | %s | %s | %s | %s | %s | %s |\n' \
-      "$number" "$url" "$title" "$required_ci" "$other_ci" "$unresolved" "$behind" "$merge" "$slack"
+    printf '| [#%s](%s) %s | %s | %s | %s | %s | %s | %s | %s |\n' \
+      "$number" "$url" "$title" "$required_ci" "$other_ci" "$approval" "$unresolved" "$behind" "$merge" "$slack"
   else
     required_display=$(pad_cell "$(terminal_status "$required_ci")" 19)
     other_display=$(pad_cell "$(terminal_status "$other_ci")" 22)
+    approval_display=$(pad_cell "$(terminal_status "$approval")" 20)
     merge_display=$(pad_cell "$(terminal_status "$merge")" 11)
     terminal_link "$url" "#$number" 7
-    printf '  %s  %s  %s  %-10s  %-6s  %s  ' \
+    printf '  %s  %s  %s  %s  %-10s  %-6s  %s  ' \
       "$(pad_cell "$title" "$title_width")" \
       "$required_display" \
       "$other_display" \
+      "$approval_display" \
       "$unresolved" \
       "$behind" \
       "$merge_display"
