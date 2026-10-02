@@ -176,7 +176,7 @@ cleanup_cycle() {
     local usage candidates _last_activity session
     usage="$(disk_usage_percent)"
     log "disk usage is ${usage}% (cleanup threshold ${threshold}%)"
-    [ "$usage" -ge "$threshold" ] || return
+    [ "$usage" -ge "$threshold" ] || return 0
 
     candidates="$temp_dir/candidates"
     collect_candidates "$candidates"
