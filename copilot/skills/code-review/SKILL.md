@@ -1,12 +1,12 @@
 ---
 name: code-review
-description: Run code review with the latest GPT and Opus models and output review comments without making local changes.
+description: Run code review with the hydrafusion model and output review comments without making local changes.
 allowed-tools: "*"
 ---
 
 # Code Review
 
-Run `/review` with both the latest GPT and Opus models. Do not make any local changes. Only output code review comments.
+Run `/review` with the hydrafusion model. Do not make any local changes. Only output code review comments.
 
 ## Prepare the correct diff first
 
