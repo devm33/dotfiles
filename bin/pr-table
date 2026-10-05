@@ -257,7 +257,17 @@ else
 fi
 
 for number in $(
-  jq -s 'sort_by(.updated_at) | reverse | .[].number' "$tmp_dir"/*.detail.json
+  for detail in "$tmp_dir"/*.detail.json; do
+    number=$(jq -r '.number' "$detail")
+    updated_at=$(jq -r '.updated_at' "$detail")
+    review_decision=$(jq -r '.data.repository.pullRequest.reviewDecision // ""' "$tmp_dir/$number.threads.json")
+    if [[ "$review_decision" == "APPROVED" ]]; then
+      approval_rank=0
+    else
+      approval_rank=1
+    fi
+    printf '%s\t%s\t%s\n' "$approval_rank" "$updated_at" "$number"
+  done | sort -t $'\t' -k1,1n -k2,2r | cut -f3
 ); do
   detail="$tmp_dir/$number.detail.json"
   checks="$tmp_dir/$number.checks.json"
