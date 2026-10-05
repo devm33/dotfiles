@@ -1,0 +1,676 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+min_interval=10
+max_interval=60
+discovery_interval=120
+stable_interval=900
+request_interval=2
+retry_cooldown=120
+error_max_interval=300
+rate_limit_cooldown=900
+author="@me"
+once=0
+dry_run=0
+
+usage() {
+  cat <<'EOF'
+Usage: rerun-required-ci [options]
+
+Watch your approved, non-draft pull requests in the current repository and
+rerun failed required GitHub Actions jobs until their required checks pass.
+A live dashboard is displayed in the terminal's alternate screen. Press
+Ctrl-C to stop.
+
+Options:
+  --author LOGIN             PR author to watch (default: @me)
+  --min-interval SECONDS     Fastest active-check interval (default: 10)
+  --max-interval SECONDS     Slowest active-check interval (default: 60)
+  --discovery-interval SEC   Refresh the open PR list this often (default: 120)
+  --stable-interval SECONDS  Recheck passing or blocked PRs (default: 900)
+  --request-interval SEC     Minimum delay between API queries (default: 2)
+  --retry-cooldown SEC       Minimum delay before repeating a rerun (default: 120)
+  --once                     Check each current PR once, trigger reruns, then exit
+  --dry-run                  Report reruns without triggering them
+  -h, --help                 Show this help
+EOF
+}
+
+is_positive_integer() {
+  [[ "$1" =~ ^[1-9][0-9]*$ ]]
+}
+
+while (($#)); do
+  case "$1" in
+    --author)
+      [[ $# -ge 2 ]] || { echo "error: --author needs a value" >&2; exit 2; }
+      author=$2
+      shift 2
+      ;;
+    --min-interval)
+      [[ $# -ge 2 ]] || { echo "error: --min-interval needs a value" >&2; exit 2; }
+      min_interval=$2
+      shift 2
+      ;;
+    --max-interval)
+      [[ $# -ge 2 ]] || { echo "error: --max-interval needs a value" >&2; exit 2; }
+      max_interval=$2
+      shift 2
+      ;;
+    --discovery-interval)
+      [[ $# -ge 2 ]] || { echo "error: --discovery-interval needs a value" >&2; exit 2; }
+      discovery_interval=$2
+      shift 2
+      ;;
+    --stable-interval)
+      [[ $# -ge 2 ]] || { echo "error: --stable-interval needs a value" >&2; exit 2; }
+      stable_interval=$2
+      shift 2
+      ;;
+    --request-interval)
+      [[ $# -ge 2 ]] || { echo "error: --request-interval needs a value" >&2; exit 2; }
+      request_interval=$2
+      shift 2
+      ;;
+    --retry-cooldown)
+      [[ $# -ge 2 ]] || { echo "error: --retry-cooldown needs a value" >&2; exit 2; }
+      retry_cooldown=$2
+      shift 2
+      ;;
+    --once)
+      once=1
+      shift
+      ;;
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "error: unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+    *)
+      echo "error: unexpected argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+is_positive_integer "$min_interval" || { echo "error: --min-interval must be a positive integer" >&2; exit 2; }
+is_positive_integer "$max_interval" || { echo "error: --max-interval must be a positive integer" >&2; exit 2; }
+is_positive_integer "$discovery_interval" || { echo "error: --discovery-interval must be a positive integer" >&2; exit 2; }
+is_positive_integer "$stable_interval" || { echo "error: --stable-interval must be a positive integer" >&2; exit 2; }
+is_positive_integer "$request_interval" || { echo "error: --request-interval must be a positive integer" >&2; exit 2; }
+is_positive_integer "$retry_cooldown" || { echo "error: --retry-cooldown must be a positive integer" >&2; exit 2; }
+((max_interval >= min_interval)) || { echo "error: --max-interval must be at least --min-interval" >&2; exit 2; }
+
+for command in gh jq flock; do
+  command -v "$command" >/dev/null 2>&1 || { echo "error: required command not found: $command" >&2; exit 127; }
+done
+
+repo=$(gh repo view --json nameWithOwner --jq '.nameWithOwner') || {
+  echo "error: could not infer a GitHub repository from the current working directory" >&2
+  exit 1
+}
+
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/rerun-required-ci"
+repo_key=$(printf '%s' "$repo" | tr '/:@' '____' | tr -cd '[:alnum:]_.-')
+mkdir -p "$state_root" || exit 1
+state_file="$state_root/${repo_key}.tsv"
+lock_file="$state_root/${repo_key}.lock"
+
+exec 9>"$lock_file"
+if ! flock -n 9; then
+  echo "error: another watcher is already running for $repo" >&2
+  exit 1
+fi
+
+tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/rerun-required-ci.XXXXXX") || exit 1
+interactive=0
+if [[ -t 1 && ${TERM:-dumb} != "dumb" ]]; then
+  interactive=1
+fi
+
+cleanup() {
+  local rc=$?
+  trap - EXIT
+  if ((interactive)); then
+    printf '\033[?25h\033[?1049l'
+  fi
+  rm -rf "$tmp_dir"
+  exit "$rc"
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT TERM
+
+if ((interactive)); then
+  printf '\033[?1049h\033[?25l'
+fi
+
+declare -A run_phase=()
+declare -A run_requested_at=()
+declare -A run_attempts=()
+
+declare -A pr_title=()
+declare -A pr_sha=()
+declare -A pr_state=()
+declare -A pr_detail=()
+declare -A pr_next_check=()
+declare -A pr_poll_interval=()
+declare -A pr_fingerprint=()
+declare -A pr_seen=()
+declare -A pr_checked_once=()
+
+if [[ -f "$state_file" ]]; then
+  while IFS=$'\t' read -r run_id phase requested_at attempts; do
+    [[ "$run_id" =~ ^[0-9]+$ ]] || continue
+    run_phase["$run_id"]=${phase:-unknown}
+    run_requested_at["$run_id"]=${requested_at:-0}
+    run_attempts["$run_id"]=${attempts:-0}
+  done <"$state_file"
+fi
+
+save_state() {
+  local output="$tmp_dir/state.tsv"
+  local run_id
+  : >"$output"
+  for run_id in "${!run_phase[@]}"; do
+    printf '%s\t%s\t%s\t%s\n' \
+      "$run_id" \
+      "${run_phase[$run_id]}" \
+      "${run_requested_at[$run_id]:-0}" \
+      "${run_attempts[$run_id]:-0}" >>"$output"
+  done
+  sort -n "$output" -o "$output"
+  chmod 600 "$output"
+  mv "$output" "$state_file"
+}
+
+increase_interval() {
+  local current=$1
+  local maximum=$2
+  local increased=$((current * 2))
+  ((increased > maximum)) && increased=$maximum
+  printf '%s' "$increased"
+}
+
+is_rate_limit_error() {
+  [[ "$1" =~ [Rr]ate[[:space:]-]*limit|[Aa]buse[[:space:]]detection ]]
+}
+
+single_line() {
+  local value=$1
+  value=${value//$'\n'/ }
+  value=${value//$'\r'/ }
+  printf '%s' "$value"
+}
+
+fit_text() {
+  local value
+  value=$(single_line "$1")
+  local width=$2
+  if ((${#value} <= width)); then
+    printf '%s' "$value"
+  elif ((width <= 3)); then
+    printf '%.*s' "$width" "$value"
+  else
+    printf '%.*s...' "$((width - 3))" "$value"
+  fi
+}
+
+format_wait() {
+  local due=$1
+  local now=$2
+  if ((due <= 0)); then
+    printf '%s' "-"
+  elif ((due <= now)); then
+    printf '%s' "now"
+  else
+    local remaining=$((due - now))
+    if ((remaining >= 60)); then
+      printf '%dm%02ds' "$((remaining / 60))" "$((remaining % 60))"
+    else
+      printf '%ds' "$remaining"
+    fi
+  fi
+}
+
+sorted_pr_numbers() {
+  ((${#pr_title[@]})) || return 0
+  printf '%s\n' "${!pr_title[@]}" | sort -n
+}
+
+next_due_pr() {
+  local now=$1
+  local selected=""
+  local selected_due=0
+  local number due
+
+  for number in "${!pr_title[@]}"; do
+    if ((once)) && [[ ${pr_checked_once[$number]:-0} == 1 ]]; then
+      continue
+    fi
+    due=${pr_next_check[$number]:-0}
+    if ((due <= 0 || due > now)); then
+      continue
+    fi
+    if [[ -z "$selected" ]] || ((due < selected_due)) || ((due == selected_due && number < selected)); then
+      selected=$number
+      selected_due=$due
+    fi
+  done
+
+  printf '%s' "$selected"
+}
+
+last_message="Starting"
+api_status="ready"
+api_requests=0
+api_failures=0
+discovery_loaded=0
+last_render_signature=""
+
+render_table() {
+  local now
+  now=$(date +%s)
+  local cols=${COLUMNS:-}
+  if [[ -z "$cols" ]] && command -v tput >/dev/null 2>&1; then
+    cols=$(tput cols 2>/dev/null || true)
+  fi
+  [[ "$cols" =~ ^[0-9]+$ ]] || cols=120
+  ((cols < 80)) && cols=80
+
+  local fixed_width=68
+  local title_width=$((cols - fixed_width))
+  ((title_width < 12)) && title_width=12
+
+  local output=""
+  local line
+  line=$(printf '%*s' "$cols" "")
+  line=${line// /-}
+
+  printf -v output '%srerun-required-ci  %s  author %s%s\n' \
+    "$output" "$repo" "$author" "$([[ $dry_run == 1 ]] && printf '  [dry-run]')"
+  printf -v output '%sUpdated %s  API requests: %d  failures: %d  API: %s\n' \
+    "$output" "$(date '+%Y-%m-%d %H:%M:%S')" "$api_requests" "$api_failures" "$api_status"
+  printf -v output '%s%s\n' "$output" "$line"
+  printf -v output '%s%-5s %-9s %-12s %-28s %-8s %s\n' \
+    "$output" "PR" "SHA" "STATUS" "REQUIRED CHECKS" "NEXT" "TITLE"
+  printf -v output '%s%s\n' "$output" "$line"
+
+  local number status detail title next
+  while IFS= read -r number; do
+    [[ -n "$number" ]] || continue
+    status=$(fit_text "${pr_state[$number]:-queued}" 12)
+    detail=$(fit_text "${pr_detail[$number]:-waiting for first check}" 28)
+    title=$(fit_text "${pr_title[$number]:-}" "$title_width")
+    next=$(format_wait "${pr_next_check[$number]:-0}" "$now")
+    printf -v output '%s#%-4s %-9.9s %-12s %-28s %-8s %s\n' \
+      "$output" \
+      "$number" \
+      "${pr_sha[$number]:-}" \
+      "$status" \
+      "$detail" \
+      "$next" \
+      "$title"
+  done < <(sorted_pr_numbers)
+
+  if ((discovery_loaded == 0)); then
+    printf -v output '%s%-5s %s\n' "$output" "-" "PR list unavailable"
+  elif ((${#pr_title[@]} == 0)); then
+    printf -v output '%s%-5s %s\n' "$output" "-" "No open pull requests found"
+  fi
+
+  printf -v output '%s%s\n%s\n' "$output" "$line" "$(fit_text "$last_message" "$cols")"
+
+  local signature
+  signature=$output
+  if ((interactive)); then
+    printf '\033[H\033[2J%s' "$output"
+  elif [[ "$signature" != "$last_render_signature" ]]; then
+    printf '%s\n' "$output"
+  fi
+  last_render_signature=$signature
+}
+
+discovery_due=0
+discovery_backoff=$min_interval
+global_api_not_before=0
+next_api_allowed=0
+once_discovery_attempted=0
+
+mark_rate_limited() {
+  local now=$1
+  global_api_not_before=$((now + rate_limit_cooldown))
+  api_status="rate limited; paused $(format_wait "$global_api_not_before" "$now")"
+}
+
+refresh_prs() {
+  local now=$1
+  local list_error="$tmp_dir/pr-list.err"
+  local prs_json list_rc error_text delay candidate_count
+
+  once_discovery_attempted=1
+  api_requests=$((api_requests + 1))
+  prs_json=$(gh pr list \
+    --repo "$repo" \
+    --author "$author" \
+    --state open \
+    --limit 100 \
+    --json number,title,headRefOid,url,isDraft,reviewDecision \
+    2>"$list_error")
+  list_rc=$?
+
+  if ((list_rc != 0)) || ! jq -e 'type == "array"' >/dev/null 2>&1 <<<"$prs_json"; then
+    api_failures=$((api_failures + 1))
+    error_text=$(single_line "$(cat "$list_error")")
+    [[ -n "$error_text" ]] || error_text="invalid response"
+    if is_rate_limit_error "$error_text"; then
+      mark_rate_limited "$now"
+    else
+      api_status="discovery error"
+    fi
+    delay=$discovery_backoff
+    discovery_backoff=$(increase_interval "$discovery_backoff" "$error_max_interval")
+    discovery_due=$((now + delay))
+    last_message="Could not refresh PRs; retrying in ${delay}s: $error_text"
+    return
+  fi
+
+  candidate_count=$(jq 'length' <<<"$prs_json")
+  prs_json=$(jq '[.[] | select(.isDraft == false and .reviewDecision == "APPROVED")]' <<<"$prs_json")
+
+  discovery_backoff=$min_interval
+  discovery_due=$((now + discovery_interval))
+  discovery_loaded=1
+  api_status="ready"
+
+  local number
+  for number in "${!pr_title[@]}"; do
+    pr_seen["$number"]=0
+  done
+
+  local pr title sha
+  while IFS= read -r pr; do
+    [[ -n "$pr" ]] || continue
+    number=$(jq -r '.number' <<<"$pr")
+    title=$(single_line "$(jq -r '.title' <<<"$pr")")
+    sha=$(jq -r '.headRefOid' <<<"$pr")
+    pr_seen["$number"]=1
+
+    if [[ -z ${pr_title[$number]+x} ]]; then
+      pr_state["$number"]="queued"
+      pr_detail["$number"]="waiting for first check"
+      pr_next_check["$number"]=$now
+      pr_poll_interval["$number"]=$min_interval
+      pr_fingerprint["$number"]=""
+      pr_checked_once["$number"]=0
+    elif [[ "${pr_sha[$number]:-}" != "$sha" ]]; then
+      pr_state["$number"]="changed"
+      pr_detail["$number"]="new head commit"
+      pr_next_check["$number"]=$now
+      pr_poll_interval["$number"]=$min_interval
+      pr_fingerprint["$number"]=""
+      pr_checked_once["$number"]=0
+    fi
+
+    pr_title["$number"]=$title
+    pr_sha["$number"]=$sha
+  done < <(jq -c '.[]' <<<"$prs_json")
+
+  for number in "${!pr_title[@]}"; do
+    if [[ ${pr_seen[$number]:-0} == 0 ]]; then
+      unset 'pr_title[$number]' 'pr_sha[$number]' 'pr_state[$number]' \
+        'pr_detail[$number]' 'pr_next_check[$number]' 'pr_poll_interval[$number]' \
+        'pr_fingerprint[$number]' 'pr_seen[$number]' 'pr_checked_once[$number]'
+    fi
+  done
+
+  local count
+  count=$(jq 'length' <<<"$prs_json")
+  if ((candidate_count == 100)); then
+    last_message="Monitoring $count approved, non-draft PR(s) from the first 100 open PRs; GitHub returned the configured limit"
+  else
+    last_message="Discovered $count approved, non-draft PR(s); next discovery in ${discovery_interval}s"
+  fi
+}
+
+check_pr() {
+  local number=$1
+  local now=$2
+  local checks_error="$tmp_dir/pr-${number}-checks.err"
+  local required_json checks_rc error_text interval fingerprint previous_fingerprint
+
+  api_requests=$((api_requests + 1))
+  required_json=$(gh pr checks "$number" \
+    --repo "$repo" \
+    --required \
+    --json bucket,link,name,state,workflow \
+    2>"$checks_error")
+  checks_rc=$?
+  pr_checked_once["$number"]=1
+
+  if ! jq -e 'type == "array"' >/dev/null 2>&1 <<<"$required_json"; then
+    api_failures=$((api_failures + 1))
+    error_text=$(single_line "$(cat "$checks_error")")
+    [[ -n "$error_text" ]] || error_text="invalid response (exit $checks_rc)"
+    interval=${pr_poll_interval[$number]:-$min_interval}
+    pr_poll_interval["$number"]=$(increase_interval "$interval" "$error_max_interval")
+    pr_next_check["$number"]=$((now + interval))
+    pr_state["$number"]="API error"
+    pr_detail["$number"]="retry in ${interval}s"
+    if is_rate_limit_error "$error_text"; then
+      mark_rate_limited "$now"
+    else
+      api_status="check error"
+    fi
+    last_message="#$number check query failed: $error_text"
+    return
+  fi
+
+  api_status="ready"
+  fingerprint=$(jq -cS 'sort_by(.name, .workflow, .link)' <<<"$required_json")
+  previous_fingerprint=${pr_fingerprint[$number]:-}
+  pr_fingerprint["$number"]=$fingerprint
+
+  local required_count pending_count failed_count passed_count running_count
+  required_count=$(jq 'length' <<<"$required_json")
+  pending_count=$(jq '[.[] | select(.bucket == "pending")] | length' <<<"$required_json")
+  failed_count=$(jq '[.[] | select(.bucket == "fail" or .bucket == "cancel")] | length' <<<"$required_json")
+  passed_count=$(jq '[.[] | select(.bucket == "pass")] | length' <<<"$required_json")
+  running_count=$(jq '[.[] | select((.state // "" | ascii_upcase) == "IN_PROGRESS")] | length' <<<"$required_json")
+
+  if ((required_count == 0)); then
+    pr_state["$number"]="pass"
+    pr_detail["$number"]="no required checks"
+    pr_poll_interval["$number"]=$min_interval
+    pr_next_check["$number"]=$((now + stable_interval))
+    last_message="#$number has no required checks"
+    return
+  fi
+
+  if ((pending_count > 0)); then
+    interval=${pr_poll_interval[$number]:-$min_interval}
+    if [[ -n "$previous_fingerprint" && "$fingerprint" == "$previous_fingerprint" ]]; then
+      interval=$(increase_interval "$interval" "$max_interval")
+    else
+      interval=$min_interval
+    fi
+    pr_poll_interval["$number"]=$interval
+    pr_next_check["$number"]=$((now + interval))
+    pr_state["$number"]="pending"
+    pr_detail["$number"]="$passed_count/$required_count passing ($running_count running)"
+
+    local pending_run_id
+    while IFS= read -r pending_run_id; do
+      [[ -n "$pending_run_id" ]] || continue
+      run_phase["$pending_run_id"]="pending"
+      run_requested_at["$pending_run_id"]=0
+    done < <(jq -r '
+      .[]
+      | select(.bucket == "pending")
+      | (.link // "")
+      | try capture("/actions/runs/(?<id>[0-9]+)").id catch empty
+    ' <<<"$required_json" | sort -u)
+    return
+  fi
+
+  if ((failed_count == 0)); then
+    pr_state["$number"]="pass"
+    pr_detail["$number"]="$passed_count/$required_count passing"
+    pr_poll_interval["$number"]=$min_interval
+    pr_next_check["$number"]=$((now + stable_interval))
+    last_message="#$number required checks pass"
+    return
+  fi
+
+  local -a failed_run_ids=()
+  mapfile -t failed_run_ids < <(jq -r '
+    .[]
+    | select(.bucket == "fail" or .bucket == "cancel")
+    | (.link // "")
+    | try capture("/actions/runs/(?<id>[0-9]+)").id catch empty
+  ' <<<"$required_json" | sort -u)
+
+  local rerun_count=0
+  local waiting_count=0
+  local rerun_error_count=0
+  local run_id phase requested_at attempts rerun_error
+  for run_id in "${failed_run_ids[@]}"; do
+    [[ -n "$run_id" ]] || continue
+    phase=${run_phase[$run_id]:-new}
+    requested_at=${run_requested_at[$run_id]:-0}
+
+    if [[ "$phase" == "requested" || "$phase" == "error" ]] && ((now - requested_at < retry_cooldown)); then
+      waiting_count=$((waiting_count + 1))
+      continue
+    fi
+
+    attempts=${run_attempts[$run_id]:-0}
+    if ((dry_run)); then
+      rerun_count=$((rerun_count + 1))
+      continue
+    fi
+
+    sleep "$request_interval"
+    rerun_error="$tmp_dir/run-${run_id}-rerun.err"
+    api_requests=$((api_requests + 1))
+    if gh run rerun "$run_id" --failed --repo "$repo" 2>"$rerun_error"; then
+      run_phase["$run_id"]="requested"
+      run_requested_at["$run_id"]=$now
+      run_attempts["$run_id"]=$((attempts + 1))
+      rerun_count=$((rerun_count + 1))
+    else
+      error_text=$(single_line "$(cat "$rerun_error")")
+      run_phase["$run_id"]="error"
+      run_requested_at["$run_id"]=$now
+      rerun_error_count=$((rerun_error_count + 1))
+      api_failures=$((api_failures + 1))
+      if is_rate_limit_error "$error_text"; then
+        mark_rate_limited "$now"
+      fi
+      last_message="#$number could not rerun run $run_id: $error_text"
+    fi
+  done
+
+  local external_failed=$((failed_count - ${#failed_run_ids[@]}))
+  if ((rerun_count > 0 || waiting_count > 0)); then
+    pr_state["$number"]=$([[ $dry_run == 1 ]] && printf '%s' "dry-run" || printf '%s' "rerunning")
+    pr_detail["$number"]="$failed_count failed, $rerun_count rerun"
+    pr_poll_interval["$number"]=$min_interval
+    if ((dry_run)); then
+      pr_next_check["$number"]=$((now + max_interval))
+    else
+      pr_next_check["$number"]=$((now + min_interval))
+    fi
+    if ((dry_run)); then
+      last_message="#$number would rerun ${rerun_count} failed workflow run(s)"
+    else
+      last_message="#$number reran ${rerun_count} failed workflow run(s)"
+    fi
+  elif ((rerun_error_count > 0)); then
+    interval=${pr_poll_interval[$number]:-$min_interval}
+    interval=$(increase_interval "$interval" "$error_max_interval")
+    pr_state["$number"]="rerun error"
+    pr_detail["$number"]="$rerun_error_count rerun request(s) failed"
+    pr_poll_interval["$number"]=$interval
+    pr_next_check["$number"]=$((now + interval))
+  else
+    pr_state["$number"]="blocked"
+    pr_detail["$number"]="$external_failed external failure(s)"
+    pr_poll_interval["$number"]=$min_interval
+    pr_next_check["$number"]=$((now + stable_interval))
+    last_message="#$number has failed required checks with no Actions run to rerun"
+  fi
+}
+
+once_complete() {
+  ((once_discovery_attempted)) || return 1
+  local number
+  for number in "${!pr_title[@]}"; do
+    [[ ${pr_checked_once[$number]:-0} == 1 ]] || return 1
+  done
+  return 0
+}
+
+while :; do
+  now=$(date +%s)
+  did_request=0
+
+  if ((now >= global_api_not_before && now >= next_api_allowed)); then
+    if ((now >= discovery_due)); then
+      refresh_prs "$now"
+      did_request=1
+    else
+      number=$(next_due_pr "$now")
+      if [[ -n "$number" ]]; then
+        check_pr "$number" "$now"
+        did_request=1
+      fi
+    fi
+  fi
+
+  if ((did_request)); then
+    next_api_allowed=$(($(date +%s) + request_interval))
+    ((dry_run)) || save_state
+  fi
+
+  render_table
+
+  if ((once)) && once_complete; then
+    break
+  fi
+
+  now=$(date +%s)
+  if ((global_api_not_before > now)); then
+    sleep_for=$((global_api_not_before - now))
+  else
+    next_wake=$discovery_due
+    for number in "${!pr_title[@]}"; do
+      due=${pr_next_check[$number]:-0}
+      if ((due > 0 && (next_wake <= 0 || due < next_wake))); then
+        next_wake=$due
+      fi
+    done
+    if ((next_wake <= now)); then
+      if ((next_api_allowed > now)); then
+        sleep_for=$((next_api_allowed - now))
+      else
+        sleep_for=1
+      fi
+    else
+      sleep_for=$((next_wake - now))
+    fi
+  fi
+
+  ((sleep_for < 1)) && sleep_for=1
+  sleep "$sleep_for" || true
+done
