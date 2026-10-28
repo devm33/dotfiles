@@ -674,11 +674,11 @@ alias clicd='cd ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | he
 alias clisesopen='code-insiders ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
 alias clises='chropen ~/.copilot/session-state/"$(ls -t ~/.copilot/session-state/ | head -1)"/events.jsonl'
 ask_copilot() {
-    copilot --model=gpt-5.4-mini -s -p "Respond succinctly to the following user question: $*"
+    copilot -s -p "Respond succinctly to the following user question: $*"
 }
 alias ask=ask_copilot
 ask_copilot_i() {
-    copilot --model=gpt-5.4-mini -i "Respond succinctly to the following user question: $*"
+    copilot -i "Respond succinctly to the following user question: $*"
 }
 alias aski=ask_copilot_i
 alias ci=code-insiders
