@@ -25,7 +25,7 @@ trap 'exit 143' TERM
 while true; do
   if ssh -o ConnectTimeout=10 \
     -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
-    -t "$@" 'tmux new-session -A -s main'; then
+    -t "$@" 'zsh -c ta'; then
     exit 0
   else
     rc=$?
