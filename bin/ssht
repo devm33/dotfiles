@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if (($# == 0)); then
+  echo "Usage: ssht [ssh-options] [user@]host" >&2
+  exit 2
+fi
+
+terminal_state=""
+if [[ -t 0 ]]; then
+  terminal_state=$(stty -g)
+fi
+
+reset_terminal() {
+  [[ -n "$terminal_state" ]] || return 0
+  stty "$terminal_state"
+  printf '\033[?1049l\033[?25h'
+}
+
+trap reset_terminal EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+while true; do
+  if ssh -o ConnectTimeout=10 \
+    -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+    -t "$@" 'tmux new-session -A -s main'; then
+    exit 0
+  else
+    rc=$?
+  fi
+  reset_terminal
+  [[ $rc -eq 130 ]] && exit 130
+  printf 'ssht: SSH exited with status %s; reconnecting in 2 seconds (Ctrl-C to stop)\n' "$rc" >&2
+  sleep 2
+done
